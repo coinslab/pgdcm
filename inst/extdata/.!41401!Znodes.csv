@@ -1,0 +1,4 @@
+name,type,compute,details
+O3,task,zscore,O3: Picture Completion
+T3,task,zscore,T3: NIH Picture Completion. This measure is coputed  as described in paragrpah xXXX on page VVVV of document XXXX 
+A1,attribute,binary,A1: Perseverance

@@ -1,0 +1,10 @@
+name,type,compute,details
+O3,task,zscore,O3: Picture Completion
+T3,task,zscore,T3: NIH Picture Completion. This measure is coputed  as described in paragrpah xXXX on page VVVV of document XXXX 
+A1,attribute,binary,A1: Perseverance
+A2,attribute,binary,A2: Working Memory. This is the famous working memory  conceptual construct inspired by my puppy dog…amazing!!! See NIH documentation URL XXXX
+A3,attribute,binary,A3: Processing Speed
+O1,task,zscore,O1: Flanker
+T1,task,zscore,T1: NIH List Sorting
+O2,task,zscore,O2: Pattern Compare
+T2,task,zscore,T2: NIH Card Sorting

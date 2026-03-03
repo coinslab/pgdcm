@@ -1,0 +1,9 @@
+^renv$
+^renv\.lock$
+^\.Rhistory$
+^\.Rproj\.user$
+pgdcm/.Rhistory
+^pgdcm/\.Rhistory$
+^\.Rproj\.user$
+^\.Rproj\.user$
+\.Rproj\.user

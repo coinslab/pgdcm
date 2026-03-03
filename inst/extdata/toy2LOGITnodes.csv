@@ -1,0 +1,14 @@
+name,type,compute,details
+A1,attribute,DINO,SKILL: Vector Calculus: Matrix Chain Rule (cross-reference Problem 1.2.2 on Page 17)
+A2,attribute,DINA,SKILL: Linear Algebra: Matrix Multiplication
+A3,attribute,DINM,SKILL: ML Unsupervised Learning
+A4,attribute,DINA,SKILL: ML Supervised Learning
+Q1HW1,task,DINA,ESSAY: ML Gradient Descent Derivation
+Q2HW1,task,DINM,MC: EasyMatrixDerivative
+Q3HW1,task,DINM,MC: ML Supervised Learning
+Q4HW1,task,DINM,X.Essay.VectorCalculus
+Q5HW1,task,DINM,ESSAY: HardMatrixDerivative (cross-reference Problem 7.2.2. on page 25 of Golden (2020))
+Exam1Q1,task,DINM,ESSAY: ML Gradient Descent Derivation
+Exam1Q2,task,DINM,MC: EasyMatrixDerivative
+Exam1Q3,task,DINM,MC: ML Supervised Learning
+Exam1Q4,task,DINM,X.Essay.VectorCalculus

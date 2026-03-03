@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+    <key attr.name="SUID" attr.type="long" for="node" id="SUID"/>
+    <key attr.name="shared name" attr.type="string" for="node" id="shared name"/>
+    <key attr.name="compute" attr.type="string" for="node" id="compute"/>
+    <key attr.name="type" attr.type="string" for="node" id="type"/>
+    <key attr.name="name" attr.type="string" for="node" id="name"/>
+    <key attr.name="selected" attr.type="boolean" for="node" id="selected"/>
+    <key attr.name="NumChildren" attr.type="int" for="node" id="NumChildren"/>
+    <key attr.name="__ViewSettings" attr.type="string" for="node" id="__ViewSettings"/>
+    <key attr.name="__AggregationSettings" attr.type="string" for="node" id="__AggregationSettings"/>
+    <key attr.name="__AggregationOverrideSettings" attr.type="string" for="node" id="__AggregationOverrideSettings"/>
+    <key attr.name="NumDescendents" attr.type="int" for="node" id="NumDescendents"/>
+    <key attr.name="SUID" attr.type="long" for="edge" id="SUID"/>
+    <key attr.name="shared name" attr.type="string" for="edge" id="shared name"/>
+    <key attr.name="shared interaction" attr.type="string" for="edge" id="shared interaction"/>
+    <key attr.name="name" attr.type="string" for="edge" id="name"/>
+    <key attr.name="selected" attr.type="boolean" for="edge" id="selected"/>
+    <key attr.name="interaction" attr.type="string" for="edge" id="interaction"/>
+    <key attr.name="SUID" attr.type="long" for="graph" id="SUID"/>
+    <key attr.name="shared name" attr.type="string" for="graph" id="shared name"/>
+    <key attr.name="name" attr.type="string" for="graph" id="name"/>
+    <key attr.name="selected" attr.type="boolean" for="graph" id="selected"/>
+    <key attr.name="__Annotations" attr.type="string" for="graph" id="__Annotations"/>
+    <graph edgedefault="directed" id="G">
+        <node id="303">
+            <data key="SUID">303</data>
+            <data key="shared name">Node 4</data>
+            <data key="compute">NA</data>
+            <data key="type">task</data>
+            <data key="name">Node 4</data>
+            <data key="selected">false</data>
+        </node>
+        <node id="300">
+            <data key="SUID">300</data>
+            <data key="shared name">Node 3</data>
+            <data key="compute">NA</data>
+            <data key="type">task</data>
+            <data key="name">Node 3</data>
+            <data key="selected">false</data>
+        </node>
+        <node id="297">
+            <data key="SUID">297</data>
+            <data key="shared name">Node 2</data>
+            <data key="compute">NA</data>
+            <data key="type">attribute</data>
+            <data key="name">Node 2</data>
+            <data key="selected">false</data>
+        </node>
+        <node id="294">
+            <data key="SUID">294</data>
+            <data key="shared name">Node 1</data>
+            <data key="compute">NA</data>
+            <data key="type">attribute</data>
+            <data key="name">Node 1</data>
+            <data key="selected">false</data>
+        </node>
+        <edge source="297" target="303">
+            <data key="SUID">315</data>
+            <data key="shared name">Node 2 (interacts with) Node 4</data>
+            <data key="shared interaction">interacts with</data>
+            <data key="name">Node 2 (interacts with) Node 4</data>
+            <data key="selected">false</data>
+            <data key="interaction">interacts with</data>
+        </edge>
+        <edge source="297" target="300">
+            <data key="SUID">309</data>
+            <data key="shared name">Node 2 (interacts with) Node 3</data>
+            <data key="shared interaction">interacts with</data>
+            <data key="name">Node 2 (interacts with) Node 3</data>
+            <data key="selected">false</data>
+            <data key="interaction">interacts with</data>
+        </edge>
+        <edge source="294" target="297">
+            <data key="SUID">318</data>
+            <data key="shared name">Node 1 (interacts with) Node 2</data>
+            <data key="shared interaction">interacts with</data>
+            <data key="name">Node 1 (interacts with) Node 2</data>
+            <data key="selected">false</data>
+            <data key="interaction">interacts with</data>
+        </edge>
+        <edge source="294" target="300">
+            <data key="SUID">312</data>
+            <data key="shared name">Node 1 (interacts with) Node 3</data>
+            <data key="shared interaction">interacts with</data>
+            <data key="name">Node 1 (interacts with) Node 3</data>
+            <data key="selected">false</data>
+            <data key="interaction">interacts with</data>
+        </edge>
+        <edge source="294" target="303">
+            <data key="SUID">306</data>
+            <data key="shared name">Node 1 (interacts with) Node 4</data>
+            <data key="shared interaction">interacts with</data>
+            <data key="name">Node 1 (interacts with) Node 4</data>
+            <data key="selected">false</data>
+            <data key="interaction">interacts with</data>
+        </edge>
+    </graph>
+</graphml>
