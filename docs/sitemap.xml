@@ -8,6 +8,7 @@
 <url><loc>/index.html</loc></url>
 <url><loc>/reference/AdjMatrix2CytoNodes.html</loc></url>
 <url><loc>/reference/AdjMatrix2iGraph.html</loc></url>
+<url><loc>/reference/LayoutChange.html</loc></url>
 <url><loc>/reference/QMatrix2CytoNodes.html</loc></url>
 <url><loc>/reference/QMatrix2iGraph.html</loc></url>
 <url><loc>/reference/Tasks2CytoNodes.html</loc></url>
@@ -16,12 +17,15 @@
 <url><loc>/reference/build_from_q_matrix.html</loc></url>
 <url><loc>/reference/build_model_config.html</loc></url>
 <url><loc>/reference/check_mcmc_convergence.html</loc></url>
+<url><loc>/reference/checklegaledges.html</loc></url>
 <url><loc>/reference/compute_M2.html</loc></url>
 <url><loc>/reference/configure_dcm.html</loc></url>
 <url><loc>/reference/configure_sem.html</loc></url>
 <url><loc>/reference/create_edge_df.html</loc></url>
 <url><loc>/reference/create_node_df.html</loc></url>
 <url><loc>/reference/determine_model_type.html</loc></url>
+<url><loc>/reference/edgeadd.html</loc></url>
+<url><loc>/reference/edgedelete.html</loc></url>
 <url><loc>/reference/enforce_topo_sort.html</loc></url>
 <url><loc>/reference/filter_structural_nas.html</loc></url>
 <url><loc>/reference/generate_ppc_plots.html</loc></url>
@@ -31,8 +35,11 @@
 <url><loc>/reference/igraphedit.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/push_to_cytoscape.html</loc></url>
+<url><loc>/reference/readigraph.html</loc></url>
 <url><loc>/reference/run_pgdcm_auto.html</loc></url>
 <url><loc>/reference/run_predictive_check.html</loc></url>
 <url><loc>/reference/validate_graph_and_data.html</loc></url>
+<url><loc>/reference/viewparentsandchildren.html</loc></url>
+<url><loc>/reference/writeigraph.html</loc></url>
 </urlset>
 

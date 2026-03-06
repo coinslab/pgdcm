@@ -18,4 +18,3 @@ A list with \code{constants}, \code{inits}, \code{monitors}, and \code{data}.
 Generates the necessary Nimble \code{constants}, \code{inits}, and \code{monitors}
 specifically tailored for Diagnostic Classification Models (DCMs).
 }
-\keyword{internal}

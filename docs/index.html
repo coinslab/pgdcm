@@ -32,13 +32,6 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/DCM_workflow.html">DCM Workflow</a></li>
-    <li><a class="dropdown-item" href="articles/SEM_workflow.html">SEM Workflow</a></li>
-  </ul>
-</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -54,10 +47,19 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="pgdcm">PGDCM<a class="anchor" aria-label="anchor" href="#pgdcm"></a>
 </h1></div>
-<p>Probabilistic Graphical Diagnostic Classification Model (development)</p>
-<p>The main program is “runPGDCM.R” Specify graph structure using the prefix of the nodes file and the edges file (e.g., DTMRedges.csv and DTMRnodes.csv) Specify data set as an EXCEL spreadsheet using a format such as: DTMRdata.xlsx The graph structure and data set have to be compatible and the program tries to check this</p>
-<p>Tutorial papers can be found in the folder “TUTORIALPAPERS”</p>
 </div>
+<div class="section level1">
+<h1 id="probabilistic-graphical-diagnostic-classification-model-development">Probabilistic Graphical Diagnostic Classification Model (development)<a class="anchor" aria-label="anchor" href="#probabilistic-graphical-diagnostic-classification-model-development"></a>
+</h1>
+<p>To install the package (via Renv), run the following command:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">renv</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/renv/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"https://github.com/coinslab/pgdcm"</span><span class="op">)</span></span></code></pre></div>
+<p>To install the package (via remotes), run the following command:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"coinslab/pgdcm"</span><span class="op">)</span></span></code></pre></div>
+</div>
+
   </main><aside class="col-md-3"><div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">

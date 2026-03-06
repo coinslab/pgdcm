@@ -25,7 +25,7 @@ library(gridExtra)
 #' @param M2_obs Numeric matrix. Observed second-order moments.
 #'
 #' @return NULL. Saves a PDF file to the specified path.
-#' @keywords internal
+#' @export
 generate_ppc_plots <- function(filename, title_suffix, simMeans, simRowMeans, simColMeans, avgSimM2, obsColMeans, obsRowMeans, obsMean, M2_obs) {
     pdf(filename, width = 12, height = 12)
 

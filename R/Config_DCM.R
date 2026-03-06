@@ -13,7 +13,7 @@
 #' @param X A numeric matrix representing the observational participant data.
 #'
 #' @return A list with \code{constants}, \code{inits}, \code{monitors}, and \code{data}.
-#' @keywords internal
+#' @export
 configure_dcm <- function(info, X) {
     nrparticipants <- nrow(X)
 

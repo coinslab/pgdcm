@@ -45,4 +45,3 @@ NULL. Saves a PDF file to the specified path.
 Creates diagnostic PDF plots comparing simulated vs observed statistics
 including global means, score distributions, item difficulties, and co-occurrences.
 }
-\keyword{internal}
