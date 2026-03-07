@@ -1,3 +1,8 @@
 url: ~
 template:
   bootstrap: 5
+articles:
+  - title: "Workflows"
+    contents:
+      - DCM_workflow
+      - SEM_workflow

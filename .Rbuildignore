@@ -7,3 +7,7 @@ pgdcm/.Rhistory
 ^\.Rproj\.user$
 ^\.Rproj\.user$
 \.Rproj\.user
+^vignettes/renv
+^vignettes/\.quarto
+^vignettes/\.Rprofile$
+^docs$
