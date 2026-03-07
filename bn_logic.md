@@ -1,134 +1,109 @@
-# Formulating Mixed-Domain Cognitive Diagnostics: The `loglinearBN` Framework
+# Understanding the Mixed-Domain Logic in `loglinearBN`
 
 ## 1. Introduction
 
-Bayesian Networks (BNs) present a robust architecture for modeling complex dependencies in Psychometric frameworks such as Cognitive Diagnostic Models (CDMs) and Item Response Theory (IRT). Traditional implementations of CDMs typically require latent attributes to be strictly discrete (representing the presence or absence of a skill), whereas IRT traditionally relies strictly on continuous latent generic traits (like general intelligence).
+In educational testing and psychometrics, we often use models to figure out two things:
 
-The `pgdcm` package addresses a modern methodological challenge: formulating diagnostic equations when items or intermediate attributes demand *both* continuous roots and categorical dependencies simultaneously within a single causal hierarchy. Traditional psychometric software often separates these paradigms—forcing researchers to choose between treating all variables as continuous (e.g., Structural Equation Modeling) or all variables as categorical (e.g., Latent Class Models).
+1. **Continuous Traits**: A student's general ability level on a spectrum (e.g., General Intelligence $\theta$, ranging from -3 to +3). This is handled by **Item Response Theory (IRT)**.
+2. **Discrete Skills**: Whether a student possesses a specific skill or not (e.g., "Knows Algebra" $\alpha = 1$ or $\alpha = 0$). This is handled by **Cognitive Diagnostic Models (CDMs)**.
 
-This document details how this hybridization is mathematically orchestrated within the package's primary BN compilation engine, specifically focusing on the computational logic within the `calc_mixed_kernel` Nimble function found in `loglinearBN.R`.
+Historically, software forced researchers to choose: build a continuous model *or* build a discrete model. The `pgdcm` package solves this by allowing **Bayesian Networks (BNs)** that mix both. A single test question might require general intelligence AND a specific discrete skill simultaneously.
 
-## 2. Core Model Architecture: `loglinearBN`
-
-The `loglinearBN` script is built recursively in Nimble to map observational data ($X_{ij}$) to hierarchical latent states via Bayesian inference. The graph topography allows any node—whether it is a higher-order latent Attribute $k$ or an observable Task $j$—to have multiple distinct prerequisites (parents).
-
-Dependencies in the BN are encoded via three potential structural condensation rules per node, drawing from standard cognitive diagnostic theory:
-
-1. **DINA (Deterministic Input, Noisy "And")**: Non-compensatory logic. A subject must possess *all* requisite inputs to have a high probability of success.
-2. **DINM (Deterministic Input, Noisy "Multiplicative")**: Compensatory logic. A subject's probability of success is proportional to the ratio of possessed inputs over total required inputs.
-3. **DINO (Deterministic Input, Noisy "Or")**: Disjunctive logic. A subject must possess *any* individual requisite input to have a high probability of success.
-
-To handle parent nodes that span both continuous domains ($\theta \in \mathbb{R}$) and discrete binary domains ($\alpha \in \{0,1\}$), we developed the `calc_mixed_kernel` compiler flag.
-
-## 3. Mathematical Formalization of `calc_mixed_kernel`
-
-The fundamental purpose of `calc_mixed_kernel` is to reduce an arbitrary array of $P$ parent states into a single, scalar "Effective Input" ($\psi_{ij}$) that is subsequently passed to the standard generalized logistic regression form to compute the probability of a positive outcome:
-
-$$
-P(X_{ij} = 1 \mid \psi, \lambda) \approx \text{logit}^{-1}(\lambda_{j,1} \cdot \psi_{ij} - \lambda_{j,2})
-$$
-
-Where:
-
-* $\lambda_{j,1} \in (0, \infty)$ represents the discrimination (slope) parameter.
-* $\lambda_{j,2} \in (-\infty, \infty)$ represents the difficulty (intercept) parameter.
-* $\psi_{ij}$ is the condensed effective input for subject $i$ on node $j$, calculated dynamically by the BN.
-
-### 3.1 Kernel Aggregation Mechanics
-
-The `calc_mixed_kernel` function sequentially aggregates parent statuses during compilation. Given a vector of parent node values $v = (v_1, \dots, v_P)$ and corresponding Q-matrix/Adjacency weights $w = (w_1, \dots, w_P)$, the function computes:
-
-1. **Continuous Summation ($S_c$)**: Accumulates the weighted values of root continuous inputs. The model architecture enforces that only root nodes (nodes with 0 in-degree, indexed $p \leq \text{nrbetaroot}$) can be modeled continuously as $N(0,1)$.
-    $$ S_c = \sum_{p=1}^{\text{nrbetaroot}} w_p v_p $$
-2. **Discrete Summation ($S_d$)**: Accumulates the weighted values of categorical specific attributes (where $p > \text{nrbetaroot}$). These are strictly modeled as Bernoullis.
-    $$ S_d = \sum_{p=\text{nrbetaroot}+1}^{P} w_p v_p $$
-3. **Required Discrete Mass ($R_d$)**: Totals the strictly necessary combinatorial weight of non-continuous prerequisites.
-    $$ R_d = \sum_{p=\text{nrbetaroot}+1}^{P} w_p $$
-
-The core ingenuity of the function lies in how it handles varying combinatorial constraints under the DINA (Non-Compensatory) flag parameterization when bridging $S_c$ and $S_d$. We outline the five exclusive behavioral scenarios handled natively by the algorithm.
+This document breaks down exactly how the mathematical grading engine—a function called `calc_mixed_kernel` inside `loglinearBN.R`—handles this mixing under the hood.
 
 ---
 
-## 4. Operational Scenarios
+## 2. How the "Grading Engine" Works
 
-### Scenario 1: Standard Multidimensional IRT (Multiple Continuous Roots, No Discrete Parents)
+The core of the model is a logistic equation. For any given test question (or intermediate skill), the model calculates the probability that student $i$ will succeed:
 
-When an item loads purely onto multiple continuous traits (e.g., General Math Ability $\theta_1$ and General Reading Ability $\theta_2$), the model automatically reduces to a standard Multidimensional Item Response Theory (MIRT) mapping.
+$$
+P(\text{Success}) \approx \text{logit}^{-1}(\text{Slope} \times \text{Effective Input} - \text{Intercept})
+$$
 
-**Mathematical Behavior:**
-* The required discrete mass $R_d = 0$.
-* The discrete sum $S_d = 0$.
-* The gating logic strictly evaluates the condition $S_d == R_d$, which evaluates to `$0 == 0$` (True).
-* The outcome assigns the effective input to the continuous sum: $\psi_{ij} = S_c = \lambda_1 \theta_1 + \lambda_2 \theta_2$.
+* **Slope ($\lambda_1$)**: How well does this question distinguish between good and bad students?
+* **Intercept ($\lambda_2$)**: How fundamentally difficult is the question?
+* **Effective Input ($\psi$)**: This is what `calc_mixed_kernel` calculates. It looks at all the prerequisites the question requires, looks at what the student possesses, and spits out a single score summarizing their readiness.
 
-**Psychometric Implication:**
-The loglinear kernel becomes a multi-parameter additive combination:
-$$P(X_{ij}=1) = \text{logit}^{-1}(\lambda_{j,1}(\theta_{1} + \theta_{2}) - \lambda_{j,2})$$
-Because $S_c$ relies on simple addition, a high draw from $\theta_1$ can mathematically compensate for a low draw from $\theta_2$. The model naturally and correctly behaves as Compensatory MIRT.
+### 2.1 The Three Moving Parts
 
-### Scenario 2: Standard Unidimensional IRT (Single Continuous Root, No Discrete Parents)
+To calculate the Effective Input, the engine counts up three things for the student:
 
-This is a specific reduction of Scenario 1, where an item loads solely onto one continuous ability ($\theta_1$).
+1. **Continuous Sum ($S_c$)**: It adds up the student's continuous traits (like general intelligence) if the question requires them.
+2. **Discrete Sum ($S_d$)**: It counts how many of the required specific skills (like algebra or geometry) the student actually possesses.
+3. **Required Mass ($R_d$)**: It counts how many specific skills the question *formally demands*. (e.g., If it requires algebra and geometry, $R_d = 2$).
 
-**Mathematical Behavior:**
-* Again, $R_d = 0$ and $S_d == R_d \rightarrow \text{True}$.
-* The outcome assigns $\psi_{ij} = \theta_1$.
+Once it has these three numbers, the engine uses them to calculate the final Effective Input depending on the structure of the question.
 
-**Psychometric Implication:**
-The kernel collapses accurately to the standard 2-Parameter Logistic (2PL) IRT equation:
-$$P(X_{ij}=1) = \text{logit}^{-1}(\lambda_{j,1} \theta_1 - \lambda_{j,2})$$
+---
 
-### Scenario 3: Standard DINA (Multiple Discrete Attributes, No Continuous Roots)
+## 3. The Five Scenarios
 
-Consider a traditional cognitive item that necessitates the mastery of several distinct binary skills (e.g., $\alpha_1, \alpha_2$), completely agnostic to general continuous traits. This represents the classic Cognitive Diagnostic Model formulation.
+Below, we detail how the math plays out in five distinct real-world scenarios.
 
-**Mathematical Behavior:**
-* Continuous summation $S_c = 0$ and the internal `has_cont` flag disables.
-* The algorithm bypasses the continuous evaluation branch entirely.
-* It verifies if the student has every requisite categorical skill ($S_d == R_d$).
-* The function emits a strict discrete boolean: $\psi_{ij} = 1$ if $S_d == R_d$, else $0$.
+### Scenario 1: Standard Multidimensional IRT (Continuous Only)
 
-**Psychometric Implication:**
-The input to the logistic equation is strictly binary. Students drop into two distinct probability strata (often referred to as the guessing and slipping parameters in classical DINA formulations):
-* Masters (possessed all skills): $P(X_{ij}=1) = \text{logit}^{-1}(\lambda_{j,1}(1) - \lambda_{j,2})$
-* Non-Masters (missing $\ge 1$ skill): $P(X_{ij}=1) = \text{logit}^{-1}(\lambda_{j,1}(0) - \lambda_{j,2})$
+*Imagine a math-word problem that requires both "General Reading Ability" and "General Math Ability". It does not require any specific checklist skills.*
+
+**How the Engine Reads It:**
+
+* There are no discrete skills required, so the Required Mass ($R_d$) is 0.
+* Because nothing specific is required, the student automatically clears the "gate" ($0 == 0$ is true).
+* **The Result**: The Effective Input is simply the sum of their continuous abilities: $S_c$ (Math + Reading).
+
+**What This Means:**
+This behaves exactly like a **Compensatory MIRT** model. Because it just adds the traits together, a student with a very high reading ability can mathematically compensate for a low math ability and still get the question right.
+
+### Scenario 2: Standard Unidimensional IRT (Single Continuous Trait)
+
+*Imagine a basic vocabulary question that simply relies on "General Reading Ability."*
+
+**How the Engine Reads It:**
+
+* Exactly like Scenario 1, but there is only one trait.
+* **The Result**: The Effective Input is just their reading ability: $\theta$.
+
+**What This Means:**
+This behaves exactly like a classic **2-Parameter Logistic (2PL) IRT** model. The higher their trait, the higher their probability of getting the question right on a smooth curve.
+
+### Scenario 3: Standard DINA (Discrete Skills Only)
+
+*Imagine a strict math problem that requires knowing exactly two rules: "The Pythagorean Theorem" and "How to Multiply Fractions". General intelligence is not factored in.*
+
+**How the Engine Reads It:**
+
+* There are no continuous traits involved, so the Continuous Sum ($S_c$) is turned off.
+* The Required Mass ($R_d$) is 2. The engine checks if the student's Discrete Sum ($S_d$) equals 2.
+* **The Result**: If they have both skills, the Effective Input is `1`. If they are missing one or both, the Effective Input is `0`.
+
+**What This Means:**
+This is the classic **Cognitive Diagnostic Model (DINA)**. Probability splits into two harsh groups: "Masters" (input=1) who have a high probability of success, and "Non-Masters" (input=0) who have a very low probability (just a guessing chance).
 
 ### Scenario 4: The Gated Implementation (Mixed Continuous and Discrete Inputs)
 
-The most intricate structural constraint arises when an outcome demands *both* specific mastery ($\alpha_1$) alongside a sufficient baseline continuum trait ($\theta_1$).
+*This is the breakthrough scenario. Imagine an advanced physics question. It requires a high "General Problem Solving Ability" (Continuous $\theta$), BUT you absolutely must know "Newton's Third Law" (Discrete $\alpha$).*
 
-If one were to use standard compensatory summation ($\theta_1 + \alpha_1$), a very high continuous trait ($\theta_1 = 3.0$) could mathematically superscript a missing critical discrete requirement ($\alpha_1 = 0$), violating non-compensatory theory. For example, extreme general intelligence should not compensate for zero knowledge of the actual required vocabulary word.
+If we just added these together ($\theta + \alpha$), a genius student ($\theta = +3.0$) who doesn't know Newton's Law ($\alpha = 0$) might still get a high score. But this is a strict test; you *cannot* logic your way out of not knowing the formula!
 
-The `loglinearBN` algorithm resolves this by establishing the discrete traits as a strict **Gating Matrix** for the continuous trait:
+**How the Engine Reads It:**
+To prevent unfair compensation, the engine treats the discrete skills as a **Strict Gate**:
 
-$$
-\psi_{ij} =
-\begin{cases}
-S_c & \text{if } S_d == R_d \quad \text{(Gate Open)} \\
--10.0 & \text{otherwise} \quad \text{(Gate Closed)}
-\end{cases}
-$$
+1. It compares the student's skills ($S_d$) to the requirements ($R_d$).
+2. **If they pass the Gate ($S_d == R_d$)**: The gate opens! The Effective Input becomes their continuous intelligence ($S_c$). They get to use their problem-solving ability on the question.
+3. **If they fail the Gate ($S_d \neq R_d$)**: The engine intervenes and assigns an extreme penalty: **Effective Input = -10.0**.
 
-**Mathematical Behavior:**
-* The function detects that continuous inputs exist (`has_cont == 1.0`).
-* It checks the categorical prerequisite constraint ($S_d == R_d$).
-* **If prerequisites are met**, the discrete gate opens, and the effective input becomes the continuous scalar $\theta_1$. The probability evaluates identically to a standard 2PL curve scaling along the continuum variable.
-* **If prerequisites are violated**, the item emits an extreme, overriding scalar penalty ($\psi_{ij} = -10.0$).
-
-**Psychometric Implication:**
-Under a standard logistic curve, $\text{logit}^{-1}(-10) \approx 0.000045$. This forces the probability of success to near-zero, strictly terminating the capacity for the continuous trait $\theta$ to compensate for the missing discrete skill. The item behaves exactly as a Non-Compensatory mixed-domain node should.
+**What This Means:**
+Under logistic math, an input of `-10.0` translates to a $\approx 0.000045$ probability of success. It drops straight to zero. Because of this "gate", extreme continuous intelligence cannot compensate for missing core knowledge. This successfully creates a **Mixed-Domain Non-Compensatory (Gated DINA)** model.
 
 ### Scenario 5: Compensatory and Disjunctive Topologies (DINM and DINO)
 
-When researchers invoke strictly compensatory (`isDINM=1`) or disjunctive (`isDINO=1`) architectures, substituting the DINA rule constraint, the algorithm behaves algebraically across all domains.
+*What if the researcher doesn't want the strict "All-or-Nothing" rules? They can flip a flag to use DINM or DINO logic instead.*
 
-* **DINM (Compensatory)**: Computes uniformly utilizing the mass inputs regardless of continuity properties by taking the ratio of possessed weight over total required weight.
-  $$ \psi_{ij} = \frac{S_c + S_d}{\max(1, \sum w_p)} $$
-  *Note: A high continuous draw in $S_c$ can successfully increase the ratio, directly modeling compensation.*
-* **DINO (Disjunctive)**: Computes a straightforward logical bypass mapping:
-  $$ \psi_{ij} = 1.0 \text{ if } (S_c + S_d > 0) \text{ else } 0.0 $$
-  If the subject has *any* of the prerequisites (whether that is a categorical skill $\alpha=1$ or a sufficient continuous draw $\theta > 0$), they are granted full input mass.
+* **DINM (Partial Credit/Compensatory)**: The engine ignores the "gate" and just calculates a ratio: (What you have) / (What is required). If you need 3 skills/traits and possess 2, your Effective Input is $2/3$. High continuous ability *can* boost your ratio here.
+* **DINO (Fast Track/Disjunctive)**: The engine says, "Do you have *any* of the required skills or traits > 0?" If yes, your Effective Input is a full `1.0`.
 
-## 5. Conclusion
+---
 
-The topological computation engine powering `loglinearBN` successfully abstracts the traditionally disjoint continuous (IRT) and categorical (CDM) parameter spaces. By utilizing the `calc_mixed_kernel` subroutine, the Bayesian structural compiler fluently handles unidimensional IRT, multidimensional compensatory arrays, strict categorical grouping rules, and complex gated hierarchies under a single, unified syntax standard.
+## 4. Conclusion
+
+The `calc_mixed_kernel` function operates as a universal psychometric compiler. By intelligently grouping and gating continuous sums ($S_c$) and discrete sums ($S_d$), it allows researchers to build single Bayesian Networks that seamlessly switch between standard IRT curves, strict DINA groupings, and the novel Gated Mixed-Domain logic—all on a node-by-node basis.
