@@ -95,7 +95,7 @@ generate_ppc_plots <- function(filename, title_suffix, simMeans, simRowMeans, si
 #'
 #' @return A list containing the simulated and observed statistics.
 #' @export
-run_predictive_check <- function(config, obs_X, posterior_samples = NULL, n_sim = 50, prefix = "Unified", title = "PPC") {
+run_predictive_check <- function(config, obs_X, posterior_samples = NULL, n_sim = 50, prefix = "Untitled", title = "PPC") {
     source(config$code_file)
     model_code <- get(config$model_object)
 

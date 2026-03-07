@@ -23,8 +23,13 @@ run_pgdcm_auto <- function(config, estimation_config, prefix = "Unified_Pipeline
     source(config$code_file)
     model_code <- get(config$model_object)
 
-    print("\n--- 1. Running Prior Predictive Check ---")
-    prior_res <- run_predictive_check(config, config$data$X, posterior_samples = NULL, n_sim = estimation_config$prior_sims, prefix = prefix, title = "PriorPPC")
+    prior_res <- NULL
+    if (!is.null(estimation_config$prior_sims) && estimation_config$prior_sims > 0) {
+        print("\n--- 1. Running Prior Predictive Check ---")
+        prior_res <- run_predictive_check(config, config$data$X, posterior_samples = NULL, n_sim = estimation_config$prior_sims, prefix = prefix, title = "PriorPPC")
+    } else {
+        print("\n--- 1. Skipping Prior Predictive Check ---")
+    }
 
     print("\n--- 2. Executing MCMC Inference ---")
     mcmc.out <- nimbleMCMC(
@@ -64,8 +69,13 @@ run_pgdcm_auto <- function(config, estimation_config, prefix = "Unified_Pipeline
     convergence <- check_mcmc_convergence(res_clean, blocksize = min(50, estimation_config$niter / 10), burninperiod = min(100, estimation_config$nburnin / 2))
     print(paste("MCMC Convergence Estimate (relerrors < 0.1):", convergence$converged))
 
-    print("\n--- 4. Running Posterior Predictive Check ---")
-    post_res <- run_predictive_check(config, config$data$X, posterior_samples = res_clean, n_sim = estimation_config$post_sims, prefix = prefix, title = "PosteriorPPC")
+    post_res <- NULL
+    if (!is.null(estimation_config$post_sims) && estimation_config$post_sims > 0) {
+        print("\n--- 4. Running Posterior Predictive Check ---")
+        post_res <- run_predictive_check(config, config$data$X, posterior_samples = res_clean, n_sim = estimation_config$post_sims, prefix = prefix, title = "PosteriorPPC")
+    } else {
+        print("\n--- 4. Skipping Posterior Predictive Check ---")
+    }
 
     print("\nPipeline Complete!")
     return(list(
