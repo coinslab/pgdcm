@@ -116,7 +116,7 @@ QMatrix2iGraph <- function(Q, compute = "dina") {
     }
 
     # Create the igraph object
-    g <- graph_from_data_frame(d = edges, vertices = nodes, directed = TRUE)
+    g <- enforce_topo_sort(g)
     return(g)
 }
 
@@ -176,7 +176,7 @@ AdjMatrix2iGraph <- function(Adj, compute = "dina") {
     }
 
     # Create the igraph object
-    g <- graph_from_data_frame(d = edges, vertices = nodes, directed = TRUE)
+    g <- enforce_topo_sort(g)
     return(g)
 }
 
@@ -212,7 +212,7 @@ AdjMatrix2CytoNodes <- function(Adj, compute = "dina", title = "Scenario3_AdjMat
 pull_from_cytoscape <- function(network.title = NULL, base.url = "http://localhost:1234/v1") {
     if (!requireNamespace("RCy3", quietly = TRUE)) stop("Please install RCy3 to use Cytoscape.")
     library(RCy3)
-    
+
     # Check if network exists
     if (!is.null(network.title)) {
         net_list <- getNetworkList(base.url = base.url)
@@ -222,14 +222,14 @@ pull_from_cytoscape <- function(network.title = NULL, base.url = "http://localho
         # Set it as current so createIgraphFromNetwork targets it
         setCurrentNetwork(network = network.title, base.url = base.url)
     }
-    
+
     # Pull raw network
     g_raw <- createIgraphFromNetwork(network = "current", base.url = base.url)
     message(sprintf("✓ Pulled network from Cytoscape: %d nodes, %d edges", vcount(g_raw), ecount(g_raw)))
-    
+
     # Enforce Topological Sort for Nimble Compatibility
     g_sorted <- enforce_topo_sort(g_raw)
     message("✓ Enforced topological sort for Nimble compilation")
-    
+
     return(g_sorted)
 }
