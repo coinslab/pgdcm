@@ -1,9 +1,9 @@
 ---
 title: "SEM Workflow"
-output: rmarkdown::html_vignette
+format: html
 vignette: >
   %\VignetteIndexEntry{SEM Workflow}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
 ---
 
