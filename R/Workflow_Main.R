@@ -37,7 +37,8 @@ run_pgdcm_auto <- function(config, estimation_config, prefix = "Unified_Pipeline
         nburnin = estimation_config$nburnin,
         summary = TRUE,
         monitors = config$monitors,
-        samplesAsCodaMCMC = TRUE
+        samplesAsCodaMCMC = TRUE,
+        WAIC = TRUE
     )
 
     res <- mcmc.list(mcmc.out$samples)
@@ -67,5 +68,11 @@ run_pgdcm_auto <- function(config, estimation_config, prefix = "Unified_Pipeline
     post_res <- run_predictive_check(config, config$data$X, posterior_samples = res_clean, n_sim = estimation_config$post_sims, prefix = prefix, title = "PosteriorPPC")
 
     print("\nPipeline Complete!")
-    return(list(mcmc_out = mcmc.out, samples = res_clean, prior_ppc = prior_res, post_ppc = post_res))
+    return(list(
+        mcmc_out = mcmc.out,
+        samples = res_clean,
+        prior_ppc = prior_res,
+        post_ppc = post_res,
+        WAIC = mcmc.out$WAIC
+    ))
 }
