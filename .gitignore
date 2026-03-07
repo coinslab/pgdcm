@@ -3,3 +3,6 @@
 .RData
 .Ruserdata
 BACKUP/DTMRBACKUP0206262325edges.csv
+
+/.quarto/
+**/*.quarto_ipynb
