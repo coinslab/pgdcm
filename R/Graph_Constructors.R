@@ -15,7 +15,7 @@ library(igraph)
 #'
 #' @return A topologically sorted \code{igraph} object representing the Q-matrix structure.
 #' @export
-build_from_q_matrix <- function(QMatrixFile, DefaultAttributeCompute = "zscore", DefaultTaskCompute = "dina") {
+build_from_q_matrix <- function(QMatrixFile, DefaultAttributeCompute = "dina", DefaultTaskCompute = "dina") {
     print(paste("Building from Q-Matrix:", QMatrixFile))
     Q <- read.csv(QMatrixFile, row.names = 1, check.names = FALSE)
     TaskNames <- rownames(Q)

@@ -198,3 +198,38 @@ AdjMatrix2CytoNodes <- function(Adj, compute = "dina", title = "Scenario3_AdjMat
     message(sprintf("✓ Pushed Adjacency Matrix network to Cytoscape: %d nodes, %d edges", vcount(g), ecount(g)))
     return(g)
 }
+
+#' Pull Graph from Cytoscape
+#'
+#' Pulls the current active network from Cytoscape, converts it to an igraph object,
+#' and enforces a topological sort so it can be safely compiled by the nimble BN/SEM engines.
+#'
+#' @param network.title Character. The name of the network in Cytoscape to pull. If NULL, pulls the currently active network.
+#' @param base.url Character. The base URL for the Cytoscape REST API. Default is \code{"http://localhost:1234/v1"}.
+#'
+#' @return A topologically sorted \code{igraph} object.
+#' @export
+pull_from_cytoscape <- function(network.title = NULL, base.url = "http://localhost:1234/v1") {
+    if (!requireNamespace("RCy3", quietly = TRUE)) stop("Please install RCy3 to use Cytoscape.")
+    library(RCy3)
+    
+    # Check if network exists
+    if (!is.null(network.title)) {
+        net_list <- getNetworkList(base.url = base.url)
+        if (!(network.title %in% net_list)) {
+            stop(sprintf("Network '%s' not found in Cytoscape.", network.title))
+        }
+        # Set it as current so createIgraphFromNetwork targets it
+        setCurrentNetwork(network = network.title, base.url = base.url)
+    }
+    
+    # Pull raw network
+    g_raw <- createIgraphFromNetwork(network = "current", base.url = base.url)
+    message(sprintf("✓ Pulled network from Cytoscape: %d nodes, %d edges", vcount(g_raw), ecount(g_raw)))
+    
+    # Enforce Topological Sort for Nimble Compatibility
+    g_sorted <- enforce_topo_sort(g_raw)
+    message("✓ Enforced topological sort for Nimble compilation")
+    
+    return(g_sorted)
+}
