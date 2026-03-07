@@ -116,6 +116,7 @@ QMatrix2iGraph <- function(Q, compute = "dina") {
     }
 
     # Create the igraph object
+    g <- graph_from_data_frame(d = edges, vertices = nodes, directed = TRUE)
     g <- enforce_topo_sort(g)
     return(g)
 }
@@ -176,6 +177,7 @@ AdjMatrix2iGraph <- function(Adj, compute = "dina") {
     }
 
     # Create the igraph object
+    g <- graph_from_data_frame(d = edges, vertices = nodes, directed = TRUE)
     g <- enforce_topo_sort(g)
     return(g)
 }
