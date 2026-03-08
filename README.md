@@ -1,14 +1,30 @@
-# PGDCM
+# PGDCM: Probabilistic Graphical Diagnostic Classification Models
 
-# Probabilistic Graphical Diagnostic Classification Model (development)
+PGDCM stands for **Probabilistic Graphical Diagnostic Classification Models**. It is a unified framework for building and estimating several psychometric models within the probabilistic graphical modeling framework (i.e., treating these psychometric models as special cases of Bayesian networks, Hidden Markov Models, or Partially Observed Markov Decision Processes).
 
-To install the package (via Renv), run the following command:
+Currently supported models include:
+
+* Diagnostic Classification Models (DCM)
+* Higher-order Diagnostic Classification Models (HDCM)
+* Multidimensional Item Response Theory (MIRT) Models
+* Item Response Theory (IRT) Models
+* Structural Equation Models (SEM)
+
+We currently use [Cytoscape](https://cytoscape.org/) for graph building and [NIMBLE](https://r-nimble.org/) for Markov Chain Monte Carlo (MCMC) estimation. However, a core design philosophy of `pgdcm` is extensibility, allowing developers to swap out the MCMC sampler with other estimation algorithms in the future.
+
+To interact with the graph building component, you will need to have Cytoscape installed and running on your system, as well as the **RCy3** R package. Using the Cytoscape template file that we provide ensures that the graph is built correctly for the estimation engine.
+
+*(Tip: You can use `pgdcm::get_Cyto_template()` in R to automatically copy this template into your working directory).*
+
+## Installation
+
+To install the package using `renv`, run the following command:
 
 ```R
-renv::install("https://github.com/coinslab/pgdcm")
+renv::install("coinslab/pgdcm")
 ```
 
-To install the package (via remotes), run the following command:
+Alternatively, you can install the package using the `remotes` package:
 
 ```R
 install.packages("remotes")

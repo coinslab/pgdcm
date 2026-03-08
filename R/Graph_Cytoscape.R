@@ -235,3 +235,38 @@ pull_from_cytoscape <- function(network.title = NULL, base.url = "http://localho
 
     return(g_sorted)
 }
+
+#' Get Cytoscape Template
+#'
+#' Copies the bundled PGDCM Cytoscape template file to the current working directory.
+#'
+#' @param dest_dir Character. The destination directory to copy the template to. Defaults to the current working directory.
+#' @param overwrite Logical. Whether to overwrite the file if it already exists. Defaults to FALSE.
+#'
+#' @return Logical. TRUE if successful, FALSE otherwise.
+#' @export
+get_Cyto_template <- function(dest_dir = getwd(), overwrite = FALSE) {
+    template_path <- system.file("PGDCM_template.cys", package = "pgdcm")
+
+    if (template_path == "") {
+        warning("PGDCM_template.cys not found in the package installation.")
+        return(FALSE)
+    }
+
+    dest_file <- file.path(dest_dir, "PGDCM_template.cys")
+
+    if (file.exists(dest_file) && !overwrite) {
+        warning(sprintf("File '%s' already exists. Use overwrite = TRUE to replace it.", dest_file))
+        return(FALSE)
+    }
+
+    success <- file.copy(template_path, dest_file, overwrite = overwrite)
+
+    if (success) {
+        message(sprintf("✓ Successfully copied PGDCM_template.cys to %s", dest_dir))
+    } else {
+        warning("Failed to copy PGDCM_template.cys.")
+    }
+
+    return(invisible(success))
+}
