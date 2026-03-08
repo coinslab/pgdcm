@@ -1,6 +1,19 @@
 url: ~
 template:
   bootstrap: 5
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    articles:
+      text: Articles
+      menu:
+        - text: Workflows
+        - text: DCM Workflow
+          href: articles/DCM_workflow.html
+        - text: SEM Workflow
+          href: articles/SEM_workflow.html
 articles:
   - title: "Workflows"
     contents:
