@@ -4,8 +4,16 @@
 <url><loc>/articles/DCM_workflow.html</loc></url>
 <url><loc>/articles/SEM_workflow.html</loc></url>
 <url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/renv/library/macos/R-4.5/aarch64-apple-darwin20/renv/doc/ci.html</loc></url>
+<url><loc>/articles/renv/library/macos/R-4.5/aarch64-apple-darwin20/renv/doc/docker.html</loc></url>
+<url><loc>/articles/renv/library/macos/R-4.5/aarch64-apple-darwin20/renv/doc/faq.html</loc></url>
+<url><loc>/articles/renv/library/macos/R-4.5/aarch64-apple-darwin20/renv/doc/package-install.html</loc></url>
+<url><loc>/articles/renv/library/macos/R-4.5/aarch64-apple-darwin20/renv/doc/package-sources.html</loc></url>
+<url><loc>/articles/renv/library/macos/R-4.5/aarch64-apple-darwin20/renv/doc/packages.html</loc></url>
+<url><loc>/articles/renv/library/macos/R-4.5/aarch64-apple-darwin20/renv/doc/packrat.html</loc></url>
+<url><loc>/articles/renv/library/macos/R-4.5/aarch64-apple-darwin20/renv/doc/profiles.html</loc></url>
+<url><loc>/articles/renv/library/macos/R-4.5/aarch64-apple-darwin20/renv/doc/python.html</loc></url>
 <url><loc>/authors.html</loc></url>
-<url><loc>/bn_logic.html</loc></url>
 <url><loc>/index.html</loc></url>
 <url><loc>/reference/AdjMatrix2CytoNodes.html</loc></url>
 <url><loc>/reference/AdjMatrix2iGraph.html</loc></url>
@@ -35,6 +43,7 @@
 <url><loc>/reference/get_graph_info.html</loc></url>
 <url><loc>/reference/igraphedit.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/pull_from_cytoscape.html</loc></url>
 <url><loc>/reference/push_to_cytoscape.html</loc></url>
 <url><loc>/reference/readigraph.html</loc></url>
 <url><loc>/reference/run_pgdcm_auto.html</loc></url>
@@ -42,6 +51,5 @@
 <url><loc>/reference/validate_graph_and_data.html</loc></url>
 <url><loc>/reference/viewparentsandchildren.html</loc></url>
 <url><loc>/reference/writeigraph.html</loc></url>
-<url><loc>/sem_logic.html</loc></url>
 </urlset>
 

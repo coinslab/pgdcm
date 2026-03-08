@@ -16,8 +16,6 @@ To interact with the graph building component, you will need to have Cytoscape i
 
 We also provide many `igraph` edit functions in this package that can be used for graph building and graph editing. These are especially useful if you prefer a code-based workflow instead of Cytoscape, or if you want to eliminate the dependency on Cytoscape entirely.
 
-*(Tip: You can use `pgdcm::get_Cyto_template()` in R to automatically copy this template into your working directory).*
-
 ## Installation
 
 To install the package using `renv`, run the following command:

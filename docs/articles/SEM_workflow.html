@@ -32,13 +32,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/DCM_workflow.html">DCM Workflow</a></li>
-    <li><a class="dropdown-item" href="../articles/SEM_workflow.html">SEM Workflow</a></li>
-  </ul>
-</li>
+<li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -74,18 +68,16 @@
 </h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># library(pgdcm)</span></span>
+<code class="sourceCode R"><span><span class="co"># Activate the local renv if it isn't automatically loaded:</span></span>
+<span><span class="co"># renv::activate()</span></span>
 <span></span>
-<span><span class="co"># If running locally without installing:</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"R/GraphBuilder.R"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"R/ModelConfig.R"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"R/Workflow.R"</span><span class="op">)</span></span>
+<span><span class="co"># Load the package and Cytoscape interface</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pgdcm</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cytoscape/RCy3" class="external-link">RCy3</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Helper to find data files whether installed or running locally</span></span>
+<span><span class="co"># Helper to find built-in package data</span></span>
 <span><span class="va">get_data_path</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">filename</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="va">filename</span>, package <span class="op">=</span> <span class="st">"pgdcm"</span><span class="op">)</span></span>
-<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">path</span> <span class="op">==</span> <span class="st">""</span><span class="op">)</span> <span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"inst/extdata/"</span>, <span class="va">filename</span><span class="op">)</span></span>
-<span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="va">filename</span>, package <span class="op">=</span> <span class="st">"pgdcm"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 </section><section class="level2"><h3 id="build-the-graph">2. Build the Graph<a class="anchor" aria-label="anchor" href="#build-the-graph"></a>

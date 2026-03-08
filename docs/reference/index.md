@@ -49,6 +49,8 @@
   Graph
 - [`get_graph_info()`](get_graph_info.md) : Extract Graph Information
 - [`igraphedit()`](igraphedit.md) : Run Interactive Graph Editor
+- [`pull_from_cytoscape()`](pull_from_cytoscape.md) : Pull Graph from
+  Cytoscape
 - [`push_to_cytoscape()`](push_to_cytoscape.md) : Push Graph to
   Cytoscape
 - [`readigraph()`](readigraph.md) : Read Igraph from Files

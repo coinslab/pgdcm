@@ -9,18 +9,16 @@ IRT) are automatically determined.
 ### 1. Setup
 
 ``` r
-# library(pgdcm)
+# Activate the local renv if it isn't automatically loaded:
+# renv::activate()
 
-# If running locally without installing:
-source("R/GraphBuilder.R")
-source("R/ModelConfig.R")
-source("R/Workflow.R")
+# Load the package and Cytoscape interface
+library(pgdcm)
+library(RCy3)
 
-# Helper to find data files whether installed or running locally
+# Helper to find built-in package data
 get_data_path <- function(filename) {
-    path <- system.file("extdata", filename, package = "pgdcm")
-    if (path == "") path <- paste0("inst/extdata/", filename)
-    return(path)
+    system.file("extdata", filename, package = "pgdcm")
 }
 ```
 

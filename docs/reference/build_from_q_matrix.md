@@ -7,7 +7,7 @@ Constructs a bipartite `igraph` object from a standard Q-matrix file.
 ``` r
 build_from_q_matrix(
   QMatrixFile,
-  DefaultAttributeCompute = "zscore",
+  DefaultAttributeCompute = "dina",
   DefaultTaskCompute = "dina"
 )
 ```
