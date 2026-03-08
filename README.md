@@ -12,7 +12,9 @@ Currently supported models include:
 
 We currently use [Cytoscape](https://cytoscape.org/) for graph building and [NIMBLE](https://r-nimble.org/) for Markov Chain Monte Carlo (MCMC) estimation. However, a core design philosophy of `pgdcm` is extensibility, allowing developers to swap out the MCMC sampler with other estimation algorithms in the future.
 
-To interact with the graph building component, you will need to have Cytoscape installed and running on your system, as well as the **RCy3** R package. Using the Cytoscape template file that we provide ensures that the graph is built correctly for the estimation engine.
+To interact with the graph building component, you will need to have Cytoscape installed and running on your system, as well as the **RCy3** R package. Using the Cytoscape template file that we provide ensures that the graph is built correctly for the estimation engine. Once a graph is built in Cytoscape, we use `igraph` for other operations.
+
+We also provide many `igraph` edit functions in this package that can be used for graph building and graph editing. These are especially useful if you prefer a code-based workflow instead of Cytoscape, or if you want to eliminate the dependency on Cytoscape entirely.
 
 *(Tip: You can use `pgdcm::get_Cyto_template()` in R to automatically copy this template into your working directory).*
 
