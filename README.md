@@ -1,6 +1,6 @@
 # PGDCM: Probabilistic Graphical Diagnostic Classification Models
 
-PGDCM stands for **Probabilistic Graphical Diagnostic Classification Models**. It is a unified framework for building and estimating several psychometric models within the probabilistic graphical modeling framework (i.e., treating these psychometric models as special cases of Bayesian networks, Hidden Markov Models, or Partially Observed Markov Decision Processes).
+PGDCM is a unified framework for building and estimating several psychometric models within the probabilistic graphical modeling framework (i.e., treating these psychometric models as special cases of Bayesian networks, Hidden Markov Models, or Partially Observed Markov Decision Processes).
 
 Currently supported models include:
 

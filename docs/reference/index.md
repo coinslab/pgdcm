@@ -43,6 +43,7 @@
   Structural NAs from MCMC Samples
 - [`generate_ppc_plots()`](generate_ppc_plots.md) : Generate
   Posterior/Prior Predictive Plots
+- [`get_Cyto_template()`](get_Cyto_template.md) : Get Cytoscape Template
 - [`get_EdgesTable()`](get_EdgesTable.md) : Extract Edges Table from
   Graph
 - [`get_NodesTable()`](get_NodesTable.md) : Extract Nodes Table from

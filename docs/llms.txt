@@ -1,14 +1,45 @@
-# PGDCM
+# PGDCM: Probabilistic Graphical Diagnostic Classification Models
 
-# Probabilistic Graphical Diagnostic Classification Model (development)
+PGDCM is a unified framework for building and estimating several
+psychometric models within the probabilistic graphical modeling
+framework (i.e., treating these psychometric models as special cases of
+Bayesian networks, Hidden Markov Models, or Partially Observed Markov
+Decision Processes).
 
-To install the package (via Renv), run the following command:
+Currently supported models include:
+
+- Diagnostic Classification Models (DCM)
+- Higher-order Diagnostic Classification Models (HDCM)
+- Multidimensional Item Response Theory (MIRT) Models
+- Item Response Theory (IRT) Models
+- Structural Equation Models (SEM)
+
+We currently use [Cytoscape](https://cytoscape.org/) for graph building
+and [NIMBLE](https://r-nimble.org/) for Markov Chain Monte Carlo (MCMC)
+estimation. However, a core design philosophy of `pgdcm` is
+extensibility, allowing developers to swap out the MCMC sampler with
+other estimation algorithms in the future.
+
+To interact with the graph building component, you will need to have
+Cytoscape installed and running on your system, as well as the **RCy3**
+R package. Using the Cytoscape template file that we provide ensures
+that the graph is built correctly for the estimation engine. Once a
+graph is built in Cytoscape, we use `igraph` for other operations.
+
+We also provide many `igraph` edit functions in this package that can be
+used for graph building and graph editing. These are especially useful
+if you prefer a code-based workflow instead of Cytoscape, or if you want
+to eliminate the dependency on Cytoscape entirely.
+
+## Installation
+
+To install the package using `renv`, run the following command:
 
 ``` r
-renv::install("https://github.com/coinslab/pgdcm")
+renv::install("coinslab/pgdcm")
 ```
 
-To install the package (via remotes), run the following command:
+Alternatively, you can install the package using the `remotes` package:
 
 ``` r
 install.packages("remotes")
@@ -60,6 +91,7 @@ remotes::install_github("coinslab/pgdcm")
   Structural NAs from MCMC Samples
 - [`generate_ppc_plots()`](generate_ppc_plots.md) : Generate
   Posterior/Prior Predictive Plots
+- [`get_Cyto_template()`](get_Cyto_template.md) : Get Cytoscape Template
 - [`get_EdgesTable()`](get_EdgesTable.md) : Extract Edges Table from
   Graph
 - [`get_NodesTable()`](get_NodesTable.md) : Extract Nodes Table from

@@ -12,7 +12,7 @@ run_predictive_check(
   obs_X,
   posterior_samples = NULL,
   n_sim = 50,
-  prefix = "Unified",
+  prefix = "Untitled",
   title = "PPC"
 )
 ```
