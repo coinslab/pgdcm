@@ -8,7 +8,12 @@ checks.
 ## Usage
 
 ``` r
-run_pgdcm_auto(config, estimation_config, prefix = "Unified_Pipeline")
+run_pgdcm_auto(
+  config,
+  estimation_config = list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL,
+    post_sims = NULL),
+  prefix = NULL
+)
 ```
 
 ## Arguments
@@ -20,11 +25,16 @@ run_pgdcm_auto(config, estimation_config, prefix = "Unified_Pipeline")
 - estimation_config:
 
   List of parameters controlling MCMC execution (`niter`, `nburnin`,
-  `chains`, `prior_sims`, `post_sims`).
+  `chains`, `prior_sims`, `post_sims`). The `prior_sims` and `post_sims`
+  arguments control the number of simulated datasets drawn during Prior
+  and Posterior Predictive Checking respectively. Passing `NULL`
+  disables these checks entirely. Defaults to
+  `list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL, post_sims = NULL)`.
 
 - prefix:
 
   Character. Descriptor prefix used for saving generated reports.
+  Defaults to a timestamped string based on the model type.
 
 ## Value
 

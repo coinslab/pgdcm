@@ -10,6 +10,8 @@ navbar:
       text: Articles
       menu:
         - text: Workflows
+        - text: Beginner Tutorial
+          href: articles/Beginner_Tutorial.html
         - text: DCM Workflow
           href: articles/DCM_workflow.html
         - text: SEM Workflow
@@ -17,5 +19,6 @@ navbar:
 articles:
   - title: "Workflows"
     contents:
+      - Beginner_Tutorial
       - DCM_workflow
       - SEM_workflow

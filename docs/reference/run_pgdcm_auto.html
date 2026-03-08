@@ -23,6 +23,7 @@ and generates posterior predictive checks."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
+    <li><a class="dropdown-item" href="../articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/DCM_workflow.html">DCM Workflow</a></li>
     <li><a class="dropdown-item" href="../articles/SEM_workflow.html">SEM Workflow</a></li>
   </ul></li>
@@ -49,7 +50,12 @@ and generates posterior predictive checks.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run_pgdcm_auto</span><span class="op">(</span><span class="va">config</span>, <span class="va">estimation_config</span>, prefix <span class="op">=</span> <span class="st">"Unified_Pipeline"</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run_pgdcm_auto</span><span class="op">(</span></span>
+<span>  <span class="va">config</span>,</span>
+<span>  estimation_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">1000</span>, nburnin <span class="op">=</span> <span class="fl">100</span>, chains <span class="op">=</span> <span class="fl">2</span>, prior_sims <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    post_sims <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
+<span>  prefix <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -61,11 +67,14 @@ and generates posterior predictive checks.</p>
 
 
 <dt id="arg-estimation-config">estimation_config<a class="anchor" aria-label="anchor" href="#arg-estimation-config"></a></dt>
-<dd><p>List of parameters controlling MCMC execution (<code>niter</code>, <code>nburnin</code>, <code>chains</code>, <code>prior_sims</code>, <code>post_sims</code>).</p></dd>
+<dd><p>List of parameters controlling MCMC execution (<code>niter</code>, <code>nburnin</code>, <code>chains</code>, <code>prior_sims</code>, <code>post_sims</code>).
+The <code>prior_sims</code> and <code>post_sims</code> arguments control the number of simulated datasets drawn
+during Prior and Posterior Predictive Checking respectively. Passing <code>NULL</code> disables these checks entirely.
+Defaults to <code>list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL, post_sims = NULL)</code>.</p></dd>
 
 
 <dt id="arg-prefix">prefix<a class="anchor" aria-label="anchor" href="#arg-prefix"></a></dt>
-<dd><p>Character. Descriptor prefix used for saving generated reports.</p></dd>
+<dd><p>Character. Descriptor prefix used for saving generated reports. Defaults to a timestamped string based on the model type.</p></dd>
 
 </dl></div>
     <div class="section level2">

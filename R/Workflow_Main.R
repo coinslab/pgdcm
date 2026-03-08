@@ -15,11 +15,19 @@ library(MCMCvis)
 #'
 #' @param config Model configuration list from \code{build_model_config}.
 #' @param estimation_config List of parameters controlling MCMC execution (\code{niter}, \code{nburnin}, \code{chains}, \code{prior_sims}, \code{post_sims}).
-#' @param prefix Character. Descriptor prefix used for saving generated reports.
+#'   The \code{prior_sims} and \code{post_sims} arguments control the number of simulated datasets drawn
+#'   during Prior and Posterior Predictive Checking respectively. Passing \code{NULL} disables these checks entirely.
+#'   Defaults to \code{list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL, post_sims = NULL)}.
+#' @param prefix Character. Descriptor prefix used for saving generated reports. Defaults to a timestamped string based on the model type.
 #'
 #' @return A comprehensive list containing the raw \code{mcmc_out}, \code{samples} (cleaned), \code{prior_ppc}, and \code{post_ppc} objects.
 #' @export
-run_pgdcm_auto <- function(config, estimation_config, prefix = "Unified_Pipeline") {
+run_pgdcm_auto <- function(config,
+                           estimation_config = list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL, post_sims = NULL),
+                           prefix = NULL) {
+    if (is.null(prefix)) {
+        prefix <- paste0(config$type, "_", format(Sys.time(), "%Y%m%d_%H%M%S"))
+    }
     source(config$code_file)
     model_code <- get(config$model_object)
 

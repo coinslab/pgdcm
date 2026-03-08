@@ -23,5 +23,27 @@ build_model_config(graph, dataframe)
 
 ## Value
 
-A configuration list encompassing Nimble constants, initialization
-functions, data references, and source model file trajectories.
+A configuration list encompassing Nimble requirements. The list
+contains:
+
+- `constants`: A list of graph constants (e.g., node counts, adjacency
+  matrices, priors).
+
+- `inits`: A list containing initial values for MCMC sampling (e.g.,
+  `beta_root`, `theta`, `lambda`).
+
+- `monitors`: A character vector of node names to monitor during MCMC.
+
+- `data`: A list containing the aligned observational response matrix
+  `X`.
+
+- `code_file`: The resolved absolute path to the underlying Nimble model
+  generator script.
+
+- `model_object`: A character string denoting the name of the function
+  to invoke (e.g., `"loglinearBN"`).
+
+- `graph`: The fully verified and topologically sorted `igraph` object.
+
+- `type`: A character string denoting the detected architecture (e.g.,
+  `"DCM"`, `"SEM"`).

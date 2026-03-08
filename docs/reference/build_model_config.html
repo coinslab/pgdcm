@@ -23,6 +23,7 @@ Automatically detects the exact model geometry to invoke the appropriate compile
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
+    <li><a class="dropdown-item" href="../articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/DCM_workflow.html">DCM Workflow</a></li>
     <li><a class="dropdown-item" href="../articles/SEM_workflow.html">SEM Workflow</a></li>
   </ul></li>
@@ -66,9 +67,15 @@ Automatically detects the exact model geometry to invoke the appropriate compile
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A configuration list encompassing Nimble constants, initialization functions,
-   data references, and source model file trajectories.</p>
-    </div>
+    <p>A configuration list encompassing Nimble requirements. The list contains:</p><ul><li><p><code>constants</code>: A list of graph constants (e.g., node counts, adjacency matrices, priors).</p></li>
+<li><p><code>inits</code>: A list containing initial values for MCMC sampling (e.g., <code>beta_root</code>, <code>theta</code>, <code>lambda</code>).</p></li>
+<li><p><code>monitors</code>: A character vector of node names to monitor during MCMC.</p></li>
+<li><p><code>data</code>: A list containing the aligned observational response matrix <code>X</code>.</p></li>
+<li><p><code>code_file</code>: The resolved absolute path to the underlying Nimble model generator script.</p></li>
+<li><p><code>model_object</code>: A character string denoting the name of the function to invoke (e.g., <code>"loglinearBN"</code>).</p></li>
+<li><p><code>graph</code>: The fully verified and topologically sorted <code>igraph</code> object.</p></li>
+<li><p><code>type</code>: A character string denoting the detected architecture (e.g., <code>"DCM"</code>, <code>"SEM"</code>).</p></li>
+</ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
