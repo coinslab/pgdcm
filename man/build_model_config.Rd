@@ -12,8 +12,17 @@ build_model_config(graph, dataframe)
 \item{dataframe}{A \code{data.frame} of raw responses matching graph Tasks.}
 }
 \value{
-A configuration list encompassing Nimble constants, initialization functions,
-   data references, and source model file trajectories.
+A configuration list encompassing Nimble requirements. The list contains:
+\itemize{
+  \item \code{constants}: A list of graph constants (e.g., node counts, adjacency matrices, priors).
+  \item \code{inits}: A list containing initial values for MCMC sampling (e.g., \code{beta_root}, \code{theta}, \code{lambda}).
+  \item \code{monitors}: A character vector of node names to monitor during MCMC.
+  \item \code{data}: A list containing the aligned observational response matrix \code{X}.
+  \item \code{code_file}: The resolved absolute path to the underlying Nimble model generator script.
+  \item \code{model_object}: A character string denoting the name of the function to invoke (e.g., \code{"loglinearBN"}).
+  \item \code{graph}: The fully verified and topologically sorted \code{igraph} object.
+  \item \code{type}: A character string denoting the detected architecture (e.g., \code{"DCM"}, \code{"SEM"}).
+}
 }
 \description{
 The primary entry point for bridging the structural \code{igraph} topology

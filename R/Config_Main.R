@@ -19,44 +19,44 @@ library(igraph)
 validate_graph_and_data <- function(graph, dataframe) {
     # Get list of all graph nodes
     graphnodelist <- V(graph)$name
-    
+
     # Get list of data set nodes
     dataframeheaderlist <- names(dataframe)
-    datanodelist <- dataframeheaderlist[-1]  # all headers except column 1 (e.g. ID)
-    
+    datanodelist <- dataframeheaderlist[-1] # all headers except column 1 (e.g. ID)
+
     tasknodelist <- V(graph)[tolower(V(graph)$type) != "attribute"]$name
-    
+
     usermessage <- c()
     spacerline <- "------------------------------"
-    
+
     # Get list of duplicate data nodes
     is_duplicate <- duplicated(datanodelist)
     dataduplicatelist <- datanodelist[is_duplicate]
-    if (length(dataduplicatelist) > 0){
+    if (length(dataduplicatelist) > 0) {
         themessage <- "WARNING! Following duplicate data nodes were found in dataset:"
         usermessage <- c(usermessage, themessage, dataduplicatelist, spacerline)
     }
-    
+
     # Get list of the task nodes in graph which are not in the data nodes list
     tasknodesnotindata <- setdiff(tasknodelist, datanodelist)
-    if (length(tasknodesnotindata) > 0){
+    if (length(tasknodesnotindata) > 0) {
         themessage <- "WARNING! Following task-nodes in graph were not found in the dataset:"
         usermessage <- c(usermessage, themessage, tasknodesnotindata, spacerline)
     }
-    
+
     # Get list of the data nodes in data file which are not in the task nodes list
     datanodesnotintask <- setdiff(datanodelist, tasknodelist)
-    if (length(datanodesnotintask) > 0){
+    if (length(datanodesnotintask) > 0) {
         themessage <- "WARNING! Following data nodes in dataset were not in the task-nodes in graph:"
         usermessage <- c(usermessage, themessage, datanodesnotintask, spacerline)
     }
-    
+
     if (length(usermessage) > 0) {
         print(usermessage)
         Sys.sleep(30)
         return(FALSE)
     }
-    
+
     return(TRUE)
 }
 
@@ -70,8 +70,17 @@ validate_graph_and_data <- function(graph, dataframe) {
 #' @param graph An \code{igraph} object representing the conceptual architecture.
 #' @param dataframe A \code{data.frame} of raw responses matching graph Tasks.
 #'
-#' @return A configuration list encompassing Nimble constants, initialization functions,
-#'    data references, and source model file trajectories.
+#' @return A configuration list encompassing Nimble requirements. The list contains:
+#' \itemize{
+#'   \item \code{constants}: A list of graph constants (e.g., node counts, adjacency matrices, priors).
+#'   \item \code{inits}: A list containing initial values for MCMC sampling (e.g., \code{beta_root}, \code{theta}, \code{lambda}).
+#'   \item \code{monitors}: A character vector of node names to monitor during MCMC.
+#'   \item \code{data}: A list containing the aligned observational response matrix \code{X}.
+#'   \item \code{code_file}: The resolved absolute path to the underlying Nimble model generator script.
+#'   \item \code{model_object}: A character string denoting the name of the function to invoke (e.g., \code{"loglinearBN"}).
+#'   \item \code{graph}: The fully verified and topologically sorted \code{igraph} object.
+#'   \item \code{type}: A character string denoting the detected architecture (e.g., \code{"DCM"}, \code{"SEM"}).
+#' }
 #' @export
 build_model_config <- function(graph, dataframe) {
     if (!validate_graph_and_data(graph, dataframe)) {
@@ -82,7 +91,7 @@ build_model_config <- function(graph, dataframe) {
 
     # Align dataset columns with task nodes
     X_mat <- as.matrix(dataframe)
-    
+
     dataidsortlist <- c()
     task_names <- V(graph)[tolower(V(graph)$type) == "task"]$name
     for (tname in task_names) {
@@ -92,7 +101,7 @@ build_model_config <- function(graph, dataframe) {
 
     # First column is usually respondent ID or similar, we keep it then add sorted data
     new_dataframe <- dataframe[, c(1, dataidsortlist), drop = FALSE]
-    
+
     X <- as.matrix(new_dataframe[, -1, drop = FALSE])
 
     m_type <- determine_model_type(info)
