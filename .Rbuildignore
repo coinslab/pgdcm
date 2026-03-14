@@ -14,3 +14,4 @@ pgdcm/.Rhistory
 ^_pkgdown\.yml$
 ^vignettes/Beginner_Tutorial copy\.qmd$
 ^vignettes/generate_tutorial_data copy\.R$
+^vignettes/renv$

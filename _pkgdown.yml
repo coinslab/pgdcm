@@ -12,6 +12,8 @@ navbar:
         - text: Workflows
         - text: Beginner Tutorial
           href: articles/Beginner_Tutorial.html
+        - text: Model Specification Tutorial
+          href: articles/Model_Specification_Tutorial.html
         - text: Advanced Tutorial
           href: articles/Advanced_Tutorial.html
         - text: DCM Workflow
@@ -22,6 +24,7 @@ articles:
   - title: "Workflows"
     contents:
       - Beginner_Tutorial
+      - Model_Specification_Tutorial
       - Advanced_Tutorial
       - DCM_workflow
       - SEM_workflow
