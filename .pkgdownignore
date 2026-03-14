@@ -1,3 +1,6 @@
-^vignettes/renv
-^vignettes/\.quarto
-^vignettes/\.Rprofile$
+vignettes/renv
+vignettes/renv/**
+vignettes/.quarto
+vignettes/.Rprofile
+vignettes/Beginner_Tutorial copy.qmd
+vignettes/generate_tutorial_data copy.R

@@ -2,6 +2,19 @@ dtmr_data               Diagnosing teachers' multiplicative reasoning
                         (DTMR)
 ecpe_data               Examination for the certificate of proficiency
                         in English (ECPE)
+fraction_data           Tatsuoka fraction subtraction data
 generate_ids            Generate unique identifiers
 log_odds                Log-odds transformation
+mcmi_data               Millon Clinical Multiaxial Inventory-III
+                        (MCMI-III)
 mdm_data                MacReady & Dayton multiplication data (MDM)
+pie_ft_data             Pathways for instructionally embedded
+                        assessment (PIE)
+roarpa_data             Rapid online assessment of reading and
+                        phonological awareness (ROAR-PA)
+timss03_data            Trends in international mathematics and science
+                        study (TIMSS) assessment for grade 8
+                        mathematics (2003)
+timss07_data            Trends in international mathematics and science
+                        study (TIMSS) assessment for grade 4
+                        mathematics (2007)

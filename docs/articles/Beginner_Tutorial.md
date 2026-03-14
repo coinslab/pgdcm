@@ -6,7 +6,7 @@ This tutorial is designed as an introductory resource for researchers
 and practitioners seeking a quick, practical guide to probabilistic
 programming and Bayesian psychometric modeling through `pgdcm`.
 
-> ****Learning Objectives:****
+> **Learning Objectives:**
 >
 > By the end of this tutorial, you will learn how to:
 >
@@ -135,7 +135,7 @@ results <- run_pgdcm_auto(
 saveRDS(results, "Beginner_Tutorial_Results.rds")
 ```
 
-> **What’s happening under the hood of `run_pgdcm_auto`?**
+> **What’s happening under the hood of run_pgdcm_auto?**
 >
 > Under the hood, [`run_pgdcm_auto()`](../reference/run_pgdcm_auto.md)
 > handles several complex configurations so you don’t have to manually

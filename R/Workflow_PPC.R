@@ -10,10 +10,13 @@ library(gridExtra)
 # ── Reporting Plots ──────────────────────────────────────────────────────────
 #' Generate Posterior/Prior Predictive Plots
 #'
-#' Creates diagnostic PDF plots comparing simulated vs observed statistics
+#' Creates diagnostic plots comparing simulated vs observed statistics
 #' including global means, score distributions, item difficulties, and co-occurrences.
+#' When \code{filename} is \code{NULL}, plots render inline to the active graphics
+#' device (e.g., RStudio Plots pane or Quarto output). Otherwise, saves to a PDF file.
 #'
-#' @param filename Character. Output path for the PDF file.
+#' @param filename Character or \code{NULL}. Output path for the PDF file.
+#'   If \code{NULL}, renders inline instead of saving to PDF.
 #' @param title_suffix Character. Title suffix appended to plot titles.
 #' @param simMeans Numeric vector. Simulated global means.
 #' @param simRowMeans Numeric matrix. Simulated row (participant) means.
@@ -24,10 +27,13 @@ library(gridExtra)
 #' @param obsMean Numeric. Observed global mean.
 #' @param M2_obs Numeric matrix. Observed second-order moments.
 #'
-#' @return NULL. Saves a PDF file to the specified path.
+#' @return NULL. Saves a PDF file to the specified path, or renders inline if
+#'   \code{filename} is \code{NULL}.
 #' @export
 generate_ppc_plots <- function(filename, title_suffix, simMeans, simRowMeans, simColMeans, avgSimM2, obsColMeans, obsRowMeans, obsMean, M2_obs) {
-    pdf(filename, width = 12, height = 12)
+    if (!is.null(filename)) {
+        pdf(filename, width = 12, height = 12)
+    }
 
     p1 <- ggplot(data.frame(x = simMeans), aes(x = x)) +
         geom_histogram(fill = "lightblue", color = "black", bins = 15) +
@@ -76,8 +82,10 @@ generate_ppc_plots <- function(filename, title_suffix, simMeans, simRowMeans, si
         theme_minimal()
 
     grid.arrange(p1, arrangeGrob(p2, p3, ncol = 2), arrangeGrob(p4, p5, ncol = 2), nrow = 3)
-    dev.off()
-    print(paste("Plots saved to", filename))
+    if (!is.null(filename)) {
+        dev.off()
+        print(paste("Plots saved to", filename))
+    }
 }
 
 # ── General Predictive Checking Wrapper ──────────────────────────────────────
@@ -90,7 +98,8 @@ generate_ppc_plots <- function(filename, title_suffix, simMeans, simRowMeans, si
 #' @param obs_X Numeric matrix of observed data to compare against.
 #' @param posterior_samples Optional \code{mcmc.list} or matrix of posterior samples. If \code{NULL}, simulates priors.
 #' @param n_sim Numeric. Number of simulations to draw. Default is 50.
-#' @param prefix Character. Prefix for the output plot filename.
+#' @param prefix Character or \code{NULL}. Prefix for the output plot filename.
+#'   If \code{NULL}, plots render inline instead of saving to PDF.
 #' @param title Character. String used for labeling (e.g., "PriorPPC").
 #'
 #' @return A list containing the simulated and observed statistics.
@@ -160,8 +169,14 @@ run_predictive_check <- function(config, obs_X, posterior_samples = NULL, n_sim 
         if (i %% 10 == 0) print(paste(title, "Simulation:", i, "/", n_sim))
     }
 
+    if (!is.null(prefix)) {
+        plot_filename <- paste0(prefix, "_", gsub(" ", "", title), "_", config$type, ".pdf")
+    } else {
+        plot_filename <- NULL
+    }
+
     generate_ppc_plots(
-        paste0(prefix, "_", gsub(" ", "", title), "_", config$type, ".pdf"),
+        plot_filename,
         paste("(", title, "-", config$type, ")"),
         simMeans, simRowMeans, simColMeans, simM2Sum / n_sim, obsColMeans, obsRowMeans, obsMean, obsM2
     )

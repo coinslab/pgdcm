@@ -1,0 +1,306 @@
+# Advanced Customization via the NIMBLE MCMC Engine
+
+## Introduction
+
+> **Note on Model Scope**
+>
+> To keep the example simpler for this tutorial, we assume an
+> independent skills model (i.e., there does not exist any dependencies
+> between the different skills).
+
+If you are new to the package, we highly recommend starting with the
+[Beginner
+Tutorial](https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html).
+There, we introduce the
+[`run_pgdcm_auto()`](../reference/run_pgdcm_auto.md) function, which was
+purposefully designed to offer a quick, automated, and streamlined
+approach to estimation.
+
+While automated wrappers are fantastic for rapid prototyping and
+standard applications, advanced researchers and psychometric
+practitioners often demand finer control over their inferential engine.
+You may need to modify the underlying Bayesian network priors,
+explicitly configure internal MCMC sampling blocks, customize the
+diagnostic plotting routines, or manually inspect step-by-step
+predictive simulations.
+
+This advanced tutorial is tailored specifically for users who need that
+deeper level of control. In the following sections, we will conceptually
+deconstruct the automated pipeline. We will guide you through explicitly
+defining the Bayesian network architecture, executing the core
+`nimbleMCMC` sampling engine, and leveraging the granular configuration
+options available in both `pgdcm` and `nimbleMCMC`.
+
+## 1. Environment and Data Setup
+
+First, we will load the requisite packages and structural data. We will
+utilize the basic DTMR dataset and its corresponding Q-Matrix to
+demonstrate the manual estimation workflow.
+
+``` r
+library(nimble)
+library(pgdcm)
+library(dcmdata)
+library(MCMCvis)
+
+# Load data and Q-Matrix
+X <- dtmr_data
+Q <- dtmr_qmatrix
+
+# Build the graphical structure
+g <- QMatrix2iGraph(Q)
+
+# Generate Nimble configurations
+config <- build_model_config(g, X)
+```
+
+The [`build_model_config()`](../reference/build_model_config.md) is a
+critical foundational setup function:
+
+- **Arguments**: Accepts an `igraph` object representing the Q-Matrix
+  dependencies (`g`), the observational item response matrix (`X`), and
+  optionally a character specifying the framework (`compute`, e.g.,
+  “dina”, “dino”, “dinm”).
+- **Returns**: A list (which we saved to `config`) containing structural
+  validation, prior constants (`config$constants`), isolated data matrix
+  (`config$data`), initial values for MCMC (`config$inits`), and the
+  name of the dynamically generated model code file
+  (`config$code_file`).
+
+## 2. Extracting the NIMBLE Model Code
+
+The `pgdcm` package dynamically writes Bayesian mathematical syntax
+(BUGS/NIMBLE language) to a temporary file based on your Q-Matrix
+topology. To manually run `nimble`, we need to load this raw code into
+our R session.
+
+``` r
+# The config object specifies the location of the generated code inside your library
+source(config$code_file)
+
+# We extract the actual code object into memory
+model_code <- get(config$model_object)
+```
+
+> **Customizing Models**
+>
+> For advanced users looking to build custom model types, you can simply
+> point the `model_code` variable above to your own customized NIMBLE
+> model definition. The rest of this manual estimation workflow will
+> continue to function properly provided you adhere to the parameter
+> naming conventions we have utilized throughout the package’s DCM and
+> SEM foundational `logitmodel` code.
+
+## 3. Prior Predictive Checking
+
+Before launching a computationally expensive MCMC sampler, rigorous
+Bayesian workflows conduct a **Prior Predictive Check (PPC)**. This step
+simulates dataset outcomes strictly from the prior distributions without
+conditioning on any observed data. It acts as a generative plausibility
+check, ensuring that our specified model parameter priors produce
+theoretically sound distributions of observable test scores before
+empirical training even begins.
+
+We do this using
+[`run_predictive_check()`](../reference/run_predictive_check.md).
+
+``` r
+prior_ppc_results <- run_predictive_check(
+    config = config,
+    obs_X = config$data$X,
+    posterior_samples = NULL, # Enforces PRIOR checking
+    n_sim = 50,
+    prefix = NULL, # Forces the plot to render inline instead of drawing to a PDF
+    title = "PriorCheck"
+)
+```
+
+- **Arguments**:
+  - `config`: Our configuration list.
+  - `obs_X`: The observed response data matrix to compare against.
+  - `posterior_samples`: MCMC samples. We set this to `NULL` to let the
+    function know that this is a prior predictive check and not a
+    posterior predictive check.
+  - `n_sim`: The number of predictive datasets to simulate.
+  - `prefix` and `title`: Strings used to name the output report.
+- **Returns**: A quantitative list of simulated summary metrics
+  (`simMeans`, `simRowMeans`, `simColMeans`, etc.) and automatically
+  generates a diagnostic PDF plot in your working directory.
+
+![](PriorCheck_Plot.png)
+
+Prior Predictive Check Diagnostics
+
+### Explaining the Prior Predictive Plots
+
+Executing this function generates a multifaceted diagnostic
+visualization showing exactly what the naive, untrained model believes a
+classroom of students would score:
+
+1.  **Global Mean Check**: A histogram showing the average overall test
+    score expected by the model. The vertical red line shows your *real*
+    observed data mean. In a prior check, this distribution should be
+    incredibly wide (uninformed).
+2.  **Score Distribution**: Density plots showing expected
+    participant-level scores (blue) vs the actual observed spread
+    (black).
+3.  **Item Percentage Correct Distribution**: Density plots showing the
+    expected distribution of the percentage correct for items across the
+    assessment vs the observed distribution.
+4.  **Item Accuracy**: A scatter plot comparing the empirically observed
+    percentage correct for a given item against the simulated percentage
+    correct for that exact same item.
+5.  **Item Co-occurrence**: A scatter plot comparing the observed versus
+    simulated second-order moments, revealing how accurately the model
+    captured the frequency with which pairs of items were answered
+    correctly together.
+
+*(Note: Because we used uninformed priors internally in the package, you
+should expect these prior predictive checks to look very dispersed and
+potentially mismatched from the black actual data lines—this is normal
+before training!)*
+
+## 4. Manual MCMC Execution
+
+Now, we will execute the NIMBLE engine manually. By doing this
+explicitly, you have the freedom to intercept the configuration object
+and apply custom block samplers or change hyperparameters before calling
+[`nimbleMCMC()`](https://rdrr.io/pkg/nimble/man/nimbleMCMC.html).
+
+> **Note**
+>
+> *For the sake of testing/tutorial, the code below defaults to a fast
+> compilation format. In a rigorous real-world analysis, you migh have
+> to run over 10,000 iterations across 2-3 chains!*
+
+``` r
+mcmc_raw <- nimbleMCMC(
+    code = model_code, # The NIMBLE code we extracted earlier
+    constants = config$constants, # Fixed constants mapped from the Q-Matrix
+    data = config$data, # The isolated observational vectors
+    inits = config$inits, # Starter values for the Markov chain
+    monitors = config$monitors, # Variables we want NIMBLE to track
+    nchains = 2,
+    niter = 2000,
+    nburnin = 500,
+    summary = TRUE,
+    samplesAsCodaMCMC = TRUE, # Force output to a list format compatible with CODA
+    WAIC = TRUE # Calculate the Watanabe-Akaike Information Criterion
+)
+```
+
+**Understanding the Execution Output**
+
+Because we enabled the `summary` and `WAIC` flags in the function call
+above, [`nimbleMCMC()`](https://rdrr.io/pkg/nimble/man/nimbleMCMC.html)
+will conclude its sampling process and return a composite list to the
+`mcmc_raw` object containing three primary elements:
+
+1.  **`samples`**: An `mcmc.list` containing the raw, point-by-point
+    posterior draws for every tracked parameter across all chains.
+2.  **`summary`**: A pre-calculated matrix providing the mean, median,
+    standard deviation, and key credible intervals for every estimated
+    parameter.
+3.  **`WAIC`**: A standalone list of predictive accuracy metrics.
+    Specifically:
+    - **WAIC (Watanabe-Akaike Information Criterion)**: An estimator of
+      out-of-sample predictive accuracy. Lower WAIC values indicate a
+      better-fitting model, which is highly useful when comparing
+      competing Q-Matrices or network architectures.
+    - **pWAIC**: The estimated “effective number of parameters.” In
+      complex hierarchical Bayesian networks like cognitive modeling,
+      this penalty term describes the structural complexity and
+      shrinkage of your model, penalizing overly parameterized networks
+      that risk overfitting.
+
+## 5. Post-Processing and Convergence
+
+Once the sampler has finished executing, we isolate our posterior
+samples.
+
+When mapping complex hierarchical graphical networks recursively,
+mathematically unconnected structural placeholders are marked with `NA`
+to preserve the parent Q-Matrix dimensions. We filter these empty
+pathways out natively before validating model convergence to guarantee
+pure mathematical comparisons.
+
+``` r
+# Convert raw samples to an MCMC list format
+res_mcmc <- mcmc.list(mcmc_raw$samples)
+
+# Clean structural MCMC artifacts
+res_clean <- filter_structural_nas(res_mcmc)
+```
+
+- [`filter_structural_nas()`](../reference/filter_structural_nas.md)
+  accepts an `mcmc.list` and returns a cleanly formatted `mcmc.list`
+  with unused topology nodes stripped out so that parameter arrays
+  correctly match the structural dimensions required for diagnostic
+  math.
+
+We can now cleanly verify if our MCMC chains have successfully traversed
+the distribution and converged:
+
+``` r
+convergence_diag <- check_mcmc_convergence(
+    chainlist = res_clean,
+    blocksize = 50,
+    burninperiod = 100
+)
+
+print(paste("Algorithm fully converged:", convergence_diag$converged))
+```
+
+- [`check_mcmc_convergence()`](../reference/check_mcmc_convergence.md)
+  accepts an `mcmc.list`, a block size to average across, and a burn-in
+  iteration count. It conceptually evaluates chain stability by
+  calculating moving block averages across the specified intervals. It
+  returns a list of resulting stability metrics, including a strict
+  boolean `converged` parameter indicating if the relative errors of all
+  parameter blocks have successfully stabilized beneath a 10% tolerance
+  threshold (`< 0.1`).
+
+## 6. Posterior Predictive Checking
+
+Finally, the cornerstone of an advanced Bayesian workflow is the
+**Posterior Predictive Check (PPC)**. We run the exact same
+[`run_predictive_check()`](../reference/run_predictive_check.md)
+function from Step 3, but this time we provide it with our posterior
+predictice samples we got from the estimation procedure (res_clean).
+
+``` r
+post_ppc_results <- run_predictive_check(
+    config = config,
+    obs_X = config$data$X,
+    posterior_samples = res_clean, # Uses trained inference
+    n_sim = 50,
+    prefix = NULL, # Renders plot inline in Quarto
+    title = "PosteriorCheck"
+)
+```
+
+![](PosteriorCheck_Plot.png)
+
+Posterior Predictive Check Diagnostics
+
+### Understanding the Posterior Predictive Checking Results
+
+If the chosen Diagnostic Classification Model (in this case, DINA)
+successfully maps the psychometric properties of your test to the
+students, you will see a much tighter relationship in the plots:
+
+1.  **Global Mean**: The simulated blue histogram should tightly cluster
+    around your red observed mean line.
+2.  **Score & Item Distributions**: The fluctuating blue simulation
+    lines should overlay effectively perfectly onto the thick black
+    observed data lines.
+3.  **Scatter Plots**: The blue nodes (item accuracy and co-occurrence
+    representations) should hug tightly to the diagonal red equivalence
+    line.
+
+If the posterior predictive plots show significant deviations (for
+instance, the distributions don’t align, or scatter nodes sit far off
+the red line), this is diagnostic proof that your chosen psychological
+framework (like DINA) is structurally misspecified for this dataset, and
+you should likely attempt a different network framework like DINO or
+DINM.

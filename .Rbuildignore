@@ -11,3 +11,6 @@ pgdcm/.Rhistory
 ^vignettes/\.quarto
 ^vignettes/\.Rprofile$
 ^docs$
+^_pkgdown\.yml$
+^vignettes/Beginner_Tutorial copy\.qmd$
+^vignettes/generate_tutorial_data copy\.R$

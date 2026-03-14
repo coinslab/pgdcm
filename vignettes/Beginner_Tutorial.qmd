@@ -10,7 +10,9 @@ vignette: >
 
 This tutorial is designed as an introductory resource for researchers and practitioners seeking a quick, practical guide to probabilistic programming and Bayesian psychometric modeling through `pgdcm`. 
 
-::: {.callout-tip title="**Learning Objectives:**" appearance="default"}
+::: {.callout-tip}
+## Learning Objectives:
+
 By the end of this tutorial, you will learn how to:
 
 1. Prepare your item response data and Q-Matrix (evidence model) for analysis with the `pgdcm` package.
@@ -84,7 +86,8 @@ results <- run_pgdcm_auto(
 saveRDS(results, "Beginner_Tutorial_Results.rds")
 ```
 
-::: {.callout-note collapse="true" title="What's happening under the hood of `run_pgdcm_auto`?" appearance="default"}
+::: {.callout-note}
+## What's happening under the hood of run_pgdcm_auto?
 
 Under the hood, `run_pgdcm_auto()` handles several complex configurations so you don't have to manually code them. The function configures the MCMC algorithmic engine with the following default parameters:
 
@@ -93,10 +96,9 @@ Under the hood, `run_pgdcm_auto()` handles several complex configurations so you
 * **`chains = 2`**: The algorithm runs two independent sampling processes simultaneously to ensure they both converge onto the same distribution.
 
 Additionally, standard comprehensive workflows evaluate the viability of a model using simulation. While `run_pgdcm_auto` has arguments (`prior_sims = NULL`, `post_sims = NULL`) that bypass this by default for speed, they are critical components of a full Bayesian workflow:
- 
+
 * **Prior Predictive Checking**: Before seeing the actual data, what kind of data does the model *think* it will see based purely on our initial parameter bounds (priors)? This ensures our initial limits are logical and not mathematically impossible.
 * **Posterior Predictive Checking**: After the network learns the distribution, we simulate student response patterns utilizing the trained distributions. We then compare these simulated response patterns against the *real* observational data. If the model accurately captured the underlying psychometric properties, the simulated data should closely resemble the real data.
-
 :::
 
 ## 4. Interpreting the Bayesian Output
@@ -152,4 +154,3 @@ Each dot represents the mean estimate for a specific parameter. The horizontal l
 
 * A wider line indicates high uncertainty (a broader credible interval) for that parameter.
 * A shorter, narrower line indicates the model is highly confident in its estimate (a tighter credible interval) for that parameter.
-
