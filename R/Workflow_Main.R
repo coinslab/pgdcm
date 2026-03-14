@@ -59,10 +59,29 @@ run_pgdcm_auto <- function(config,
     print("\n--- 3. Removing Structural NAs and Assessing Convergence ---")
     res_clean <- filter_structural_nas(res)
 
+    mapped_results <- NULL
+    extra_tables <- list(skill_profiles = NULL, item_parameters = NULL)
     tryCatch(
         {
             mcmc_summ <- MCMCsummary(object = res_clean)
             print(head(mcmc_summ))
+
+            print("Mapping parameters to human-readable names...")
+            mapped_results <- map_pgdcm_parameters(summary_mx = mcmc_summ, config_obj = config)
+            mapped_csv_file <- paste0(prefix, "_mapped_parameters.csv")
+            write.csv(mapped_results, file = mapped_csv_file, row.names = FALSE)
+            print(paste("Mapped parameters saved to:", mapped_csv_file))
+
+            print("Generating skill profiles and item parameters...")
+            extra_tables <- generate_summary_tables(mapped_results = mapped_results, config_obj = config)
+            
+            skill_csv <- paste0(prefix, "_skill_profiles.csv")
+            write.csv(extra_tables$skill_profiles, file = skill_csv, row.names = TRUE)
+            print(paste("Skill profiles saved to:", skill_csv))
+            
+            item_csv <- paste0(prefix, "_item_parameters.csv")
+            write.csv(extra_tables$item_parameters, file = item_csv, row.names = FALSE)
+            print(paste("Item parameters saved to:", item_csv))
 
             valid_params <- colnames(res_clean[[1]])
             if (any(grepl("beta_root", valid_params))) MCMCplot(object = res_clean, params = "beta_root", HPD = TRUE, ci = c(50, 90))
@@ -89,6 +108,9 @@ run_pgdcm_auto <- function(config,
     return(list(
         mcmc_out = mcmc.out,
         samples = res_clean,
+        mapped_parameters = mapped_results,
+        skill_profiles = extra_tables$skill_profiles,
+        item_parameters = extra_tables$item_parameters,
         prior_ppc = prior_res,
         post_ppc = post_res,
         WAIC = mcmc.out$WAIC

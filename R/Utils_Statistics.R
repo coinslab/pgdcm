@@ -129,3 +129,182 @@ check_mcmc_convergence <- function(chainlist, blocksize = 10, burninperiod = 100
 
     return(convergeinfo)
 }
+
+# ── map_pgdcm_parameters ─────────────────────────────────────────────────────
+#' Map PGDCM Parameters to Readble Names
+#'
+#' Maps the MCMC parameter indices back to the actual string names
+#' of items and skills provided during graph construction.
+#'
+#' @param summary_mx A matrix of summarized MCMC parameters (e.g., from \code{MCMCsummary}).
+#' @param config_obj The model configuration list returned by \code{build_model_config}.
+#' @param student_names An optional character vector of student names. If NULL, generic IDs are used.
+#'
+#' @return A \code{data.frame} combining the original summary with \code{Readable_Name} and \code{Type} columns.
+#' @export
+map_pgdcm_parameters <- function(summary_mx, config_obj, student_names=NULL) {
+    # 1. Provide Generic IDs if none exist.
+    if(is.null(student_names)) student_names <- 1:config_obj$constants$nrparticipants
+
+    raw_names <- rownames(summary_mx)
+    clean_names <- character(length(raw_names))
+    types <- character(length(raw_names))
+
+    # 2. Extract strictly ordered nodes directly from pgdcm's igraph object
+    g <- config_obj$graph
+    task_nodes <- igraph::V(g)[tolower(igraph::V(g)$type) == "task"]$name
+    attr_nodes <- igraph::V(g)[tolower(igraph::V(g)$type) == "attribute"]$name
+
+    # 3. Iterate through parameter trace names
+    for(i in seq_along(raw_names)) {
+        rn <- raw_names[i]
+
+        # --- A. Lambda (Items/Tasks) ---
+        if(grepl("^lambda\\[", rn)) {
+            matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
+            j <- as.numeric(matches[1])
+            col <- as.numeric(matches[2])
+
+            if(j <= length(task_nodes)) {
+                item_name <- task_nodes[j]
+                param_type <- ifelse(col == 1, "Slope", "Intercept")
+
+                clean_names[i] <- paste0(item_name, " - ", param_type)
+                types[i] <- "Item Parameter"
+            } else {
+                clean_names[i] <- rn
+                types[i] <- "Index Error"
+            }
+        }
+        # --- B. Theta (Attribute Dependencies/Non-Roots) ---
+        else if(grepl("^theta\\[", rn)) {
+            matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
+            k <- as.numeric(matches[1])
+            col <- as.numeric(matches[2])
+
+            if(k <= length(attr_nodes)) {
+                attr_name <- attr_nodes[k]
+                param_type <- ifelse(col == 1, "Dependency on Parent", "Intercept")
+
+                clean_names[i] <- paste0(attr_name, " - ", param_type)
+                types[i] <- "Attribute Structure"
+            } else {
+                 clean_names[i] <- rn
+                 types[i] <- "Index Error"
+            }
+        }
+        # --- C. Beta Root (Root Attributes) ---
+        else if(grepl("^beta_root\\[", rn)) {
+            matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
+            k <- as.numeric(matches[1])
+
+            if(k <= length(attr_nodes)) {
+                attr_name <- attr_nodes[k]
+
+                clean_names[i] <- paste0(attr_name, " - Prior/Intercept")
+                types[i] <- "Root Structure"
+            } else {
+                clean_names[i] <- rn
+            }
+        }
+        # --- D. Attribute Nodes (Students' true mastery traits) ---
+        else if(grepl("^attributenodes\\[", rn)) {
+             matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
+             s_idx <- as.numeric(matches[1]) # Student Row
+             k <- as.numeric(matches[2])     # Attribute Column
+
+             s_id <- "Unknown"
+             if(s_idx <= length(student_names)) s_id <- student_names[s_idx]
+
+             attr_name <- "Unknown"
+             if(k <= length(attr_nodes)) attr_name <- attr_nodes[k]
+
+             clean_names[i] <- paste0(s_id, " - ", attr_name)
+             types[i] <- "Student Mastery"
+        }
+        else {
+            clean_names[i] <- rn
+            types[i] <- "Other"
+        }
+    }
+
+    out_df <- data.frame(
+        Raw_Param = rownames(summary_mx),
+        Readable_Name = clean_names,
+        Type = types
+    )
+    out_df <- cbind(out_df, as.data.frame(summary_mx))
+    return(out_df)
+}
+
+# ── generate_summary_tables ──────────────────────────────────────────────────
+#' Generate Specific Summary Tables
+#'
+#' Generates skill profiles and item parameters tables from the mapped MCMC results.
+#'
+#' @param mapped_results The \code{data.frame} output from \code{map_pgdcm_parameters}.
+#' @param config_obj The model configuration list returned by \code{build_model_config}.
+#' @param student_names Optional character vector of student names. If NULL, generic IDs are used.
+#'
+#' @return A list containing \code{skill_profiles} and \code{item_parameters} dataframes.
+#' @export
+generate_summary_tables <- function(mapped_results, config_obj, student_names=NULL) {
+    if(is.null(student_names)) student_names <- 1:config_obj$constants$nrparticipants
+
+    g <- config_obj$graph
+    task_nodes <- igraph::V(g)[tolower(igraph::V(g)$type) == "task"]$name
+    attr_nodes <- igraph::V(g)[tolower(igraph::V(g)$type) == "attribute"]$name
+
+    # 1. Skill Profiles (I x K matrix of mean mastery)
+    student_mastery <- mapped_results[mapped_results$Type == "Student Mastery", ]
+
+    skill_profiles <- matrix(NA, nrow = length(student_names), ncol = length(attr_nodes))
+    rownames(skill_profiles) <- student_names
+    colnames(skill_profiles) <- attr_nodes
+
+    for (i in seq_along(student_names)) {
+        for (k in seq_along(attr_nodes)) {
+            rn <- paste0("^attributenodes\\[", i, ", ?", k, "\\]$")
+            idx <- grep(rn, student_mastery$Raw_Param)
+            if(length(idx) > 0) {
+                skill_profiles[i, k] <- student_mastery$mean[idx[1]]
+            }
+        }
+    }
+    
+    # 2. Item Parameters
+    item_params <- mapped_results[mapped_results$Type == "Item Parameter", ]
+    out_items <- data.frame(
+        item = task_nodes,
+        difficulty_mean = NA,
+        difficulty_SD = NA,
+        difficulty_Rhat = NA,
+        discrimination_mean = NA,
+        discrimination_SD = NA,
+        discrimination_Rhat = NA,
+        stringsAsFactors = FALSE
+    )
+
+    for (j in seq_along(task_nodes)) {
+        # Difficulty (Intercept, col=2)
+        diff_idx <- grep(paste0("^lambda\\[", j, ", ?2\\]$"), item_params$Raw_Param)
+        if (length(diff_idx) > 0) {
+            out_items$difficulty_mean[j] <- item_params$mean[diff_idx[1]]
+            out_items$difficulty_SD[j] <- item_params$sd[diff_idx[1]]
+            out_items$difficulty_Rhat[j] <- item_params$Rhat[diff_idx[1]]
+        }
+        
+        # Discrimination (Slope, col=1)
+        disc_idx <- grep(paste0("^lambda\\[", j, ", ?1\\]$"), item_params$Raw_Param)
+        if (length(disc_idx) > 0) {
+            out_items$discrimination_mean[j] <- item_params$mean[disc_idx[1]]
+            out_items$discrimination_SD[j] <- item_params$sd[disc_idx[1]]
+            out_items$discrimination_Rhat[j] <- item_params$Rhat[disc_idx[1]]
+        }
+    }
+
+    return(list(
+        skill_profiles = as.data.frame(skill_profiles),
+        item_parameters = out_items
+    ))
+}

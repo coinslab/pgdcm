@@ -22,7 +22,8 @@ run_predictive_check(
 
 \item{n_sim}{Numeric. Number of simulations to draw. Default is 50.}
 
-\item{prefix}{Character. Prefix for the output plot filename.}
+\item{prefix}{Character or \code{NULL}. Prefix for the output plot filename.
+If \code{NULL}, plots render inline instead of saving to PDF.}
 
 \item{title}{Character. String used for labeling (e.g., "PriorPPC").}
 }

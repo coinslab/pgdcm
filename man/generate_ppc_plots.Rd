@@ -18,7 +18,8 @@ generate_ppc_plots(
 )
 }
 \arguments{
-\item{filename}{Character. Output path for the PDF file.}
+\item{filename}{Character or \code{NULL}. Output path for the PDF file.
+If \code{NULL}, renders inline instead of saving to PDF.}
 
 \item{title_suffix}{Character. Title suffix appended to plot titles.}
 
@@ -39,9 +40,12 @@ generate_ppc_plots(
 \item{M2_obs}{Numeric matrix. Observed second-order moments.}
 }
 \value{
-NULL. Saves a PDF file to the specified path.
+NULL. Saves a PDF file to the specified path, or renders inline if
+  \code{filename} is \code{NULL}.
 }
 \description{
-Creates diagnostic PDF plots comparing simulated vs observed statistics
+Creates diagnostic plots comparing simulated vs observed statistics
 including global means, score distributions, item difficulties, and co-occurrences.
+When \code{filename} is \code{NULL}, plots render inline to the active graphics
+device (e.g., RStudio Plots pane or Quarto output). Otherwise, saves to a PDF file.
 }
