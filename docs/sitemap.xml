@@ -41,12 +41,15 @@
 <url><loc>/reference/enforce_topo_sort.html</loc></url>
 <url><loc>/reference/filter_structural_nas.html</loc></url>
 <url><loc>/reference/generate_ppc_plots.html</loc></url>
+<url><loc>/reference/generate_summary_tables.html</loc></url>
 <url><loc>/reference/get_Cyto_template.html</loc></url>
 <url><loc>/reference/get_EdgesTable.html</loc></url>
 <url><loc>/reference/get_NodesTable.html</loc></url>
 <url><loc>/reference/get_graph_info.html</loc></url>
+<url><loc>/reference/groupattributepatterns.html</loc></url>
 <url><loc>/reference/igraphedit.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/map_pgdcm_parameters.html</loc></url>
 <url><loc>/reference/pull_from_cytoscape.html</loc></url>
 <url><loc>/reference/push_to_cytoscape.html</loc></url>
 <url><loc>/reference/readigraph.html</loc></url>

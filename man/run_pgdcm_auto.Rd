@@ -8,7 +8,8 @@ run_pgdcm_auto(
   config,
   estimation_config = list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL,
     post_sims = NULL),
-  prefix = NULL
+  prefix = NULL,
+  threshold = 0.5
 )
 }
 \arguments{
@@ -20,9 +21,22 @@ during Prior and Posterior Predictive Checking respectively. Passing \code{NULL}
 Defaults to \code{list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL, post_sims = NULL)}.}
 
 \item{prefix}{Character. Descriptor prefix used for saving generated reports. Defaults to a timestamped string based on the model type.}
+
+\item{threshold}{Numeric. The mastery probability threshold to use for latent class grouping. Default is 0.5.}
 }
 \value{
-A comprehensive list containing the raw \code{mcmc_out}, \code{samples} (cleaned), \code{prior_ppc}, and \code{post_ppc} objects.
+A comprehensive list containing:
+\itemize{
+  \item \code{mcmc_out}: The raw Nimble MCMC output list.
+  \item \code{samples}: The cleaned \code{mcmc.list} with structural NAs removed.
+  \item \code{mapped_parameters}: A data.frame of all summary statistics mapped from model parameter names to human-readable names.
+  \item \code{skill_profiles}: An I x K matrix of posterior mean mastery for each student.
+  \item \code{item_parameters}: A clean table of difficulty and discrimination parameters per item.
+  \item \code{group_patterns}: A list organizing participants into latent classes based on 0.5 mastery thresholds.
+  \item \code{prior_ppc}: Results from the prior predictive check (if requested).
+  \item \code{post_ppc}: Results from the posterior predictive check (if requested).
+  \item \code{WAIC}: The Watanabe-Akaike Information Criterion metric.
+}
 }
 \description{
 Orchestrates the complete end-to-end Bayesian estimation pipeline for PGDCM and SEM.

@@ -1,8 +1,10 @@
 # Generate Posterior/Prior Predictive Plots
 
-Creates diagnostic PDF plots comparing simulated vs observed statistics
+Creates diagnostic plots comparing simulated vs observed statistics
 including global means, score distributions, item difficulties, and
-co-occurrences.
+co-occurrences. When `filename` is `NULL`, plots render inline to the
+active graphics device (e.g., RStudio Plots pane or Quarto output).
+Otherwise, saves to a PDF file.
 
 ## Usage
 
@@ -25,7 +27,8 @@ generate_ppc_plots(
 
 - filename:
 
-  Character. Output path for the PDF file.
+  Character or `NULL`. Output path for the PDF file. If `NULL`, renders
+  inline instead of saving to PDF.
 
 - title_suffix:
 
@@ -65,4 +68,5 @@ generate_ppc_plots(
 
 ## Value
 
-NULL. Saves a PDF file to the specified path.
+NULL. Saves a PDF file to the specified path, or renders inline if
+`filename` is `NULL`.

@@ -19,12 +19,25 @@ library(MCMCvis)
 #'   during Prior and Posterior Predictive Checking respectively. Passing \code{NULL} disables these checks entirely.
 #'   Defaults to \code{list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL, post_sims = NULL)}.
 #' @param prefix Character. Descriptor prefix used for saving generated reports. Defaults to a timestamped string based on the model type.
+#' @param threshold Numeric. The mastery probability threshold to use for latent class grouping. Default is 0.5.
 #'
-#' @return A comprehensive list containing the raw \code{mcmc_out}, \code{samples} (cleaned), \code{prior_ppc}, and \code{post_ppc} objects.
+#' @return A comprehensive list containing:
+#' \itemize{
+#'   \item \code{mcmc_out}: The raw Nimble MCMC output list.
+#'   \item \code{samples}: The cleaned \code{mcmc.list} with structural NAs removed.
+#'   \item \code{mapped_parameters}: A data.frame of all summary statistics mapped from model parameter names to human-readable names.
+#'   \item \code{skill_profiles}: An I x K matrix of posterior mean mastery for each student.
+#'   \item \code{item_parameters}: A clean table of difficulty and discrimination parameters per item.
+#'   \item \code{group_patterns}: A list organizing participants into latent classes based on 0.5 mastery thresholds.
+#'   \item \code{prior_ppc}: Results from the prior predictive check (if requested).
+#'   \item \code{post_ppc}: Results from the posterior predictive check (if requested).
+#'   \item \code{WAIC}: The Watanabe-Akaike Information Criterion metric.
+#' }
 #' @export
 run_pgdcm_auto <- function(config,
                            estimation_config = list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL, post_sims = NULL),
-                           prefix = NULL) {
+                           prefix = NULL,
+                           threshold = 0.5) {
     if (is.null(prefix)) {
         prefix <- paste0(config$type, "_", format(Sys.time(), "%Y%m%d_%H%M%S"))
     }
@@ -60,7 +73,7 @@ run_pgdcm_auto <- function(config,
     res_clean <- filter_structural_nas(res)
 
     mapped_results <- NULL
-    extra_tables <- list(skill_profiles = NULL, item_parameters = NULL)
+    extra_tables <- list(skill_profiles = NULL, item_parameters = NULL, group_patterns = NULL)
     tryCatch(
         {
             mcmc_summ <- MCMCsummary(object = res_clean)
@@ -73,15 +86,29 @@ run_pgdcm_auto <- function(config,
             print(paste("Mapped parameters saved to:", mapped_csv_file))
 
             print("Generating skill profiles and item parameters...")
-            extra_tables <- generate_summary_tables(mapped_results = mapped_results, config_obj = config)
+            extra_tables <- generate_summary_tables(mapped_results = mapped_results, config_obj = config, threshold = threshold)
             
             skill_csv <- paste0(prefix, "_skill_profiles.csv")
             write.csv(extra_tables$skill_profiles, file = skill_csv, row.names = TRUE)
             print(paste("Skill profiles saved to:", skill_csv))
-            
+
             item_csv <- paste0(prefix, "_item_parameters.csv")
             write.csv(extra_tables$item_parameters, file = item_csv, row.names = FALSE)
             print(paste("Item parameters saved to:", item_csv))
+
+            group_file <- paste0(prefix, "_latent_classes.txt")
+            sink(group_file)
+            for (grp in names(extra_tables$group_patterns)) {
+                gdata <- extra_tables$group_patterns[[grp]]
+                cat(paste0("Group Pattern [", paste(gdata$label, collapse = " "), "]:\n"))
+                cat(paste0("  Number of Members: ", length(gdata$members), "\n"))
+                if(length(gdata$members) > 0) {
+                    cat(paste0("  Members: ", paste(gdata$members, collapse = ", "), "\n"))
+                }
+                cat("---------------------------------------------------------------\n")
+            }
+            sink()
+            print(paste("Latent classes saved to:", group_file))
 
             valid_params <- colnames(res_clean[[1]])
             if (any(grepl("beta_root", valid_params))) MCMCplot(object = res_clean, params = "beta_root", HPD = TRUE, ci = c(50, 90))
@@ -111,6 +138,7 @@ run_pgdcm_auto <- function(config,
         mapped_parameters = mapped_results,
         skill_profiles = extra_tables$skill_profiles,
         item_parameters = extra_tables$item_parameters,
+        group_patterns = extra_tables$group_patterns,
         prior_ppc = prior_res,
         post_ppc = post_res,
         WAIC = mcmc.out$WAIC

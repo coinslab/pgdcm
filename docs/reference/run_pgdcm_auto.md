@@ -38,5 +38,27 @@ run_pgdcm_auto(
 
 ## Value
 
-A comprehensive list containing the raw `mcmc_out`, `samples` (cleaned),
-`prior_ppc`, and `post_ppc` objects.
+A comprehensive list containing:
+
+- `mcmc_out`: The raw Nimble MCMC output list.
+
+- `samples`: The cleaned `mcmc.list` with structural NAs removed.
+
+- `mapped_parameters`: A data.frame of all summary statistics mapped
+  from model parameter names to human-readable names.
+
+- `skill_profiles`: An I x K matrix of posterior mean mastery for each
+  student.
+
+- `item_parameters`: A clean table of difficulty and discrimination
+  parameters per item.
+
+- `group_patterns`: A list organizing participants into latent classes
+  based on 0.5 mastery thresholds.
+
+- `prior_ppc`: Results from the prior predictive check (if requested).
+
+- `post_ppc`: Results from the posterior predictive check (if
+  requested).
+
+- `WAIC`: The Watanabe-Akaike Information Criterion metric.

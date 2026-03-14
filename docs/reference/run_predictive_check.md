@@ -38,7 +38,8 @@ run_predictive_check(
 
 - prefix:
 
-  Character. Prefix for the output plot filename.
+  Character or `NULL`. Prefix for the output plot filename. If `NULL`,
+  plots render inline instead of saving to PDF.
 
 - title:
 

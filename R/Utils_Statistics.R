@@ -245,10 +245,11 @@ map_pgdcm_parameters <- function(summary_mx, config_obj, student_names=NULL) {
 #' @param mapped_results The \code{data.frame} output from \code{map_pgdcm_parameters}.
 #' @param config_obj The model configuration list returned by \code{build_model_config}.
 #' @param student_names Optional character vector of student names. If NULL, generic IDs are used.
+#' @param threshold Numeric. The mastery probability threshold to use for latent class grouping. Default is 0.5.
 #'
 #' @return A list containing \code{skill_profiles} and \code{item_parameters} dataframes.
 #' @export
-generate_summary_tables <- function(mapped_results, config_obj, student_names=NULL) {
+generate_summary_tables <- function(mapped_results, config_obj, student_names=NULL, threshold=0.5) {
     if(is.null(student_names)) student_names <- 1:config_obj$constants$nrparticipants
 
     g <- config_obj$graph
@@ -303,8 +304,69 @@ generate_summary_tables <- function(mapped_results, config_obj, student_names=NU
         }
     }
 
+    # 3. Group Attribute Patterns (Latent Classes)
+    group_patterns <- groupattributepatterns(skill_profiles, threshold = threshold)
+
     return(list(
         skill_profiles = as.data.frame(skill_profiles),
-        item_parameters = out_items
+        item_parameters = out_items,
+        group_patterns = group_patterns
     ))
+}
+
+# ── groupattributepatterns ───────────────────────────────────────────────────
+#' Group Participants by Attribute Mastery Patterns
+#'
+#' Takes a matrix of continuous mastery probabilities (e.g., from \code{skill_profiles})
+#' and groups participants into discrete latent classes based on a provided threshold.
+#'
+#' @param attributenodes An \code{I x K} matrix or dataframe of participant masteries.
+#' @param threshold Numeric. The probability cutoff above which a skill is considered mastered. Default is 0.5.
+#'
+#' @return A list of all possible $2^K$ groups, containing group \code{label}
+#'   (the binary vector pattern) and \code{members} (row indices or names of participants).
+#' @export
+groupattributepatterns <- function(attributenodes, threshold = 0.5){
+  
+  nrparticipants <- nrow(attributenodes)
+  nrattributes <- ncol(attributenodes)
+  
+  # Compute All Possible Binary Attribute Patterns
+  nrgroups <- 2^(nrattributes)
+  binaryoptions <- replicate(nrattributes, 0:1, simplify = FALSE)
+  attributevectorgrid <- expand.grid(binaryoptions)
+  possibleattributepatterns <- as.matrix(attributevectorgrid)
+  
+  # Use participant names if they exist, otherwise use indices
+  participant_labels <- rownames(attributenodes)
+  if (is.null(participant_labels)) {
+      participant_labels <- 1:nrparticipants
+  }
+  
+  if (!is.null(colnames(attributenodes))) {
+      colnames(possibleattributepatterns) <- colnames(attributenodes)
+  }
+  
+  # Find rows in possibleattributepatterns which are present in attributenodes
+  groupmembers <- list()
+  classifiedattnodes <- matrix(as.numeric(as.matrix(attributenodes) > threshold), ncol = nrattributes, byrow = FALSE)
+  
+  for (groupid in 1:nrgroups) {
+    groupval <- list()
+    participantids <- c()
+    
+    for (i in 1:nrparticipants){
+      matchedi <- identical(as.numeric(classifiedattnodes[i,]), as.numeric(possibleattributepatterns[groupid,]))
+      if (matchedi) {
+        participantids <- c(participantids, participant_labels[i])
+      }
+    }
+    
+    groupval$members <- participantids
+    groupval$label <- possibleattributepatterns[groupid,]
+    groupmembers[[paste(possibleattributepatterns[groupid,], collapse="")]] <- groupval
+  }
+  
+  # Prepare grouping output
+  return(groupmembers)
 }

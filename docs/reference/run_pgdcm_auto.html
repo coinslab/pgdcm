@@ -79,8 +79,16 @@ Defaults to <code>list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NUL
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A comprehensive list containing the raw <code>mcmc_out</code>, <code>samples</code> (cleaned), <code>prior_ppc</code>, and <code>post_ppc</code> objects.</p>
-    </div>
+    <p>A comprehensive list containing:</p><ul><li><p><code>mcmc_out</code>: The raw Nimble MCMC output list.</p></li>
+<li><p><code>samples</code>: The cleaned <code>mcmc.list</code> with structural NAs removed.</p></li>
+<li><p><code>mapped_parameters</code>: A data.frame of all summary statistics mapped from model parameter names to human-readable names.</p></li>
+<li><p><code>skill_profiles</code>: An I x K matrix of posterior mean mastery for each student.</p></li>
+<li><p><code>item_parameters</code>: A clean table of difficulty and discrimination parameters per item.</p></li>
+<li><p><code>group_patterns</code>: A list organizing participants into latent classes based on 0.5 mastery thresholds.</p></li>
+<li><p><code>prior_ppc</code>: Results from the prior predictive check (if requested).</p></li>
+<li><p><code>post_ppc</code>: Results from the posterior predictive check (if requested).</p></li>
+<li><p><code>WAIC</code>: The Watanabe-Akaike Information Criterion metric.</p></li>
+</ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

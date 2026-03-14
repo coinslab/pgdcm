@@ -91,13 +91,19 @@ remotes::install_github("coinslab/pgdcm")
   Structural NAs from MCMC Samples
 - [`generate_ppc_plots()`](generate_ppc_plots.md) : Generate
   Posterior/Prior Predictive Plots
+- [`generate_summary_tables()`](generate_summary_tables.md) : Generate
+  Specific Summary Tables
 - [`get_Cyto_template()`](get_Cyto_template.md) : Get Cytoscape Template
 - [`get_EdgesTable()`](get_EdgesTable.md) : Extract Edges Table from
   Graph
 - [`get_NodesTable()`](get_NodesTable.md) : Extract Nodes Table from
   Graph
 - [`get_graph_info()`](get_graph_info.md) : Extract Graph Information
+- [`groupattributepatterns()`](groupattributepatterns.md) : Group
+  Participants by Attribute Mastery Patterns
 - [`igraphedit()`](igraphedit.md) : Run Interactive Graph Editor
+- [`map_pgdcm_parameters()`](map_pgdcm_parameters.md) : Map PGDCM
+  Parameters to Readble Names
 - [`pull_from_cytoscape()`](pull_from_cytoscape.md) : Pull Graph from
   Cytoscape
 - [`push_to_cytoscape()`](push_to_cytoscape.md) : Push Graph to

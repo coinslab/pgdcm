@@ -4,7 +4,12 @@
 \alias{generate_summary_tables}
 \title{Generate Specific Summary Tables}
 \usage{
-generate_summary_tables(mapped_results, config_obj, student_names = NULL)
+generate_summary_tables(
+  mapped_results,
+  config_obj,
+  student_names = NULL,
+  threshold = 0.5
+)
 }
 \arguments{
 \item{mapped_results}{The \code{data.frame} output from \code{map_pgdcm_parameters}.}
@@ -12,6 +17,8 @@ generate_summary_tables(mapped_results, config_obj, student_names = NULL)
 \item{config_obj}{The model configuration list returned by \code{build_model_config}.}
 
 \item{student_names}{Optional character vector of student names. If NULL, generic IDs are used.}
+
+\item{threshold}{Numeric. The mastery probability threshold to use for latent class grouping. Default is 0.5.}
 }
 \value{
 A list containing \code{skill_profiles} and \code{item_parameters} dataframes.
