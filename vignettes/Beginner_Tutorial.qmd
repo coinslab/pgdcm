@@ -154,3 +154,8 @@ Each dot represents the mean estimate for a specific parameter. The horizontal l
 
 * A wider line indicates high uncertainty (a broader credible interval) for that parameter.
 * A shorter, narrower line indicates the model is highly confident in its estimate (a tighter credible interval) for that parameter.
+
+::: {.callout-note}
+## Next Steps
+Ready to dive deeper? Check out the [Advanced Tutorial](https://coinslab.github.io/pgdcm/articles/Advanced_Tutorial.html) to learn about customizing models, diagnosing chains, and configuring the PGDCM engine natively.
+:::

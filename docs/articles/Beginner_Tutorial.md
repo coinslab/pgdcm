@@ -276,3 +276,10 @@ illustrate the 95% Credible Interval.
   for that parameter.
 - A shorter, narrower line indicates the model is highly confident in
   its estimate (a tighter credible interval) for that parameter.
+
+> **Next Steps**
+>
+> Ready to dive deeper? Check out the [Advanced
+> Tutorial](https://coinslab.github.io/pgdcm/articles/Advanced_Tutorial.html)
+> to learn about customizing models, diagnosing chains, and configuring
+> the PGDCM engine natively.

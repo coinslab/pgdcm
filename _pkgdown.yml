@@ -10,21 +10,15 @@ navbar:
       text: Articles
       menu:
         - text: Workflows
-        - text: Beginner Tutorial
-          href: articles/Beginner_Tutorial.html
         - text: Model Specification Tutorial
           href: articles/Model_Specification_Tutorial.html
+        - text: Beginner Tutorial
+          href: articles/Beginner_Tutorial.html
         - text: Advanced Tutorial
           href: articles/Advanced_Tutorial.html
-        - text: DCM Workflow
-          href: articles/DCM_workflow.html
-        - text: SEM Workflow
-          href: articles/SEM_workflow.html
 articles:
   - title: "Workflows"
     contents:
-      - Beginner_Tutorial
       - Model_Specification_Tutorial
+      - Beginner_Tutorial
       - Advanced_Tutorial
-      - DCM_workflow
-      - SEM_workflow
