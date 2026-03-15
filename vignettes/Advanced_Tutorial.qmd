@@ -217,3 +217,64 @@ If the chosen Diagnostic Classification Model (in this case, DINA) successfully 
 3.  **Scatter Plots**: The blue nodes (item accuracy and co-occurrence representations) should hug tightly to the diagonal red equivalence line.
 
 If the posterior predictive plots show significant deviations (for instance, the distributions don't align, or scatter nodes sit far off the red line), this is diagnostic proof that your chosen psychological framework (like DINA) is structurally misspecified for this dataset, and you should likely attempt a different network framework like DINO or DINM.
+
+## 7. Generating Summary Tables and Assessing Accuracy
+
+While the beginner-friendly `run_pgdcm_auto()` function automatically generates and saves `mapped_parameters.csv`, `skill_profiles.csv`, and `item_parameters.csv` directly to your working directory, advanced users executing manual MCMC chains must extract and build these tables themselves to maintain full control.
+
+```{r}
+#| eval: false
+# 1. Generate the raw summary matrix
+mcmc_summ <- MCMCvis::MCMCsummary(object = res_clean)
+
+# 2. Extract original participant IDs for correct row mapping
+student_ids <- rownames(config$data$X)
+
+# 3. Map Nimble parameters to human-readable names
+mapped_results <- map_pgdcm_parameters(
+    summary_mx = mcmc_summ,
+    config_obj = config,
+    student_names = student_ids
+)
+
+# 4. Generate the final clean tables (Skill Profiles, Item Parameters)
+summary_tables <- generate_summary_tables(
+    mapped_results = mapped_results,
+    config_obj = config,
+    student_names = student_ids,
+    return_groups = TRUE # Enable this to explicitly extract skill profile clusters
+)
+
+# Extract the skill profiles specifically
+skill_profiles <- summary_tables$skill_profiles
+group_patterns <- summary_tables$group_patterns
+```
+
+If you set `return_groups = TRUE`, the function will additionally map all observed skill profiles to their exhaustive $2^K$ latent class grouping combinations, allowing you to easily extract and visualize group-level membership arrays (`summary_tables$group_patterns`).
+
+### Assessing Classification Performance
+
+Once you have your `skill_profiles` matrix (either manually generated from the procedure above, or simply loaded from the `skill_profiles.csv` file automatically saved during the `run_pgdcm_auto()` workflow), you can quantitatively evaluate how well your model classified the students if you happen to possess a "ground truth" dataset.
+
+We can accomplish this using the `assess_classification_accuracy()` function.
+
+```{r}
+#| eval: false
+# Assess classification accuracy against known true profiles
+accuracy_results <- assess_classification_accuracy(
+    skill_profiles = skill_profiles,
+    true_data = dtmr_true_profiles,
+    mapping_list = list(
+        "referent_units" = "referent_units",
+        "partitioning_iterating" = "partitioning_iterating",
+        "appropriateness" = "appropriateness",
+        "multiplicative_comparison" = "multiplicative_comparison"
+    )
+)
+
+# View the individual skill accuracies, Cohen's Kappa, and overall profile match rate
+print(accuracy_results$metrics)
+print(paste("Profile Correct Classification Rate:", accuracy_results$profile_accuracy))
+```
+
+This final validation step computes both the isolated accuracy rate for every individual skill and the overarching, strict multi-dimensional profile match rate!
