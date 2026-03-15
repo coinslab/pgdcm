@@ -36,23 +36,29 @@ compute_M2 <- function(mat) {
 #' @return The cleaned \code{mcmc.list} or matrix with completely NA columns removed.
 #' @export
 filter_structural_nas <- function(res) {
-    if (inherits(res, "mcmc.list") && any(is.na(as.matrix(res)))) {
-        print("WARNING: NA values found in MCMC samples. Filtering out structural NAs...")
+    if (inherits(res, "mcmc.list")) {
+        mat <- as.matrix(res)
+        if (any(is.na(mat))) {
+            print("WARNING: NA values found in MCMC samples. Filtering out structural NAs...")
 
-        # Identify valid columns (columns that have ZERO NAs on first chain)
-        mat <- as.matrix(res[[1]])
-        valid_cols <- colSums(is.na(mat)) == 0
+            if (all(is.na(mat))) {
+                stop("CRITICAL: All generated MCMC samples are NA. The model failed to sample completely.")
+            }
 
-        # Subset the mcmc.list
-        res_clean <- res[, valid_cols, drop = FALSE]
+            # Identify valid columns (columns that have ZERO NAs across all chains)
+            valid_cols <- colSums(is.na(mat)) == 0
 
-        if (any(is.na(as.matrix(res_clean)))) {
-            print("CRITICAL: NAs persist even after removing structural columns. Model might be broken.")
-            print(head(as.matrix(res_clean)[, is.na(as.matrix(res_clean)[1, ])]))
-            return(res_clean)
-        } else {
-            print("Structural NAs successfully removed.")
-            return(res_clean)
+            # Subset the mcmc.list
+            res_clean <- res[, valid_cols, drop = FALSE]
+
+            if (any(is.na(as.matrix(res_clean)))) {
+                print("CRITICAL: NAs persist even after removing structural columns. Model might be broken.")
+                print(head(as.matrix(res_clean)[, is.na(as.matrix(res_clean)[1, ])]))
+                return(res_clean)
+            } else {
+                print("Structural NAs successfully removed.")
+                return(res_clean)
+            }
         }
     }
     # Return original if no NAs
@@ -246,10 +252,11 @@ map_pgdcm_parameters <- function(summary_mx, config_obj, student_names=NULL) {
 #' @param config_obj The model configuration list returned by \code{build_model_config}.
 #' @param student_names Optional character vector of student names. If NULL, generic IDs are used.
 #' @param threshold Numeric. The mastery probability threshold to use for latent class grouping. Default is 0.5.
+#' @param return_groups Logical. If TRUE, calculates latent classes using \code{groupattributepatterns}. Default is FALSE.
 #'
-#' @return A list containing \code{skill_profiles} and \code{item_parameters} dataframes.
+#' @return A list containing \code{skill_profiles} and \code{item_parameters} dataframes, and optionally \code{group_patterns}.
 #' @export
-generate_summary_tables <- function(mapped_results, config_obj, student_names=NULL, threshold=0.5) {
+generate_summary_tables <- function(mapped_results, config_obj, student_names=NULL, threshold=0.5, return_groups=FALSE) {
     if(is.null(student_names)) student_names <- 1:config_obj$constants$nrparticipants
 
     g <- config_obj$graph
@@ -305,7 +312,10 @@ generate_summary_tables <- function(mapped_results, config_obj, student_names=NU
     }
 
     # 3. Group Attribute Patterns (Latent Classes)
-    group_patterns <- groupattributepatterns(skill_profiles, threshold = threshold)
+    group_patterns <- NULL
+    if (return_groups) {
+        group_patterns <- groupattributepatterns(skill_profiles, threshold = threshold)
+    }
 
     return(list(
         skill_profiles = as.data.frame(skill_profiles),
@@ -369,4 +379,120 @@ groupattributepatterns <- function(attributenodes, threshold = 0.5){
   
   # Prepare grouping output
   return(groupmembers)
+}
+
+# ── assess_classification_accuracy ───────────────────────────────────────────
+#' Assess Classification Accuracy
+#'
+#' Compares estimated skill mastery profiles against known true states to calculate
+#' classification accuracy, Cohen's Kappa, and profile matching rates.
+#' Useful for simulation studies or known-group diagnostics.
+#'
+#' @param skill_profiles An \code{I x K} matrix or dataframe of estimated mastery probabilities,
+#'   typically the \code{skill_profiles} output from \code{generate_summary_tables()}.
+#' @param true_data A dataframe containing the true mastery states (0 or 1).
+#' @param mapping_list A named list mapping the expected model skill names to the column names
+#'   in \code{true_data}. For example: \code{list("Addition" = "true_add", "Subtraction" = "true_sub")}.
+#' @param threshold Numeric. The threshold used to binarize estimates. Default is 0.5.
+#' @param random_inspect Integer. The number of random participants to print detailed comparisons for. Default is 10.
+#'
+#' @return A list containing \code{metrics} (Skill-level accuracy and Kappa) and
+#'   \code{profile_accuracy} (Exact match rate across all mapped skills).
+#' @export
+assess_classification_accuracy <- function(skill_profiles, true_data, mapping_list = NULL, threshold = 0.5, random_inspect = 10) {
+    
+    if(is.null(mapping_list) || length(mapping_list) == 0) {
+        stop("Must provide 'mapping_list' to link Model Attribute Names to True Column Names. e.g. list(Addition='true_add')")
+    }
+
+    # 1. Binarize Estimates
+    prob_mx <- as.matrix(skill_profiles)
+    est_class <- (prob_mx > threshold) * 1
+    
+    true_df <- as.data.frame(true_data)
+    
+    # 2. Align Rows (IDs)
+    mod_ids <- rownames(prob_mx)
+    true_ids <- if("id" %in% colnames(true_df)) as.character(true_df$id) else rownames(true_df)
+    
+    common_ids <- intersect(mod_ids, true_ids)
+    
+    if(length(common_ids) == 0) {
+        stop("No matching IDs between Model (rownames) and True Data! Cannot assess classification accuracy safely.")
+    } else {
+        message(paste("Matched", length(common_ids), "students by ID for accuracy assessment."))
+        mod_idx <- match(common_ids, mod_ids)
+        true_idx <- match(common_ids, true_ids)
+    }
+    
+    n_common <- length(common_ids)
+    
+    # Storage for metrics
+    skill_metrics <- data.frame(Skill = names(mapping_list), Accuracy = NA, Kappa = NA, stringsAsFactors = FALSE)
+    
+    message("\n--- Classification Accuracy ---")
+    
+    for(i in seq_along(mapping_list)) {
+        mod_name <- names(mapping_list)[i]
+        true_name <- mapping_list[[i]]
+        
+        if(!mod_name %in% colnames(prob_mx)) stop(paste("Model attribute", mod_name, "not found in skill_profiles."))
+        if(!true_name %in% colnames(true_df)) stop(paste("Truth attribute", true_name, "not found in true_data."))
+        
+        y_est <- est_class[mod_idx, mod_name]
+        y_true <- true_df[true_idx, true_name]
+        
+        # Accuracy
+        acc <- mean(y_est == y_true, na.rm = TRUE)
+        
+        # Cohen's Kappa
+        t_mat <- table(factor(y_est, levels=0:1), factor(y_true, levels=0:1))
+        po <- sum(diag(t_mat)) / sum(t_mat)
+        pe <- (sum(t_mat[1,]) * sum(t_mat[,1]) + sum(t_mat[2,]) * sum(t_mat[,2])) / sum(t_mat)^2
+        kappa <- ifelse(pe == 1, 0, (po - pe) / (1 - pe))
+        
+        skill_metrics$Accuracy[i] <- round(acc, 3)
+        skill_metrics$Kappa[i] <- round(kappa, 3)
+    }
+    
+    print(skill_metrics)
+    
+    # 4. Profile Accuracy (Exact Vector Match)
+    mod_cols <- names(mapping_list)
+    true_cols <- unlist(mapping_list, use.names=FALSE)
+    
+    profiles_est <- apply(est_class[mod_idx, mod_cols, drop=FALSE], 1, paste, collapse="")
+    profiles_true <- apply(true_df[true_idx, true_cols, drop=FALSE], 1, paste, collapse="")
+    
+    prof_acc <- mean(profiles_est == profiles_true, na.rm = TRUE)
+    message(paste("Profile Correct Classification Rate:", round(prof_acc, 3)))
+
+    # 5. Random Inspection
+    if(random_inspect > 0) {
+        n_inspect <- min(random_inspect, n_common)
+        message(sprintf("\n--- Random Comparison of %d Students ---", n_inspect))
+        
+        set.seed(123)
+        sample_locs <- sample(1:n_common, n_inspect)
+        
+        for(loc in sample_locs) {
+            m_i <- mod_idx[loc]
+            t_i <- true_idx[loc]
+            tid <- common_ids[loc]
+            
+            message(paste("\nStudent ID:", tid))
+            
+            comp_df <- data.frame(
+                Skill = names(mapping_list),
+                Est_Prob = round(prob_mx[m_i, names(mapping_list)], 3),
+                Est_Class = est_class[m_i, names(mapping_list)],
+                True_State = as.integer(as.vector(t(true_df[t_i, true_cols]))),
+                stringsAsFactors = FALSE
+            )
+            print(comp_df)
+        }
+        message("------------------------------------------------")
+    }
+    
+    return(list(metrics = skill_metrics, profile_accuracy = prof_acc))
 }

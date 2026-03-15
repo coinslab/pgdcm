@@ -38,7 +38,7 @@ generate_ppc_plots <- function(filename, title_suffix, simMeans, simRowMeans, si
     p1 <- ggplot(data.frame(x = simMeans), aes(x = x)) +
         geom_histogram(fill = "lightblue", color = "black", bins = 15) +
         geom_vline(xintercept = obsMean, color = "red", linetype = "dashed", linewidth = 1.5) +
-        labs(title = paste("1. Global Mean Check", title_suffix), subtitle = paste("Obs Mean =", round(obsMean, 3))) +
+        labs(title = paste("1. Avg. Response Distribution", title_suffix), subtitle = paste("Obs Mean =", round(obsMean, 3))) +
         theme_minimal()
 
     row_means_df <- data.frame(
@@ -50,7 +50,7 @@ generate_ppc_plots <- function(filename, title_suffix, simMeans, simRowMeans, si
     p2 <- ggplot() +
         geom_density(data = subset(row_means_df, type == "Simulated"), aes(x = value, group = simulation), color = "blue", alpha = 0.1) +
         geom_density(data = subset(row_means_df, type == "Observed"), aes(x = value), color = "black", linewidth = 1.2) +
-        labs(title = paste("2. Score Dist.", title_suffix), subtitle = "Black: Obs, Blue: Sim") +
+        labs(title = paste("2. Participant Response Dist.", title_suffix), subtitle = "Black: Obs, Blue: Sim") +
         theme_minimal()
 
     col_means_df <- data.frame(
@@ -62,13 +62,13 @@ generate_ppc_plots <- function(filename, title_suffix, simMeans, simRowMeans, si
     p3 <- ggplot() +
         geom_density(data = subset(col_means_df, type == "Simulated"), aes(x = value, group = simulation), color = "blue", alpha = 0.1) +
         geom_density(data = subset(col_means_df, type == "Observed"), aes(x = value), color = "black", linewidth = 1.2) +
-        labs(title = paste("3. Item Diff. Dist.", title_suffix), subtitle = "Black: Obs, Blue: Sim") +
+        labs(title = paste("3. Item Response Dist.", title_suffix), subtitle = "Black: Obs, Blue: Sim") +
         theme_minimal()
 
     p4 <- ggplot(data.frame(Obs = obsColMeans, Sim = colMeans(simColMeans)), aes(x = Obs, y = Sim)) +
         geom_point(color = "blue", alpha = 0.7) +
         geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
-        labs(title = paste("4. Item Accuracy", title_suffix)) +
+        labs(title = paste("4. Simulated Item Response Versus Observed Item Response", title_suffix)) +
         xlim(0, 1) +
         ylim(0, 1) +
         theme_minimal()
@@ -76,7 +76,7 @@ generate_ppc_plots <- function(filename, title_suffix, simMeans, simRowMeans, si
     p5 <- ggplot(data.frame(Obs = as.vector(M2_obs), Sim = as.vector(avgSimM2)), aes(x = Obs, y = Sim)) +
         geom_point(color = "darkgreen", size = 0.5, alpha = 0.5) +
         geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
-        labs(title = paste("5. Item Co-occurrence", title_suffix)) +
+        labs(title = paste("5. Simulated Item Response Co-occurrence Versus Observed Item Response Co-occurrence", title_suffix)) +
         xlim(0, 1) +
         ylim(0, 1) +
         theme_minimal()

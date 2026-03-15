@@ -42,7 +42,7 @@ readigraph <- function(FilePrefix) {
   edgefilename <- paste0(FilePrefix, "edges.csv")
   nodefilename <- paste0(FilePrefix, "nodes.csv")
 
-  if (file.exists(edgefilename) & file.exists(nodefilename)) {
+  if (file.exists(edgefilename) && file.exists(nodefilename)) {
     igraphedges <- read.csv(edgefilename, header = TRUE, stringsAsFactors = FALSE)
     igraphnodes <- read.csv(nodefilename, header = TRUE, stringsAsFactors = FALSE)
     badedgelist <- checklegaledges(igraphnodes, igraphedges)
@@ -58,8 +58,8 @@ readigraph <- function(FilePrefix) {
       writeLines(fileupdateinfo2, stdout())
       print(badedgelist)
       writeLines("------------------------------", stdout())
+      warning("Graph edges contain undefined nodes. Please fix nodes.csv and edges.csv.")
       theigraph <- NULL
-      Sys.sleep(10)
     } else {
       # Standardize names back to older igraphedit expected "from"/"to" or "name" when converting to igraph
       if ("id" %in% names(igraphnodes)) names(igraphnodes)[names(igraphnodes) == "id"] <- "name"
@@ -220,7 +220,7 @@ edgedelete <- function(theigraph, fromnodechoice, tonodechoice) {
 #' @param layoutchoicestring The layout choice string
 #' @export
 LayoutChange <- function(theigraph, layoutchoicestring) {
-  layoutchoice <- switch(layoutchoicestring,
+  switch(layoutchoicestring,
     "st" = {
       plot(theigraph, layout = layout_as_star, main = "Competency and Evidence Graph")
     },
@@ -272,7 +272,7 @@ igraphedit <- function(FilePrefix) {
   theigraph <- NULL
   while (quitloop == 0) {
     userchoice <- readline("r)ead, v)iew, a)dd, d)elete, l)ayout, q)uit: ")
-    result <- switch(userchoice,
+    switch(userchoice,
       "r" = {
         theigraph <- readigraph(FilePrefix)
         if (!is.null(theigraph)) plot(theigraph, main = "Competency and Evidence Graph")

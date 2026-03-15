@@ -8,7 +8,8 @@ generate_summary_tables(
   mapped_results,
   config_obj,
   student_names = NULL,
-  threshold = 0.5
+  threshold = 0.5,
+  return_groups = FALSE
 )
 }
 \arguments{
@@ -19,9 +20,11 @@ generate_summary_tables(
 \item{student_names}{Optional character vector of student names. If NULL, generic IDs are used.}
 
 \item{threshold}{Numeric. The mastery probability threshold to use for latent class grouping. Default is 0.5.}
+
+\item{return_groups}{Logical. If TRUE, calculates latent classes using \code{groupattributepatterns}. Default is FALSE.}
 }
 \value{
-A list containing \code{skill_profiles} and \code{item_parameters} dataframes.
+A list containing \code{skill_profiles} and \code{item_parameters} dataframes, and optionally \code{group_patterns}.
 }
 \description{
 Generates skill profiles and item parameters tables from the mapped MCMC results.

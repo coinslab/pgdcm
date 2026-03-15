@@ -20,6 +20,7 @@ library(MCMCvis)
 #'   Defaults to \code{list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL, post_sims = NULL)}.
 #' @param prefix Character. Descriptor prefix used for saving generated reports. Defaults to a timestamped string based on the model type.
 #' @param threshold Numeric. The mastery probability threshold to use for latent class grouping. Default is 0.5.
+#' @param return_groups Logical. If \code{TRUE}, the model groups participants into exhaustive latent classes (Caution: Scales exponentially with attributes). Default is \code{FALSE}.
 #'
 #' @return A comprehensive list containing:
 #' \itemize{
@@ -37,7 +38,8 @@ library(MCMCvis)
 run_pgdcm_auto <- function(config,
                            estimation_config = list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL, post_sims = NULL),
                            prefix = NULL,
-                           threshold = 0.5) {
+                           threshold = 0.5,
+                           return_groups = FALSE) {
     if (is.null(prefix)) {
         prefix <- paste0(config$type, "_", format(Sys.time(), "%Y%m%d_%H%M%S"))
     }
@@ -79,14 +81,22 @@ run_pgdcm_auto <- function(config,
             mcmc_summ <- MCMCsummary(object = res_clean)
             print(head(mcmc_summ))
 
+            # Extract participant IDs from dataset if they exist in column 1
+            student_ids <- NULL
+            if (!is.null(config$data$X) && !is.null(rownames(config$data$X))) {
+                student_ids <- rownames(config$data$X)
+            } else if (ncol(config$dataframe_orig) > 0) {
+                student_ids <- as.character(config$dataframe_orig[[1]])
+            }
+
             print("Mapping parameters to human-readable names...")
-            mapped_results <- map_pgdcm_parameters(summary_mx = mcmc_summ, config_obj = config)
+            mapped_results <- map_pgdcm_parameters(summary_mx = mcmc_summ, config_obj = config, student_names = student_ids)
             mapped_csv_file <- paste0(prefix, "_mapped_parameters.csv")
             write.csv(mapped_results, file = mapped_csv_file, row.names = FALSE)
             print(paste("Mapped parameters saved to:", mapped_csv_file))
 
             print("Generating skill profiles and item parameters...")
-            extra_tables <- generate_summary_tables(mapped_results = mapped_results, config_obj = config, threshold = threshold)
+            extra_tables <- generate_summary_tables(mapped_results = mapped_results, config_obj = config, student_names = student_ids, threshold = threshold, return_groups = return_groups)
             
             skill_csv <- paste0(prefix, "_skill_profiles.csv")
             write.csv(extra_tables$skill_profiles, file = skill_csv, row.names = TRUE)
@@ -96,19 +106,21 @@ run_pgdcm_auto <- function(config,
             write.csv(extra_tables$item_parameters, file = item_csv, row.names = FALSE)
             print(paste("Item parameters saved to:", item_csv))
 
-            group_file <- paste0(prefix, "_latent_classes.txt")
-            sink(group_file)
-            for (grp in names(extra_tables$group_patterns)) {
-                gdata <- extra_tables$group_patterns[[grp]]
-                cat(paste0("Group Pattern [", paste(gdata$label, collapse = " "), "]:\n"))
-                cat(paste0("  Number of Members: ", length(gdata$members), "\n"))
-                if(length(gdata$members) > 0) {
-                    cat(paste0("  Members: ", paste(gdata$members, collapse = ", "), "\n"))
+            if (return_groups && !is.null(extra_tables$group_patterns)) {
+                group_file <- paste0(prefix, "_latent_classes.txt")
+                sink(group_file)
+                for (grp in names(extra_tables$group_patterns)) {
+                    gdata <- extra_tables$group_patterns[[grp]]
+                    cat(paste0("Group Pattern [", paste(gdata$label, collapse = " "), "]:\n"))
+                    cat(paste0("  Number of Members: ", length(gdata$members), "\n"))
+                    if(length(gdata$members) > 0) {
+                        cat(paste0("  Members: ", paste(gdata$members, collapse = ", "), "\n"))
+                    }
+                    cat("---------------------------------------------------------------\n")
                 }
-                cat("---------------------------------------------------------------\n")
+                sink()
+                print(paste("Latent classes saved to:", group_file))
             }
-            sink()
-            print(paste("Latent classes saved to:", group_file))
 
             valid_params <- colnames(res_clean[[1]])
             if (any(grepl("beta_root", valid_params))) MCMCplot(object = res_clean, params = "beta_root", HPD = TRUE, ci = c(50, 90))

@@ -52,8 +52,7 @@ validate_graph_and_data <- function(graph, dataframe) {
     }
 
     if (length(usermessage) > 0) {
-        print(usermessage)
-        Sys.sleep(30)
+        warning(paste(usermessage, collapse = "\n"))
         return(FALSE)
     }
 
@@ -126,6 +125,7 @@ build_model_config <- function(graph, dataframe) {
 
     cfg$graph <- graph
     cfg$type <- m_type
+    cfg$dataframe_orig <- dataframe
 
     return(cfg)
 }
