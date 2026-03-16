@@ -278,6 +278,60 @@
 <strong>Scatter Plots</strong>: The blue nodes (item accuracy and co-occurrence representations) should hug tightly to the diagonal red equivalence line.</li>
 </ol>
 <p>If the posterior predictive plots show significant deviations (for instance, the distributions don’t align, or scatter nodes sit far off the red line), this is diagnostic proof that your chosen psychological framework (like DINA) is structurally misspecified for this dataset, and you should likely attempt a different network framework like DINO or DINM.</p>
+</section></section><section class="level2"><h2 id="generating-summary-tables-and-assessing-accuracy">7. Generating Summary Tables and Assessing Accuracy<a class="anchor" aria-label="anchor" href="#generating-summary-tables-and-assessing-accuracy"></a>
+</h2>
+<p>While the beginner-friendly <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> function automatically generates and saves <code>mapped_parameters.csv</code>, <code>skill_profiles.csv</code>, and <code>item_parameters.csv</code> directly to your working directory, advanced users executing manual MCMC chains must extract and build these tables themselves to maintain full control.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 1. Generate the raw summary matrix</span></span>
+<span><span class="va">mcmc_summ</span> <span class="op">&lt;-</span> <span class="fu">MCMCvis</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MCMCvis/man/MCMCsummary.html" class="external-link">MCMCsummary</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">res_clean</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Extract original participant IDs for correct row mapping</span></span>
+<span><span class="va">student_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">config</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3. Map Nimble parameters to human-readable names</span></span>
+<span><span class="va">mapped_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/map_pgdcm_parameters.html">map_pgdcm_parameters</a></span><span class="op">(</span></span>
+<span>    summary_mx <span class="op">=</span> <span class="va">mcmc_summ</span>,</span>
+<span>    config_obj <span class="op">=</span> <span class="va">config</span>,</span>
+<span>    student_names <span class="op">=</span> <span class="va">student_ids</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 4. Generate the final clean tables (Skill Profiles, Item Parameters)</span></span>
+<span><span class="va">summary_tables</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_summary_tables.html">generate_summary_tables</a></span><span class="op">(</span></span>
+<span>    mapped_results <span class="op">=</span> <span class="va">mapped_results</span>,</span>
+<span>    config_obj <span class="op">=</span> <span class="va">config</span>,</span>
+<span>    student_names <span class="op">=</span> <span class="va">student_ids</span>,</span>
+<span>    return_groups <span class="op">=</span> <span class="cn">TRUE</span> <span class="co"># Enable this to explicitly extract skill profile clusters</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Extract the skill profiles specifically</span></span>
+<span><span class="va">skill_profiles</span> <span class="op">&lt;-</span> <span class="va">summary_tables</span><span class="op">$</span><span class="va">skill_profiles</span></span>
+<span><span class="va">group_patterns</span> <span class="op">&lt;-</span> <span class="va">summary_tables</span><span class="op">$</span><span class="va">group_patterns</span></span></code></pre></div>
+</div>
+<p>If you set <code>return_groups = TRUE</code>, the function will additionally map all observed skill profiles to their exhaustive <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>2</mn><mi>K</mi></msup><annotation encoding="application/x-tex">2^K</annotation></semantics></math> latent class grouping combinations, allowing you to easily extract and visualize group-level membership arrays (<code>summary_tables$group_patterns</code>).</p>
+<section class="level3"><h3 id="assessing-classification-performance">Assessing Classification Performance<a class="anchor" aria-label="anchor" href="#assessing-classification-performance"></a>
+</h3>
+<p>Once you have your <code>skill_profiles</code> matrix (either manually generated from the procedure above, or simply loaded from the <code>skill_profiles.csv</code> file automatically saved during the <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> workflow), you can quantitatively evaluate how well your model classified the students if you happen to possess a “ground truth” dataset.</p>
+<p>We can accomplish this using the <code><a href="../reference/assess_classification_accuracy.html">assess_classification_accuracy()</a></code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Assess classification accuracy against known true profiles</span></span>
+<span><span class="va">accuracy_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/assess_classification_accuracy.html">assess_classification_accuracy</a></span><span class="op">(</span></span>
+<span>    skill_profiles <span class="op">=</span> <span class="va">skill_profiles</span>,</span>
+<span>    true_data <span class="op">=</span> <span class="va">dtmr_true_profiles</span>,</span>
+<span>    mapping_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        <span class="st">"referent_units"</span> <span class="op">=</span> <span class="st">"referent_units"</span>,</span>
+<span>        <span class="st">"partitioning_iterating"</span> <span class="op">=</span> <span class="st">"partitioning_iterating"</span>,</span>
+<span>        <span class="st">"appropriateness"</span> <span class="op">=</span> <span class="st">"appropriateness"</span>,</span>
+<span>        <span class="st">"multiplicative_comparison"</span> <span class="op">=</span> <span class="st">"multiplicative_comparison"</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># View the individual skill accuracies, Cohen's Kappa, and overall profile match rate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">accuracy_results</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Profile Correct Classification Rate:"</span>, <span class="va">accuracy_results</span><span class="op">$</span><span class="va">profile_accuracy</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>This final validation step computes both the isolated accuracy rate for every individual skill and the overarching, strict multi-dimensional profile match rate!</p>
 </section></section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);

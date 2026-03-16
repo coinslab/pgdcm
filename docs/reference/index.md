@@ -13,6 +13,8 @@
   igraph
 - [`Tasks2CytoNodes()`](Tasks2CytoNodes.md) : Push Standalone Task Nodes
   to Cytoscape
+- [`assess_classification_accuracy()`](assess_classification_accuracy.md)
+  : Assess Classification Accuracy
 - [`build_from_adjacency()`](build_from_adjacency.md) : Build Graph from
   an Adjacency Matrix
 - [`build_from_node_edge_files()`](build_from_node_edge_files.md) :

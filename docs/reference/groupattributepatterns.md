@@ -2,12 +2,12 @@
 
 Takes a matrix of continuous mastery probabilities (e.g., from
 `skill_profiles`) and groups participants into discrete latent classes
-based on a 0.5 threshold.
+based on a provided threshold.
 
 ## Usage
 
 ``` r
-groupattributepatterns(attributenodes)
+groupattributepatterns(attributenodes, threshold = 0.5)
 ```
 
 ## Arguments
@@ -15,6 +15,11 @@ groupattributepatterns(attributenodes)
 - attributenodes:
 
   An `I x K` matrix or dataframe of participant masteries.
+
+- threshold:
+
+  Numeric. The probability cutoff above which a skill is considered
+  mastered. Default is 0.5.
 
 ## Value
 

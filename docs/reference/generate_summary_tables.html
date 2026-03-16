@@ -44,7 +44,13 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">generate_summary_tables</span><span class="op">(</span><span class="va">mapped_results</span>, <span class="va">config_obj</span>, student_names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">generate_summary_tables</span><span class="op">(</span></span>
+<span>  <span class="va">mapped_results</span>,</span>
+<span>  <span class="va">config_obj</span>,</span>
+<span>  student_names <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  threshold <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  return_groups <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -62,10 +68,18 @@
 <dt id="arg-student-names">student_names<a class="anchor" aria-label="anchor" href="#arg-student-names"></a></dt>
 <dd><p>Optional character vector of student names. If NULL, generic IDs are used.</p></dd>
 
+
+<dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
+<dd><p>Numeric. The mastery probability threshold to use for latent class grouping. Default is 0.5.</p></dd>
+
+
+<dt id="arg-return-groups">return_groups<a class="anchor" aria-label="anchor" href="#arg-return-groups"></a></dt>
+<dd><p>Logical. If TRUE, calculates latent classes using <code>groupattributepatterns</code>. Default is FALSE.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing <code>skill_profiles</code> and <code>item_parameters</code> dataframes.</p>
+    <p>A list containing <code>skill_profiles</code> and <code>item_parameters</code> dataframes, and optionally <code>group_patterns</code>.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
