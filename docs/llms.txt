@@ -89,6 +89,12 @@ if (!"RCy3" %in% installed.packages()) {
 }
 ```
 
+Alternatively, using `renv`:
+
+``` r
+renv::install("bioc::RCy3")
+```
+
 *Note: If prompted with “Do you want to attempt to install these from
 sources? (Yes/no/cancel)”, type `Yes` and press Enter.*
 
