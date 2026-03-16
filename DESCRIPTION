@@ -24,5 +24,3 @@ Suggests:
     testthat (>= 3.0.0),
     quarto
 VignetteBuilder: quarto
-Remotes:
-    bioc::RCy3
