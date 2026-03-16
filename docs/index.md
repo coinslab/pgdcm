@@ -77,28 +77,7 @@ fails, try the following steps:
     install.packages("nimble", repos = "https://r-nimble.org", type = "source")
     ```
 
-### 3. Install RCy3
-
-`RCy3` is required for interacting with Cytoscape. Install it via
-Bioconductor:
-
-``` r
-if (!"RCy3" %in% installed.packages()) {
-    install.packages("BiocManager")
-    BiocManager::install("RCy3")
-}
-```
-
-Alternatively, using `renv`:
-
-``` r
-renv::install("bioc::RCy3")
-```
-
-*Note: If prompted with “Do you want to attempt to install these from
-sources? (Yes/no/cancel)”, type `Yes` and press Enter.*
-
-### 4. Install pgdcm
+### 3. Install pgdcm
 
 Only after successfully installing the dependencies above should you
 install the `pgdcm` package from GitHub.
