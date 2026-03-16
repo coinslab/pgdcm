@@ -88,11 +88,30 @@ calc_mixed_kernel <- nimbleFunction(
         # (Works naturally with continuous abilities as well)
         val_dinm <- sum_total / max(1, sum_input)
 
-        # DINO (Disjunctive)
-        # 1 if the student has ANY of the required prerequisites
+        # DINO (Mixed/Gated Disjunctive)
+        # Check the "Gate": does the student have AT LEAST ONE required discrete skill?
+        # (If no discrete skills are required, the gate is open by default)
+        dino_gate <- 0.0
+        if (req_disc == 0.0) {
+            dino_gate <- 1.0
+        } else if (sum_disc > 0.0) {
+            dino_gate <- 1.0
+        }
+
         val_dino <- 0.0
-        if (sum_total > 0) {
-            val_dino <- 1.0
+        if (has_cont == 1.0) {
+            # Mixed or Pure Continuous Case
+            if (dino_gate == 1.0) {
+                # They possess at least one prerequisite skill -> Continuous ability passes through
+                val_dino <- sum_cont
+            } else {
+                # They lack ALL prerequisite skills -> Severe penalty
+                val_dino <- -10.0
+            }
+        } else {
+            # Pure Discrete Case
+            # Standard DINO: 1 if at least one prerequisite met, 0 otherwise
+            val_dino <- dino_gate
         }
 
         returnType(double(0))
