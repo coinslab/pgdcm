@@ -84,9 +84,10 @@ calc_mixed_kernel <- nimbleFunction(
         }
 
         # DINM (Compensatory)
-        # Simple ratio of possessed prerequisites over total required prerequisites
-        # (Works naturally with continuous abilities as well)
-        val_dinm <- sum_total / max(1, sum_input)
+        # Additive combination of possessed prerequisites.
+        # This additive model ensures the kernel matches the scale of 
+        # continuous latent variables passed by DINA/DINO.
+        val_dinm <- sum_total
 
         # DINO (Mixed/Gated Disjunctive)
         # Check the "Gate": does the student have AT LEAST ONE required discrete skill?
