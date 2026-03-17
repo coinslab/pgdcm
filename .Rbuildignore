@@ -1,17 +1,27 @@
-^renv$
-^renv\.lock$
+# RStudio and Project Locks
+^\.Rproj\.user$
 ^\.Rhistory$
-^\.Rproj\.user$
-pgdcm/.Rhistory
 ^pgdcm/\.Rhistory$
-^\.Rproj\.user$
-^\.Rproj\.user$
 \.Rproj\.user
-^vignettes/renv
-^vignettes/\.quarto
-^vignettes/\.Rprofile$
 ^docs$
 ^_pkgdown\.yml$
+^renv$
+^renv\.lock$
+
+# Tutorial and Vignette Caches (Prevents Bloat)
 ^vignettes/Beginner_Tutorial copy\.qmd$
 ^vignettes/generate_tutorial_data copy\.R$
 ^vignettes/renv$
+^vignettes/.*\.rds$
+^vignettes/.*\.csv$
+^vignettes/.*\.pdf$
+^vignettes/generate_.*\.R$
+^vignettes_locked$
+
+# Local Directories
+^locallib$
+
+# Hidden Quarto Environment Locks
+^.*/\.quarto$
+^.*/\.quarto/.*$
+^\.quarto$
