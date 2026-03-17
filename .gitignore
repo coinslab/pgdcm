@@ -6,5 +6,13 @@ BACKUP/DTMRBACKUP0206262325edges.csv
 
 /.quarto/
 **/*.quarto_ipynb
-\n.cache/
+.cache/
 vignettes/renv/library/
+
+# Package Build and Test Artifacts
+.*Rcheck/
+*.Rcheck/
+.cache/
+.deno/
+Rplots.pdf
+test_*.csv

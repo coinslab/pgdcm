@@ -1,5 +1,0 @@
-"from","to","weights","weight_type"
-"Att1","Att2",1,"required"
-"Att1","Task1",1,"required"
-"Att2","Task2",1,"required"
-"Att2","Task3",1,"required"

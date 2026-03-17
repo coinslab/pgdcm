@@ -25,3 +25,10 @@
 ^.*/\.quarto$
 ^.*/\.quarto/.*$
 ^\.quarto$
+
+# Local Caches and Test Artifacts
+^\.cache$
+^\.deno$
+^.*\.Rcheck$
+^test_.*\.csv$
+^Rplots\.pdf$
