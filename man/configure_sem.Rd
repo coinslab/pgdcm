@@ -4,12 +4,14 @@
 \alias{configure_sem}
 \title{Configure SEM Initialization and Constants}
 \usage{
-configure_sem(info, X)
+configure_sem(info, X, priors = NULL)
 }
 \arguments{
 \item{info}{Graph structural properties from \code{get_graph_info}.}
 
 \item{X}{A numeric matrix representing the observational participant data.}
+
+\item{priors}{Optional list of prior specifications.}
 }
 \value{
 A list with \code{constants}, \code{inits}, \code{monitors}, and \code{data}.

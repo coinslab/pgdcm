@@ -380,3 +380,52 @@ print(paste("Profile Correct Classification Rate:", accuracy_results$profile_acc
 This final validation step computes both the isolated accuracy rate for
 every individual skill and the overarching, strict multi-dimensional
 profile match rate!
+
+## 8. Using pgdcm as a Scoring Model
+
+A frequent use case in psychometrics is **scoring**. After successfully
+estimating and calibrating your structural and item parameters on a
+large sample, you may want to apply those fixed parameters to score
+subsequent (often smaller) datasets without recalculating the item
+difficulties.
+
+In a Bayesian framework, you “fix” a parameter by supplying it with a
+**highly informative prior** (a point distribution). By leveraging the
+`priors` argument in
+[`build_model_config()`](../reference/build_model_config.md), we can
+supply our calibrated posterior means, and lock them in place using an
+extremely small standard deviation (e.g., `1e-4`).
+
+``` r
+# 1. Assume you have tables of calibrated means from a previous study:
+# calibrated_theta_means (Dimensions: K x 2 matrix)
+# calibrated_lambda_means (Dimensions: J x 2 matrix)
+
+# 2. Build your highly informative scoring priors
+scoring_priors <- list(
+    # Keep the root attribute priors somewhat diffuse to allow new students to be scored
+    beta_mean = c(0),
+    beta_std = c(2),
+
+    # "Lock in" your previously calibrated structural parameters (K x 2 matrix)
+    theta_mean = calibrated_theta_means,
+    theta_std = matrix(0.0001, nrow = nrow(calibrated_theta_means), ncol = 2),
+
+    # "Lock in" your previously calibrated item parameters (J x 2 matrix)
+    lambda_mean = calibrated_lambda_means,
+    lambda_std = matrix(0.0001, nrow = nrow(calibrated_lambda_means), ncol = 2)
+)
+
+# 3. Compile the new config for the new dataset
+config_scoring <- build_model_config(g, X_new_students, priors = scoring_priors)
+
+# 4. Execute the automated workflow (it will sample with fixed items)
+scoring_results <- run_pgdcm_auto(config_scoring)
+
+# Profile the new students!
+print(scoring_results$skill_profiles)
+```
+
+The MCMC sampler will essentially hold those parameters constant at your
+specified means while freely updating the posterior distributions of the
+new participants’ latent skills!

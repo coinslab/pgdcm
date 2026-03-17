@@ -8,7 +8,7 @@ appropriate compiler.
 ## Usage
 
 ``` r
-build_model_config(graph, dataframe)
+build_model_config(graph, dataframe, priors = NULL)
 ```
 
 ## Arguments
@@ -20,6 +20,11 @@ build_model_config(graph, dataframe)
 - dataframe:
 
   A `data.frame` of raw responses matching graph Tasks.
+
+- priors:
+
+  Optional list of prior specifications. See `configure_dcm` or
+  `configure_sem` for details.
 
 ## Value
 

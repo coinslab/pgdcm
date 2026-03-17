@@ -14,7 +14,8 @@ run_pgdcm_auto(
     post_sims = NULL),
   prefix = NULL,
   threshold = 0.5,
-  return_groups = FALSE
+  return_groups = FALSE,
+  priors = NULL
 )
 ```
 
@@ -48,6 +49,13 @@ run_pgdcm_auto(
   Logical. If `TRUE`, the model groups participants into exhaustive
   latent classes (Caution: Scales exponentially with attributes).
   Default is `FALSE`.
+
+- priors:
+
+  Optional. A list containing prior configurations. See `configure_dcm`
+  or `configure_sem` for details. Can be used to lock parameter
+  estimation with very small standard deviations (e.g., `0.0001`) to run
+  the model as a scoring-only model.
 
 ## Value
 

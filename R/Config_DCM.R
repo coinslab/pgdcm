@@ -11,10 +11,16 @@
 #'
 #' @param info Graph structural properties from \code{get_graph_info}.
 #' @param X A numeric matrix representing the observational participant data.
+#' @param priors Optional list of prior specifications. Can be provided as common pairs
+#'   (e.g., \code{list(beta = c(mean, std), theta = c(mean, std), lambda = c(mean, std))}) or individual parameter arrays
+#'   (e.g., \code{list(beta_mean = c(...), beta_std = c(...), theta_mean = matrix(...), ...)}).
+#'   If \code{NULL}, default priors (mean 0, std 2) are generated. Passing a standard deviation of
+#'   \code{0.0001} or similar effectively acts as a point distribution, enabling the use of \code{pgdcm}
+#'   as a scoring-only model when parameter means are supplied from a previous calibration.
 #'
 #' @return A list with \code{constants}, \code{inits}, \code{monitors}, and \code{data}.
 #' @export
-configure_dcm <- function(info, X) {
+configure_dcm <- function(info, X, priors = NULL) {
     nrparticipants <- nrow(X)
 
     # Determine if root attributes are continuous (Higher-Order, MIRT, IRT structures)
@@ -26,15 +32,53 @@ configure_dcm <- function(info, X) {
         nrtasknodes = info$nrtasknodes,
         nrattributenodes = info$nrattributenodes,
         nrnodes = info$nrnodes,
+        CDMattnodes = info$nrattributenodes,
+        CDMnrtasknodes = info$nrtasknodes,
         CDMmatrix = info$matrix,
-        betapriormean = 0,
-        betapriorstd = 2,
         nrbetaroot = info$nrbetaroot,
         isDINA = info$isDINA,
         isDINO = info$isDINO,
         isDINM = info$isDINM,
         isContinuousHO = is_continuous_ho
     )
+
+    # Prior generation
+    # Defaults
+    beta_prior_mean <- matrix(0, nrow = info$nrbetaroot, ncol = 1)
+    beta_prior_std <- matrix(2, nrow = info$nrbetaroot, ncol = 1)
+    theta_prior_mean <- matrix(0, nrow = info$nrattributenodes, ncol = 2)
+    theta_prior_std <- matrix(2, nrow = info$nrattributenodes, ncol = 2)
+    lambda_prior_mean <- matrix(0, nrow = info$nrtasknodes, ncol = 2)
+    lambda_prior_std <- matrix(2, nrow = info$nrtasknodes, ncol = 2)
+
+    if (!is.null(priors)) {
+        # Check for common pairs first
+        if (all(c("beta", "theta", "lambda") %in% names(priors)) && length(priors$beta) == 2 && length(priors$theta) == 2 && length(priors$lambda) == 2 && !is.matrix(priors$theta) && !is.matrix(priors$lambda)) {
+            beta_prior_mean[] <- priors$beta[1]
+            beta_prior_std[] <- priors$beta[2]
+            theta_prior_mean[] <- priors$theta[1]
+            theta_prior_std[] <- priors$theta[2]
+            lambda_prior_mean[] <- priors$lambda[1]
+            lambda_prior_std[] <- priors$lambda[2]
+        } else {
+            # Check for individual arrays
+            if (!is.null(priors$beta_mean)) beta_prior_mean <- matrix(priors$beta_mean, ncol = 1)
+            if (!is.null(priors$beta_std)) beta_prior_std <- matrix(priors$beta_std, ncol = 1)
+
+            if (!is.null(priors$theta_mean)) theta_prior_mean <- priors$theta_mean
+            if (!is.null(priors$theta_std)) theta_prior_std <- priors$theta_std
+
+            if (!is.null(priors$lambda_mean)) lambda_prior_mean <- priors$lambda_mean
+            if (!is.null(priors$lambda_std)) lambda_prior_std <- priors$lambda_std
+        }
+    }
+
+    constants$beta_prior_mean <- beta_prior_mean
+    constants$beta_prior_std <- beta_prior_std
+    constants$theta_prior_mean <- theta_prior_mean
+    constants$theta_prior_std <- theta_prior_std
+    constants$lambda_prior_mean <- lambda_prior_mean
+    constants$lambda_prior_std <- lambda_prior_std
 
     # Inits
     beta_root_init <- rnorm(info$nrbetaroot, mean = 0, sd = 1)

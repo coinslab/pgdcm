@@ -4,12 +4,14 @@
 \alias{build_model_config}
 \title{Build Model Configuration}
 \usage{
-build_model_config(graph, dataframe)
+build_model_config(graph, dataframe, priors = NULL)
 }
 \arguments{
 \item{graph}{An \code{igraph} object representing the conceptual architecture.}
 
 \item{dataframe}{A \code{data.frame} of raw responses matching graph Tasks.}
+
+\item{priors}{Optional list of prior specifications. See \code{configure_dcm} or \code{configure_sem} for details.}
 }
 \value{
 A configuration list encompassing Nimble requirements. The list contains:

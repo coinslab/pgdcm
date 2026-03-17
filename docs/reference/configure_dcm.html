@@ -47,7 +47,7 @@ specifically tailored for Diagnostic Classification Models (DCMs).</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">configure_dcm</span><span class="op">(</span><span class="va">info</span>, <span class="va">X</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">configure_dcm</span><span class="op">(</span><span class="va">info</span>, <span class="va">X</span>, priors <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -60,6 +60,15 @@ specifically tailored for Diagnostic Classification Models (DCMs).</p>
 
 <dt id="arg-x">X<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A numeric matrix representing the observational participant data.</p></dd>
+
+
+<dt id="arg-priors">priors<a class="anchor" aria-label="anchor" href="#arg-priors"></a></dt>
+<dd><p>Optional list of prior specifications. Can be provided as common pairs
+(e.g., <code>list(beta = c(mean, std), theta = c(mean, std), lambda = c(mean, std))</code>) or individual parameter arrays
+(e.g., <code>list(beta_mean = c(...), beta_std = c(...), theta_mean = matrix(...), ...)</code>).
+If <code>NULL</code>, default priors (mean 0, std 2) are generated. Passing a standard deviation of
+<code>0.0001</code> or similar effectively acts as a point distribution, enabling the use of <code>pgdcm</code>
+as a scoring-only model when parameter means are supplied from a previous calibration.</p></dd>
 
 </dl></div>
     <div class="section level2">

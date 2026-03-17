@@ -21,6 +21,8 @@ library(MCMCvis)
 #' @param prefix Character. Descriptor prefix used for saving generated reports. Defaults to a timestamped string based on the model type.
 #' @param threshold Numeric. The mastery probability threshold to use for latent class grouping. Default is 0.5.
 #' @param return_groups Logical. If \code{TRUE}, the model groups participants into exhaustive latent classes (Caution: Scales exponentially with attributes). Default is \code{FALSE}.
+#' @param priors Optional. A list containing prior configurations. See \code{configure_dcm} or \code{configure_sem} for details.
+#'   Can be used to lock parameter estimation with very small standard deviations (e.g., \code{0.0001}) to run the model as a scoring-only model.
 #'
 #' @return A comprehensive list containing:
 #' \itemize{
@@ -39,7 +41,8 @@ run_pgdcm_auto <- function(config,
                            estimation_config = list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL, post_sims = NULL),
                            prefix = NULL,
                            threshold = 0.5,
-                           return_groups = FALSE) {
+                           return_groups = FALSE,
+                           priors = NULL) {
     if (is.null(prefix)) {
         prefix <- paste0(config$type, "_", format(Sys.time(), "%Y%m%d_%H%M%S"))
     }

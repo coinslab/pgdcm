@@ -6,7 +6,7 @@ tailored for Structural Equation Models (SEMs).
 ## Usage
 
 ``` r
-configure_sem(info, X)
+configure_sem(info, X, priors = NULL)
 ```
 
 ## Arguments
@@ -18,6 +18,10 @@ configure_sem(info, X)
 - X:
 
   A numeric matrix representing the observational participant data.
+
+- priors:
+
+  Optional list of prior specifications.
 
 ## Value
 

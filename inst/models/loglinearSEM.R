@@ -3,13 +3,13 @@ loglinearSEM <- nimbleCode({
 
     # 1. Intercepts (alpha) for all nodes
     for (k in 1:nrnodes) {
-        alpha[k] ~ dnorm(mean = betapriormean, sd = betapriorstd)
+        alpha[k] ~ dnorm(mean = alpha_prior_mean[k], sd = alpha_prior_std[k])
     }
 
     # 2. Weights (beta) for all potential edges
     for (k in 1:nrnodes) {
         for (j in 1:nrnodes) {
-            beta[k, j] ~ dnorm(mean = betapriormean, sd = betapriorstd)
+            beta[k, j] ~ dnorm(mean = beta_prior_mean[k, j], sd = beta_prior_std[k, j])
         }
     }
 

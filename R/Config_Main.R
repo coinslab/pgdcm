@@ -68,6 +68,7 @@ validate_graph_and_data <- function(graph, dataframe) {
 #'
 #' @param graph An \code{igraph} object representing the conceptual architecture.
 #' @param dataframe A \code{data.frame} of raw responses matching graph Tasks.
+#' @param priors Optional list of prior specifications. See \code{configure_dcm} or \code{configure_sem} for details.
 #'
 #' @return A configuration list encompassing Nimble requirements. The list contains:
 #' \itemize{
@@ -81,7 +82,7 @@ validate_graph_and_data <- function(graph, dataframe) {
 #'   \item \code{type}: A character string denoting the detected architecture (e.g., \code{"DCM"}, \code{"SEM"}).
 #' }
 #' @export
-build_model_config <- function(graph, dataframe) {
+build_model_config <- function(graph, dataframe, priors = NULL) {
     if (!validate_graph_and_data(graph, dataframe)) {
         stop("Graph/Data validation failed. See warnings above.")
     }
@@ -114,11 +115,11 @@ build_model_config <- function(graph, dataframe) {
     }
 
     if (m_type == "SEM") {
-        cfg <- configure_sem(info, X)
+        cfg <- configure_sem(info, X, priors = priors)
         cfg$code_file <- get_model_path("loglinearSEM.R")
         cfg$model_object <- "loglinearSEM"
     } else {
-        cfg <- configure_dcm(info, X)
+        cfg <- configure_dcm(info, X, priors = priors)
         cfg$code_file <- get_model_path("loglinearBN.R")
         cfg$model_object <- "loglinearBN"
     }

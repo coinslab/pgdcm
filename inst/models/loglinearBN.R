@@ -128,7 +128,7 @@ loglinearBN <- nimbleCode({
     if (isContinuousHO == 0) {
         # Standard Binary Root Attribute
         for (m in 1:nrbetaroot) {
-            beta_root[m] ~ dnorm(mean = betapriormean, sd = betapriorstd)
+            beta_root[m] ~ dnorm(mean = beta_prior_mean[m, 1], sd = beta_prior_std[m, 1])
         }
     }
     # If isContinuousHO == 1, the root attribute is the Latent Variable itself,
@@ -138,15 +138,15 @@ loglinearBN <- nimbleCode({
     # Only for dependent attributes (from nrbetaroot + 1 to nrattributenodes)
     if (nrattributenodes > nrbetaroot) {
         for (k in (nrbetaroot + 1):nrattributenodes) {
-            theta[k, 1] ~ T(dnorm(mean = betapriormean, sd = betapriorstd), 0, Inf) # Slope
-            theta[k, 2] ~ dnorm(mean = betapriormean, sd = betapriorstd) # Intercept
+            theta[k, 1] ~ T(dnorm(mean = theta_prior_mean[k, 1], sd = theta_prior_std[k, 1]), 0, Inf) # Slope
+            theta[k, 2] ~ dnorm(mean = theta_prior_mean[k, 2], sd = theta_prior_std[k, 2]) # Intercept
         }
     }
 
     # 3. Priors for Items (Slopes and Intercepts)
     for (j in 1:nrtasknodes) {
-        lambda[j, 1] ~ T(dnorm(mean = betapriormean, sd = betapriorstd), 0, Inf) # Slope
-        lambda[j, 2] ~ dnorm(mean = betapriormean, sd = betapriorstd) # Intercept
+        lambda[j, 1] ~ T(dnorm(mean = lambda_prior_mean[j, 1], sd = lambda_prior_std[j, 1]), 0, Inf) # Slope
+        lambda[j, 2] ~ dnorm(mean = lambda_prior_mean[j, 2], sd = lambda_prior_std[j, 2]) # Intercept
     }
 
     # --- Likelihood ---

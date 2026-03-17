@@ -56,7 +56,8 @@ and generates posterior predictive checks.</p>
 <span>    post_sims <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
 <span>  prefix <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  return_groups <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  return_groups <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  priors <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -85,6 +86,11 @@ Defaults to <code>list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NUL
 
 <dt id="arg-return-groups">return_groups<a class="anchor" aria-label="anchor" href="#arg-return-groups"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, the model groups participants into exhaustive latent classes (Caution: Scales exponentially with attributes). Default is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-priors">priors<a class="anchor" aria-label="anchor" href="#arg-priors"></a></dt>
+<dd><p>Optional. A list containing prior configurations. See <code>configure_dcm</code> or <code>configure_sem</code> for details.
+Can be used to lock parameter estimation with very small standard deviations (e.g., <code>0.0001</code>) to run the model as a scoring-only model.</p></dd>
 
 </dl></div>
     <div class="section level2">
