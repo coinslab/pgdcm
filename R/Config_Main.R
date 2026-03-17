@@ -83,6 +83,9 @@ validate_graph_and_data <- function(graph, dataframe) {
 #' }
 #' @export
 build_model_config <- function(graph, dataframe, priors = NULL) {
+    # Coerce topological sort in case users provide a raw, unordered igraph object
+    graph <- enforce_topo_sort(graph)
+
     if (!validate_graph_and_data(graph, dataframe)) {
         stop("Graph/Data validation failed. See warnings above.")
     }
