@@ -386,3 +386,46 @@ knitr::kable(edges_table3, caption = "Edges Data")
 # Save the final structured graph as a GraphML file
 write_graph(myNetwork3, "Final_Competency_Model.graphml", format = "graphml")
 ```
+
+## Scenario 4: Importing from Saved Node and Edge Tables (CSV)
+
+In this scenario, you might have previously saved your `nodes_table` and
+`edges_table` to `.csv` files (perhaps bypassing GraphML initially or
+intending to make bulk edits in Excel before re-importing).
+
+### Step 1: Rebuild the Model Object in R
+
+The
+[`build_from_node_edge_files()`](../reference/build_from_node_edge_files.md)
+utility automatically standardizes the column names of your CSVs and
+converts them into a Nimble-ready igraph object.
+
+``` r
+# Read your previously saved nodes and edges
+# (Assuming they were saved using write.csv(nodes_table, "my_nodes.csv", row.names=FALSE))
+
+# Rebuild the igraph object directly
+myNetwork4 <- build_from_node_edge_files(
+    NodesFile = "my_nodes.csv",
+    EdgesFile = "my_edges.csv"
+)
+```
+
+### Step 2: (Optional) Push the Network Back to Cytoscape
+
+If you realized you still need to make *visual* edits to your model, you
+can instantly push these raw tables back directly into the Cytoscape
+canvas using the
+[`push_to_cytoscape()`](../reference/push_to_cytoscape.md) wrapper.
+
+``` r
+# Load the CSVs as raw data.frames
+loaded_nodes <- read.csv("my_nodes.csv", stringsAsFactors = FALSE)
+loaded_edges <- read.csv("my_edges.csv", stringsAsFactors = FALSE)
+
+# Push the components right back into the visual canvas!
+push_to_cytoscape(
+    nodes = loaded_nodes,
+    edges = loaded_edges,
+)
+```

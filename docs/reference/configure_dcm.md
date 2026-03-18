@@ -26,10 +26,14 @@ configure_dcm(info, X, priors = NULL)
   `list(beta = c(mean, std), theta = c(mean, std), lambda = c(mean, std))`)
   or individual parameter arrays (e.g.,
   `list(beta_mean = c(...), beta_std = c(...), theta_mean = matrix(...), ...)`).
-  If `NULL`, default priors (mean 0, std 2) are generated. Passing a
-  standard deviation of `0.0001` or similar effectively acts as a point
-  distribution, enabling the use of `pgdcm` as a scoring-only model when
-  parameter means are supplied from a previous calibration.
+  Semantic meanings: `beta` represents the root attributes (initial
+  probabilities), `theta` represents structural attribute transitions
+  (dependencies between skills), and `lambda` represents item parameters
+  (slopes and intercepts). If `NULL`, default priors (mean 0, std 2) are
+  generated. Passing a standard deviation of `0.0001` or similar
+  effectively acts as a point distribution, enabling the use of `pgdcm`
+  as a scoring-only model when parameter means are supplied from a
+  previous calibration.
 
 ## Value
 

@@ -390,6 +390,38 @@ Figure 7: Using the Cytoscape interface we added an edge from A2 to A1. The add
 <span><span class="co"># Save the final structured graph as a GraphML file</span></span>
 <span><span class="fu"><a href="https://r.igraph.org/reference/write_graph.html" class="external-link">write_graph</a></span><span class="op">(</span><span class="va">myNetwork3</span>, <span class="st">"Final_Competency_Model.graphml"</span>, format <span class="op">=</span> <span class="st">"graphml"</span><span class="op">)</span></span></code></pre></div>
 </div>
+</section></section><section class="section level2"><h2 id="scenario-4-importing-from-saved-node-and-edge-tables-csv">Scenario 4: Importing from Saved Node and Edge Tables (CSV)<a class="anchor" aria-label="anchor" href="#scenario-4-importing-from-saved-node-and-edge-tables-csv"></a>
+</h2>
+<p>In this scenario, you might have previously saved your <code>nodes_table</code> and <code>edges_table</code> to <code>.csv</code> files (perhaps bypassing GraphML initially or intending to make bulk edits in Excel before re-importing).</p>
+<section class="level2"><h3 id="step-1-rebuild-the-model-object-in-r">Step 1: Rebuild the Model Object in R<a class="anchor" aria-label="anchor" href="#step-1-rebuild-the-model-object-in-r"></a>
+</h3>
+<p>The <code><a href="../reference/build_from_node_edge_files.html">build_from_node_edge_files()</a></code> utility automatically standardizes the column names of your CSVs and converts them into a Nimble-ready igraph object.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Read your previously saved nodes and edges</span></span>
+<span><span class="co"># (Assuming they were saved using write.csv(nodes_table, "my_nodes.csv", row.names=FALSE))</span></span>
+<span></span>
+<span><span class="co"># Rebuild the igraph object directly</span></span>
+<span><span class="va">myNetwork4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/build_from_node_edge_files.html">build_from_node_edge_files</a></span><span class="op">(</span></span>
+<span>    NodesFile <span class="op">=</span> <span class="st">"my_nodes.csv"</span>,</span>
+<span>    EdgesFile <span class="op">=</span> <span class="st">"my_edges.csv"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+</section><section class="level2"><h3 id="step-2-optional-push-the-network-back-to-cytoscape">Step 2: (Optional) Push the Network Back to Cytoscape<a class="anchor" aria-label="anchor" href="#step-2-optional-push-the-network-back-to-cytoscape"></a>
+</h3>
+<p>If you realized you still need to make <em>visual</em> edits to your model, you can instantly push these raw tables back directly into the Cytoscape canvas using the <code><a href="../reference/push_to_cytoscape.html">push_to_cytoscape()</a></code> wrapper.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load the CSVs as raw data.frames</span></span>
+<span><span class="va">loaded_nodes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"my_nodes.csv"</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">loaded_edges</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"my_edges.csv"</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Push the components right back into the visual canvas!</span></span>
+<span><span class="fu"><a href="../reference/push_to_cytoscape.html">push_to_cytoscape</a></span><span class="op">(</span></span>
+<span>    nodes <span class="op">=</span> <span class="va">loaded_nodes</span>,</span>
+<span>    edges <span class="op">=</span> <span class="va">loaded_edges</span>,</span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
 </section></section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);

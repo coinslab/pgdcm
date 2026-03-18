@@ -18,9 +18,12 @@ edges_df <- data.frame(
 )
 
 # Need to save the files first to use the function
-write.csv(nodes, "test_nodes.csv", row.names=FALSE)
-write.csv(edges_df, "test_edges.csv", row.names=FALSE)
-g <- build_from_node_edge_files("test_nodes.csv", "test_edges.csv")
+tmp_nodes <- file.path(tempdir(), "test_nodes.csv")
+tmp_edges <- file.path(tempdir(), "test_edges.csv")
+
+write.csv(nodes, tmp_nodes, row.names=FALSE)
+write.csv(edges_df, tmp_edges, row.names=FALSE)
+g <- build_from_node_edge_files(tmp_nodes, tmp_edges)
 
 # Create mock data
 set.seed(42)
@@ -60,5 +63,5 @@ print(cfg_array$constants$lambda_prior_mean)
 
 print("--- Testing execution with manual priors ---")
 # Very short run just to test execution
-res <- run_pgdcm_auto(cfg_array, estimation_config = list(niter=20, nburnin=5, chains=2), prefix = "test_run")
+res <- run_pgdcm_auto(cfg_array, estimation_config = list(niter=20, nburnin=5, chains=2), prefix = file.path(tempdir(), "test_run"))
 print(res$WAIC)

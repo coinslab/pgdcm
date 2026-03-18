@@ -66,7 +66,9 @@ specifically tailored for Diagnostic Classification Models (DCMs).</p>
 <dd><p>Optional list of prior specifications. Can be provided as common pairs
 (e.g., <code>list(beta = c(mean, std), theta = c(mean, std), lambda = c(mean, std))</code>) or individual parameter arrays
 (e.g., <code>list(beta_mean = c(...), beta_std = c(...), theta_mean = matrix(...), ...)</code>).
-If <code>NULL</code>, default priors (mean 0, std 2) are generated. Passing a standard deviation of
+Semantic meanings: <code>beta</code> represents the root attributes (initial probabilities), <code>theta</code> represents
+structural attribute transitions (dependencies between skills), and <code>lambda</code> represents item parameters
+(slopes and intercepts). If <code>NULL</code>, default priors (mean 0, std 2) are generated. Passing a standard deviation of
 <code>0.0001</code> or similar effectively acts as a point distribution, enabling the use of <code>pgdcm</code>
 as a scoring-only model when parameter means are supplied from a previous calibration.</p></dd>
 
