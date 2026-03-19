@@ -16,9 +16,16 @@ navbar:
           href: articles/Beginner_Tutorial.html
         - text: Advanced Tutorial
           href: articles/Advanced_Tutorial.html
+        - text: "---"
+        - text: Theory
+        - text: "Mathematical Foundations of the PGDCM Model"
+          href: articles/Understanding_loglinearBN.html
 articles:
   - title: "Workflows"
     contents:
       - Model_Specification_Tutorial
       - Beginner_Tutorial
       - Advanced_Tutorial
+  - title: "Theory"
+    contents:
+      - Understanding_loglinearBN
