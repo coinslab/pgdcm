@@ -4,21 +4,26 @@
 # to Cytoscape visualization.
 # =============================================================================
 
-library(igraph)
 
 #' Push Graph to Cytoscape
 #'
 #' Sends the graph structure to a running Cytoscape instance for visualization.
 #'
-#' @param ... Arguments passed to \code{createNetworkFromDataFrames}.
+#' @param network An \code{igraph} object or a \code{data.frame} of nodes.
+#' @param ... Additional arguments passed to \code{createNetworkFromIgraph} or \code{createNetworkFromDataFrames}.
 #' @param base.url Character. The base URL for the Cytoscape REST API. Default is \code{"http://localhost:1234/v1"}.
 #'
 #' @return Invisible SUID of the created network in Cytoscape.
 #' @export
-push_to_cytoscape <- function(..., base.url = "http://localhost:1234/v1") {
+push_to_cytoscape <- function(network, ..., base.url = "http://localhost:1234/v1") {
     if (!requireNamespace("RCy3", quietly = TRUE)) stop("Please install RCy3 to use Cytoscape.")
-    library(RCy3)
-    suid <- createNetworkFromDataFrames(..., base.url = base.url)
+    
+    if (inherits(network, "igraph")) {
+        suid <- createNetworkFromIgraph(network, ..., base.url = base.url)
+    } else {
+        suid <- createNetworkFromDataFrames(network, ..., base.url = base.url)
+    }
+    
     setVisualStyle("Directed", base.url = base.url)
     invisible(suid)
 }
@@ -213,7 +218,6 @@ AdjMatrix2CytoNodes <- function(Adj, compute = "dina", title = "Scenario3_AdjMat
 #' @export
 pull_from_cytoscape <- function(network.title = NULL, base.url = "http://localhost:1234/v1") {
     if (!requireNamespace("RCy3", quietly = TRUE)) stop("Please install RCy3 to use Cytoscape.")
-    library(RCy3)
 
     # Check if network exists
     if (!is.null(network.title)) {

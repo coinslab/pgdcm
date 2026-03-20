@@ -22,13 +22,18 @@
 ^locallib$
 
 # Hidden Quarto Environment Locks
-^.*/\.quarto$
-^.*/\.quarto/.*$
-^\.quarto$
-
+^vignettes/\.quarto$
+^vignettes_locked/\.quarto$
+^\.Rproj\.user$
+^\.Rhistory$
+^DCM_.*\.pdf$
+^\.pkgdownignore$
+^\.github$
+^\.rcache$
 # Local Caches and Test Artifacts
 ^\.cache$
 ^\.deno$
 ^.*\.Rcheck$
 ^test_.*\.csv$
 ^Rplots\.pdf$
+^DCM_.*\.csv$

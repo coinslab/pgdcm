@@ -19,7 +19,8 @@ Imports:
     MCMCvis,
     ggplot2,
     gridExtra,
-    coda
+    coda,
+    methods
 Suggests:
     testthat (>= 3.0.0),
     quarto

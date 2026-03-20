@@ -4,10 +4,12 @@
 \alias{push_to_cytoscape}
 \title{Push Graph to Cytoscape}
 \usage{
-push_to_cytoscape(..., base.url = "http://localhost:1234/v1")
+push_to_cytoscape(network, ..., base.url = "http://localhost:1234/v1")
 }
 \arguments{
-\item{...}{Arguments passed to \code{createNetworkFromDataFrames}.}
+\item{network}{An \code{igraph} object or a \code{data.frame} of nodes.}
+
+\item{...}{Additional arguments passed to \code{createNetworkFromIgraph} or \code{createNetworkFromDataFrames}.}
 
 \item{base.url}{Character. The base URL for the Cytoscape REST API. Default is \code{"http://localhost:1234/v1"}.}
 }

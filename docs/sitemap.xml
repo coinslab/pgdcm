@@ -29,6 +29,7 @@
 <url><loc>/reference/build_from_adjacency.html</loc></url>
 <url><loc>/reference/build_from_node_edge_files.html</loc></url>
 <url><loc>/reference/build_from_q_matrix.html</loc></url>
+<url><loc>/reference/build_irt_graph.html</loc></url>
 <url><loc>/reference/build_model_config.html</loc></url>
 <url><loc>/reference/check_mcmc_convergence.html</loc></url>
 <url><loc>/reference/checklegaledges.html</loc></url>
@@ -58,6 +59,7 @@
 <url><loc>/reference/run_pgdcm_auto.html</loc></url>
 <url><loc>/reference/run_predictive_check.html</loc></url>
 <url><loc>/reference/validate_graph_and_data.html</loc></url>
+<url><loc>/reference/validate_graph_compute_nodes.html</loc></url>
 <url><loc>/reference/viewparentsandchildren.html</loc></url>
 <url><loc>/reference/writeigraph.html</loc></url>
 </urlset>

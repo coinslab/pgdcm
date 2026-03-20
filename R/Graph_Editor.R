@@ -3,9 +3,6 @@
 # Description: Interactive Graph Editor functions imported from collaborator.
 # =============================================================================
 
-library(igraph)
-source(file.path("R", "Graph_Helpers.R"))
-source(file.path("R", "Graph_Constructors.R"))
 
 igrapheditversion <- "IGRAPHEDIT: VERSION 2.4 (revised 3/1/2026)"
 
@@ -79,7 +76,6 @@ readigraph <- function(FilePrefix) {
     if (length(files_to_delete) > maxbackups) {
       print("Cleaning up backup directory...will delete following old versions of files in 10 seconds...")
       print(files_to_delete)
-      Sys.sleep(12)
       file.remove(files_to_delete)
     }
 

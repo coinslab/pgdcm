@@ -21,6 +21,8 @@
   Build Graph from Node and Edge Files
 - [`build_from_q_matrix()`](build_from_q_matrix.md) : Build Graph from a
   Q-Matrix
+- [`build_irt_graph()`](build_irt_graph.md) : Build Graph for an IRT
+  Model
 - [`build_model_config()`](build_model_config.md) : Build Model
   Configuration
 - [`check_mcmc_convergence()`](check_mcmc_convergence.md) : Check MCMC
@@ -69,6 +71,8 @@
   Check (Prior or Posterior)
 - [`validate_graph_and_data()`](validate_graph_and_data.md) : Validate
   Graph against Dataset
+- [`validate_graph_compute_nodes()`](validate_graph_compute_nodes.md) :
+  Validate Graph Compute Nodes
 - [`viewparentsandchildren()`](viewparentsandchildren.md) : View Parents
   and Children
 - [`writeigraph()`](writeigraph.md) : Write Igraph to Files

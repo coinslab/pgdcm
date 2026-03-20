@@ -3,7 +3,6 @@
 # Description: Native list/dataframe parsing to igraphs for various scenarios.
 # =============================================================================
 
-library(igraph)
 
 #' Build Graph from a Q-Matrix
 #'

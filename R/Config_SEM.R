@@ -3,7 +3,6 @@
 # Description: Explicit constants and initialization definitions for Structural Equation Models.
 # =============================================================================
 
-library(igraph)
 
 # Distinct Initialization for SEM
 #' Configure SEM Initialization and Constants

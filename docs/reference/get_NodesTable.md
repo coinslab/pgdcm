@@ -17,5 +17,5 @@ get_NodesTable(graph)
 
 ## Value
 
-A `data.frame` containing the nodes with columns `id`, `type`, and
-`compute`.
+A `data.frame` containing the nodes with columns `id`, `type`,
+`compute`, and optionally `description`.

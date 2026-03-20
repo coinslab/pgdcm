@@ -3,7 +3,6 @@
 # Description: Standardizing structural topologies and dataframe conversions.
 # =============================================================================
 
-library(igraph)
 
 #' Create a Standardized Node DataFrame
 #'

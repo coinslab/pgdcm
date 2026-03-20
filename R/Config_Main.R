@@ -3,7 +3,6 @@
 # Description: Public interface for generating unified nimble configurations.
 # =============================================================================
 
-library(igraph)
 
 # ── Validation ───────────────────────────────────────────────────────────────
 #' Validate Graph against Dataset
@@ -71,13 +70,13 @@ validate_graph_compute_nodes <- function(graph) {
     allowed_computes <- c("dina", "dino", "dinm", "zscore", "continuous", "percentile", "binary", "pattern")
     node_computes <- tolower(V(graph)$compute)
     node_names <- V(graph)$name
-    
+
     invalid_indices <- which(!(node_computes %in% allowed_computes))
-    
+
     if (length(invalid_indices) > 0) {
         invalid_nodes <- node_names[invalid_indices]
         invalid_types <- node_computes[invalid_indices]
-        
+
         error_msg <- paste0(
             "Validation Error: Unsupported compute node types detected.\n",
             "The following nodes have illegal compute configurations:\n",
@@ -86,7 +85,7 @@ validate_graph_compute_nodes <- function(graph) {
         )
         stop(error_msg, call. = FALSE)
     }
-    
+
     return(TRUE)
 }
 
@@ -132,6 +131,11 @@ build_model_config <- function(graph, dataframe, priors = NULL) {
     task_names <- V(graph)[tolower(V(graph)$type) == "task"]$name
     for (tname in task_names) {
         colid <- which(names(dataframe) == tname)
+        if (length(colid) == 0) {
+            stop(paste("Error building model data: Task node '", tname, "' not found in dataframe columns."), call. = FALSE)
+        } else if (length(colid) > 1) {
+            stop(paste("Error building model data: Task node '", tname, "' matches multiple dataframe columns."), call. = FALSE)
+        }
         dataidsortlist <- c(dataidsortlist, colid)
     }
 

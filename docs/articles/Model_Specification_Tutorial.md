@@ -197,6 +197,31 @@ Figure 4: Renaming Node
 3.  A line will attach to your cursor. Click on the **Target** node to
     complete the edge.
 
+### Editing Large Networks (Hide/Show Sub-networks)
+
+When working with large, complex networks, the Cytoscape canvas can
+become a tangled “hairball.” If you need to focus on a specific
+sub-network (e.g., a single attribute and its connected tasks), you can
+temporarily hide the rest of the network without creating a separate
+Cytoscape network object. This guarantees all structural edits (like
+adding edges) naturally remain in your primary Evidence/Competency
+model.
+
+1.  **Select target nodes:** Highlight the nodes you want to focus on.
+    (*Tip:* Select a node, then use **Select \\ Nodes \\ First Neighbors
+    of Selected Nodes \\ Undirected** or `Cmd+6`/`Ctrl+6` to grab its
+    connections).
+2.  **Invert selection:** Go to **Select \\ Nodes \\ Invert Node
+    Selection** and **Select \\ Edges \\ Invert Edge Selection**.
+3.  **Hide the rest:** Right-click the empty canvas space and choose
+    **Hide Selected Nodes and Edges** (or go to **View \\ Hide Selected
+    Nodes and Edges**).
+4.  **Make your edits:** You can now simply adjust the layout, move
+    nodes, add edges, or edit attributes on this isolated sub-network.
+5.  **Zoom out back to the full network:** When finished, choose **View
+    \\ Show All Nodes and Edges**. All your new edits and coordinates
+    will neatly integrate back into the main network!
+
 ### Connecting R to Cytoscape
 
 Before passing any data, we need to ensure R can communicate with your

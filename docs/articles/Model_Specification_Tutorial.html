@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Competency &amp; Evidence Model Specification • pgdcm</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -13,6 +18,7 @@
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="Model_Specification_Tutorial_files/libs/quarto-html/popper.min.js"></script><script src="Model_Specification_Tutorial_files/libs/quarto-html/tippy.umd.min.js"></script><link href="Model_Specification_Tutorial_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="Model_Specification_Tutorial_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Competency &amp; Evidence Model Specification">
+<meta property="og:image" content="/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -57,8 +63,7 @@
 </nav><div class="container template-quarto">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Competency &amp; Evidence Model Specification</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Competency &amp; Evidence Model Specification</h1>
 
 
 
@@ -290,6 +295,20 @@ Figure 5: Defining node type and compute
 <li>Right-click on the <strong>Source</strong> node (the node the arrow should point <em>away</em> from).</li>
 <li>Select <strong>Add &gt; Edge</strong>.</li>
 <li>A line will attach to your cursor. Click on the <strong>Target</strong> node to complete the edge.</li>
+</ol></section><section class="level2"><h3 id="editing-large-networks-hideshow-sub-networks">Editing Large Networks (Hide/Show Sub-networks)<a class="anchor" aria-label="anchor" href="#editing-large-networks-hideshow-sub-networks"></a>
+</h3>
+<p>When working with large, complex networks, the Cytoscape canvas can become a tangled “hairball.” If you need to focus on a specific sub-network (e.g., a single attribute and its connected tasks), you can temporarily hide the rest of the network without creating a separate Cytoscape network object. This guarantees all structural edits (like adding edges) naturally remain in your primary Evidence/Competency model.</p>
+<ol type="1">
+<li>
+<strong>Select target nodes:</strong> Highlight the nodes you want to focus on. (<em>Tip:</em> Select a node, then use <strong>Select \&gt; Nodes \&gt; First Neighbors of Selected Nodes \&gt; Undirected</strong> or <code>Cmd+6</code>/<code>Ctrl+6</code> to grab its connections).</li>
+<li>
+<strong>Invert selection:</strong> Go to <strong>Select \&gt; Nodes \&gt; Invert Node Selection</strong> and <strong>Select \&gt; Edges \&gt; Invert Edge Selection</strong>.</li>
+<li>
+<strong>Hide the rest:</strong> Right-click the empty canvas space and choose <strong>Hide Selected Nodes and Edges</strong> (or go to <strong>View \&gt; Hide Selected Nodes and Edges</strong>).</li>
+<li>
+<strong>Make your edits:</strong> You can now simply adjust the layout, move nodes, add edges, or edit attributes on this isolated sub-network.</li>
+<li>
+<strong>Zoom out back to the full network:</strong> When finished, choose <strong>View \&gt; Show All Nodes and Edges</strong>. All your new edits and coordinates will neatly integrate back into the main network!</li>
 </ol></section><section class="level2"><h3 id="connecting-r-to-cytoscape">Connecting R to Cytoscape<a class="anchor" aria-label="anchor" href="#connecting-r-to-cytoscape"></a>
 </h3>
 <p>Before passing any data, we need to ensure R can communicate with your active Cytoscape session. We do this by loading the <code>RCy3</code> package and “pinging” the default Cytoscape port.</p>

@@ -3,7 +3,6 @@
 # Description: Structural parsers that translate an igraph into numeric constraints.
 # =============================================================================
 
-library(igraph)
 
 # ── Information Extraction ───────────────────────────────────────────────────
 #' Extract Graph Information

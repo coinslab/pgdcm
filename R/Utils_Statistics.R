@@ -2,7 +2,6 @@
 # Utils_Statistics.R
 # Description: General Utility Functions unified for PGDCM and SEM architecture
 # =============================================================================
-library(coda)
 
 # ── compute_M2 ───────────────────────────────────────────────────────────────
 #' Compute Second-Order Moment Matrix
@@ -148,9 +147,9 @@ check_mcmc_convergence <- function(chainlist, blocksize = 10, burninperiod = 100
 #'
 #' @return A \code{data.frame} combining the original summary with \code{Readable_Name} and \code{Type} columns.
 #' @export
-map_pgdcm_parameters <- function(summary_mx, config_obj, student_names=NULL) {
+map_pgdcm_parameters <- function(summary_mx, config_obj, student_names = NULL) {
     # 1. Provide Generic IDs if none exist.
-    if(is.null(student_names)) student_names <- 1:config_obj$constants$nrparticipants
+    if (is.null(student_names)) student_names <- 1:config_obj$constants$nrparticipants
 
     raw_names <- rownames(summary_mx)
     clean_names <- character(length(raw_names))
@@ -162,16 +161,16 @@ map_pgdcm_parameters <- function(summary_mx, config_obj, student_names=NULL) {
     attr_nodes <- igraph::V(g)[tolower(igraph::V(g)$type) == "attribute"]$name
 
     # 3. Iterate through parameter trace names
-    for(i in seq_along(raw_names)) {
+    for (i in seq_along(raw_names)) {
         rn <- raw_names[i]
 
         # --- A. Lambda (Items/Tasks) ---
-        if(grepl("^lambda\\[", rn)) {
+        if (grepl("^lambda\\[", rn)) {
             matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
             j <- as.numeric(matches[1])
             col <- as.numeric(matches[2])
 
-            if(j <= length(task_nodes)) {
+            if (j <= length(task_nodes)) {
                 item_name <- task_nodes[j]
                 param_type <- ifelse(col == 1, "Slope", "Intercept")
 
@@ -183,28 +182,28 @@ map_pgdcm_parameters <- function(summary_mx, config_obj, student_names=NULL) {
             }
         }
         # --- B. Theta (Attribute Dependencies/Non-Roots) ---
-        else if(grepl("^theta\\[", rn)) {
+        else if (grepl("^theta\\[", rn)) {
             matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
             k <- as.numeric(matches[1])
             col <- as.numeric(matches[2])
 
-            if(k <= length(attr_nodes)) {
+            if (k <= length(attr_nodes)) {
                 attr_name <- attr_nodes[k]
                 param_type <- ifelse(col == 1, "Dependency on Parent", "Intercept")
 
                 clean_names[i] <- paste0(attr_name, " - ", param_type)
                 types[i] <- "Attribute Structure"
             } else {
-                 clean_names[i] <- rn
-                 types[i] <- "Index Error"
+                clean_names[i] <- rn
+                types[i] <- "Index Error"
             }
         }
         # --- C. Beta Root (Root Attributes) ---
-        else if(grepl("^beta_root\\[", rn)) {
+        else if (grepl("^beta_root\\[", rn)) {
             matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
             k <- as.numeric(matches[1])
 
-            if(k <= length(attr_nodes)) {
+            if (k <= length(attr_nodes)) {
                 attr_name <- attr_nodes[k]
 
                 clean_names[i] <- paste0(attr_name, " - Prior/Intercept")
@@ -214,21 +213,20 @@ map_pgdcm_parameters <- function(summary_mx, config_obj, student_names=NULL) {
             }
         }
         # --- D. Attribute Nodes (Students' true mastery traits) ---
-        else if(grepl("^attributenodes\\[", rn)) {
-             matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
-             s_idx <- as.numeric(matches[1]) # Student Row
-             k <- as.numeric(matches[2])     # Attribute Column
+        else if (grepl("^attributenodes\\[", rn)) {
+            matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
+            s_idx <- as.numeric(matches[1]) # Student Row
+            k <- as.numeric(matches[2]) # Attribute Column
 
-             s_id <- "Unknown"
-             if(s_idx <= length(student_names)) s_id <- student_names[s_idx]
+            s_id <- "Unknown"
+            if (s_idx <= length(student_names)) s_id <- student_names[s_idx]
 
-             attr_name <- "Unknown"
-             if(k <= length(attr_nodes)) attr_name <- attr_nodes[k]
+            attr_name <- "Unknown"
+            if (k <= length(attr_nodes)) attr_name <- attr_nodes[k]
 
-             clean_names[i] <- paste0(s_id, " - ", attr_name)
-             types[i] <- "Student Mastery"
-        }
-        else {
+            clean_names[i] <- paste0(s_id, " - ", attr_name)
+            types[i] <- "Student Mastery"
+        } else {
             clean_names[i] <- rn
             types[i] <- "Other"
         }
@@ -256,8 +254,8 @@ map_pgdcm_parameters <- function(summary_mx, config_obj, student_names=NULL) {
 #'
 #' @return A list containing \code{skill_profiles} and \code{item_parameters} dataframes, and optionally \code{group_patterns}.
 #' @export
-generate_summary_tables <- function(mapped_results, config_obj, student_names=NULL, threshold=0.5, return_groups=FALSE) {
-    if(is.null(student_names)) student_names <- 1:config_obj$constants$nrparticipants
+generate_summary_tables <- function(mapped_results, config_obj, student_names = NULL, threshold = 0.5, return_groups = FALSE) {
+    if (is.null(student_names)) student_names <- 1:config_obj$constants$nrparticipants
 
     g <- config_obj$graph
     task_nodes <- igraph::V(g)[tolower(igraph::V(g)$type) == "task"]$name
@@ -274,12 +272,12 @@ generate_summary_tables <- function(mapped_results, config_obj, student_names=NU
         for (k in seq_along(attr_nodes)) {
             rn <- paste0("^attributenodes\\[", i, ", ?", k, "\\]$")
             idx <- grep(rn, student_mastery$Raw_Param)
-            if(length(idx) > 0) {
+            if (length(idx) > 0) {
                 skill_profiles[i, k] <- student_mastery$mean[idx[1]]
             }
         }
     }
-    
+
     # 2. Item Parameters
     item_params <- mapped_results[mapped_results$Type == "Item Parameter", ]
     out_items <- data.frame(
@@ -301,7 +299,7 @@ generate_summary_tables <- function(mapped_results, config_obj, student_names=NU
             out_items$difficulty_SD[j] <- item_params$sd[diff_idx[1]]
             out_items$difficulty_Rhat[j] <- item_params$Rhat[diff_idx[1]]
         }
-        
+
         # Discrimination (Slope, col=1)
         disc_idx <- grep(paste0("^lambda\\[", j, ", ?1\\]$"), item_params$Raw_Param)
         if (length(disc_idx) > 0) {
@@ -336,49 +334,48 @@ generate_summary_tables <- function(mapped_results, config_obj, student_names=NU
 #' @return A list of all possible $2^K$ groups, containing group \code{label}
 #'   (the binary vector pattern) and \code{members} (row indices or names of participants).
 #' @export
-groupattributepatterns <- function(attributenodes, threshold = 0.5){
-  
-  nrparticipants <- nrow(attributenodes)
-  nrattributes <- ncol(attributenodes)
-  
-  # Compute All Possible Binary Attribute Patterns
-  nrgroups <- 2^(nrattributes)
-  binaryoptions <- replicate(nrattributes, 0:1, simplify = FALSE)
-  attributevectorgrid <- expand.grid(binaryoptions)
-  possibleattributepatterns <- as.matrix(attributevectorgrid)
-  
-  # Use participant names if they exist, otherwise use indices
-  participant_labels <- rownames(attributenodes)
-  if (is.null(participant_labels)) {
-      participant_labels <- 1:nrparticipants
-  }
-  
-  if (!is.null(colnames(attributenodes))) {
-      colnames(possibleattributepatterns) <- colnames(attributenodes)
-  }
-  
-  # Find rows in possibleattributepatterns which are present in attributenodes
-  groupmembers <- list()
-  classifiedattnodes <- matrix(as.numeric(as.matrix(attributenodes) > threshold), ncol = nrattributes, byrow = FALSE)
-  
-  for (groupid in 1:nrgroups) {
-    groupval <- list()
-    participantids <- c()
-    
-    for (i in 1:nrparticipants){
-      matchedi <- identical(as.numeric(classifiedattnodes[i,]), as.numeric(possibleattributepatterns[groupid,]))
-      if (matchedi) {
-        participantids <- c(participantids, participant_labels[i])
-      }
+groupattributepatterns <- function(attributenodes, threshold = 0.5) {
+    nrparticipants <- nrow(attributenodes)
+    nrattributes <- ncol(attributenodes)
+
+    # Compute All Possible Binary Attribute Patterns
+    nrgroups <- 2^(nrattributes)
+    binaryoptions <- replicate(nrattributes, 0:1, simplify = FALSE)
+    attributevectorgrid <- expand.grid(binaryoptions)
+    possibleattributepatterns <- as.matrix(attributevectorgrid)
+
+    # Use participant names if they exist, otherwise use indices
+    participant_labels <- rownames(attributenodes)
+    if (is.null(participant_labels)) {
+        participant_labels <- 1:nrparticipants
     }
-    
-    groupval$members <- participantids
-    groupval$label <- possibleattributepatterns[groupid,]
-    groupmembers[[paste(possibleattributepatterns[groupid,], collapse="")]] <- groupval
-  }
-  
-  # Prepare grouping output
-  return(groupmembers)
+
+    if (!is.null(colnames(attributenodes))) {
+        colnames(possibleattributepatterns) <- colnames(attributenodes)
+    }
+
+    # Find rows in possibleattributepatterns which are present in attributenodes
+    groupmembers <- list()
+    classifiedattnodes <- matrix(as.numeric(as.matrix(attributenodes) > threshold), ncol = nrattributes, byrow = FALSE)
+
+    for (groupid in 1:nrgroups) {
+        groupval <- list()
+        participantids <- c()
+
+        for (i in 1:nrparticipants) {
+            matchedi <- identical(as.numeric(classifiedattnodes[i, ]), as.numeric(possibleattributepatterns[groupid, ]))
+            if (matchedi) {
+                participantids <- c(participantids, participant_labels[i])
+            }
+        }
+
+        groupval$members <- participantids
+        groupval$label <- possibleattributepatterns[groupid, ]
+        groupmembers[[paste(possibleattributepatterns[groupid, ], collapse = "")]] <- groupval
+    }
+
+    # Prepare grouping output
+    return(groupmembers)
 }
 
 # ── assess_classification_accuracy ───────────────────────────────────────────
@@ -400,88 +397,87 @@ groupattributepatterns <- function(attributenodes, threshold = 0.5){
 #'   \code{profile_accuracy} (Exact match rate across all mapped skills).
 #' @export
 assess_classification_accuracy <- function(skill_profiles, true_data, mapping_list = NULL, threshold = 0.5, random_inspect = 10) {
-    
-    if(is.null(mapping_list) || length(mapping_list) == 0) {
+    if (is.null(mapping_list) || length(mapping_list) == 0) {
         stop("Must provide 'mapping_list' to link Model Attribute Names to True Column Names. e.g. list(Addition='true_add')")
     }
 
     # 1. Binarize Estimates
     prob_mx <- as.matrix(skill_profiles)
     est_class <- (prob_mx > threshold) * 1
-    
+
     true_df <- as.data.frame(true_data)
-    
+
     # 2. Align Rows (IDs)
     mod_ids <- rownames(prob_mx)
-    true_ids <- if("id" %in% colnames(true_df)) as.character(true_df$id) else rownames(true_df)
-    
+    true_ids <- if ("id" %in% colnames(true_df)) as.character(true_df$id) else rownames(true_df)
+
     common_ids <- intersect(mod_ids, true_ids)
-    
-    if(length(common_ids) == 0) {
+
+    if (length(common_ids) == 0) {
         stop("No matching IDs between Model (rownames) and True Data! Cannot assess classification accuracy safely.")
     } else {
         message(paste("Matched", length(common_ids), "students by ID for accuracy assessment."))
         mod_idx <- match(common_ids, mod_ids)
         true_idx <- match(common_ids, true_ids)
     }
-    
+
     n_common <- length(common_ids)
-    
+
     # Storage for metrics
     skill_metrics <- data.frame(Skill = names(mapping_list), Accuracy = NA, Kappa = NA, stringsAsFactors = FALSE)
-    
+
     message("\n--- Classification Accuracy ---")
-    
-    for(i in seq_along(mapping_list)) {
+
+    for (i in seq_along(mapping_list)) {
         mod_name <- names(mapping_list)[i]
         true_name <- mapping_list[[i]]
-        
-        if(!mod_name %in% colnames(prob_mx)) stop(paste("Model attribute", mod_name, "not found in skill_profiles."))
-        if(!true_name %in% colnames(true_df)) stop(paste("Truth attribute", true_name, "not found in true_data."))
-        
+
+        if (!mod_name %in% colnames(prob_mx)) stop(paste("Model attribute", mod_name, "not found in skill_profiles."))
+        if (!true_name %in% colnames(true_df)) stop(paste("Truth attribute", true_name, "not found in true_data."))
+
         y_est <- est_class[mod_idx, mod_name]
         y_true <- true_df[true_idx, true_name]
-        
+
         # Accuracy
         acc <- mean(y_est == y_true, na.rm = TRUE)
-        
+
         # Cohen's Kappa
-        t_mat <- table(factor(y_est, levels=0:1), factor(y_true, levels=0:1))
+        t_mat <- table(factor(y_est, levels = 0:1), factor(y_true, levels = 0:1))
         po <- sum(diag(t_mat)) / sum(t_mat)
-        pe <- (sum(t_mat[1,]) * sum(t_mat[,1]) + sum(t_mat[2,]) * sum(t_mat[,2])) / sum(t_mat)^2
+        pe <- (sum(t_mat[1, ]) * sum(t_mat[, 1]) + sum(t_mat[2, ]) * sum(t_mat[, 2])) / sum(t_mat)^2
         kappa <- ifelse(pe == 1, 0, (po - pe) / (1 - pe))
-        
+
         skill_metrics$Accuracy[i] <- round(acc, 3)
         skill_metrics$Kappa[i] <- round(kappa, 3)
     }
-    
+
     print(skill_metrics)
-    
+
     # 4. Profile Accuracy (Exact Vector Match)
     mod_cols <- names(mapping_list)
-    true_cols <- unlist(mapping_list, use.names=FALSE)
-    
-    profiles_est <- apply(est_class[mod_idx, mod_cols, drop=FALSE], 1, paste, collapse="")
-    profiles_true <- apply(true_df[true_idx, true_cols, drop=FALSE], 1, paste, collapse="")
-    
+    true_cols <- unlist(mapping_list, use.names = FALSE)
+
+    profiles_est <- apply(est_class[mod_idx, mod_cols, drop = FALSE], 1, paste, collapse = "")
+    profiles_true <- apply(true_df[true_idx, true_cols, drop = FALSE], 1, paste, collapse = "")
+
     prof_acc <- mean(profiles_est == profiles_true, na.rm = TRUE)
     message(paste("Profile Correct Classification Rate:", round(prof_acc, 3)))
 
     # 5. Random Inspection
-    if(random_inspect > 0) {
+    if (random_inspect > 0) {
         n_inspect <- min(random_inspect, n_common)
         message(sprintf("\n--- Random Comparison of %d Students ---", n_inspect))
-        
+
         set.seed(123)
         sample_locs <- sample(1:n_common, n_inspect)
-        
-        for(loc in sample_locs) {
+
+        for (loc in sample_locs) {
             m_i <- mod_idx[loc]
             t_i <- true_idx[loc]
             tid <- common_ids[loc]
-            
+
             message(paste("\nStudent ID:", tid))
-            
+
             comp_df <- data.frame(
                 Skill = names(mapping_list),
                 Est_Prob = round(prob_mx[m_i, names(mapping_list)], 3),
@@ -493,6 +489,6 @@ assess_classification_accuracy <- function(skill_profiles, true_data, mapping_li
         }
         message("------------------------------------------------")
     }
-    
+
     return(list(metrics = skill_metrics, profile_accuracy = prof_acc))
 }
