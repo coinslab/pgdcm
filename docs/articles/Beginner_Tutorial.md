@@ -62,6 +62,19 @@ X <- dtmr_data
 Q <- dtmr_qmatrix
 ```
 
+It is always good practice to verify the dimensions and inspect a few
+rows to make sure everything loaded correctly:
+
+``` r
+# X should be N (students) x J (items)
+dim(X)
+head(X[, 1:6]) # first 6 columns
+
+# Q should be J (items) x K (skills)
+dim(Q)
+head(Q)
+```
+
 The `pgdcm` package mathematically treats modern psychometric models as
 probabilistic graphical models (specifically, Directed Acyclic Graphs or
 Bayesian Networks). Because of this, we must first convert our standard
@@ -142,9 +155,9 @@ saveRDS(results, "Beginner_Tutorial_Results.rds")
 > code them. The function configures the MCMC algorithmic engine with
 > the following default parameters:
 >
-> - **`niter = 2000`**: The total number of MCMC samples to draw per
+> - **`niter = 1000`**: The total number of MCMC samples to draw per
 >   chain.
-> - **`nburnin = 500`**: The number of initial samples to discard. MCMC
+> - **`nburnin = 100`**: The number of initial samples to discard. MCMC
 >   algorithms take time to traverse towards the high-probability
 >   region; discarding early “burn-in” samples ensures we only analyze
 >   parameters after they have reached a stable state.
@@ -168,52 +181,142 @@ saveRDS(results, "Beginner_Tutorial_Results.rds")
 >   accurately captured the underlying psychometric properties, the
 >   simulated data should closely resemble the real data.
 
-## 4. Interpreting the Bayesian Output
+## 4. Interpreting the Results
 
-Unlike standard frequentist statistics which often output a single “best
-guess” point estimate, Bayesian inference through MCMC outputs
-**thousands of plausible values drawn from the joint posterior
-distribution**. This fundamental difference allows us to naturally
-extract comprehensive metrics like the **posterior mean** and **credible
-intervals** to formally quantify our uncertainty.
+The `results` object returned by
+[`run_pgdcm_auto()`](../reference/run_pgdcm_auto.md) includes several
+pre-computed, beginner-friendly outputs. Let’s start with the two most
+useful: **skill profiles** and **item parameters**.
 
-To easily read and interpret these distributions, we will load our
-cached `.rds` file and use the `MCMCvis` package.
+### Who Mastered What? (Skill Profiles)
+
+The `skill_profiles` table is an $N \times K$ matrix showing the
+estimated probability of mastery for each student on each skill. Values
+close to 1 indicate likely mastery; values close to 0 indicate likely
+non-mastery.
 
 ``` r
-# Load our pre-cached exact results from the pipeline above
-results <- readRDS("Beginner_Tutorial_Results.rds")
+# Each row = one student, each column = one skill
+head(results$skill_profiles)
+```
+
+           referent_units partitioning_iterating appropriateness
+    000809   9.999444e-01              0.9986111      0.79872222
+    000994   2.627778e-02              0.9671111      0.88455556
+    002427   9.333333e-03              0.9618889      0.88227778
+    003128   9.999444e-01              0.9923333      0.74172222
+    006198   5.555556e-05              0.9937222      0.01722222
+    008702   5.328333e-01              0.9921667      0.97222222
+           multiplicative_comparison
+    000809                 0.9997778
+    000994                 0.9883889
+    002427                 0.9872222
+    003128                 0.9995556
+    006198                 0.9758333
+    008702                 0.4034444
+
+### How Did the Items Perform? (Item Parameters)
+
+The `item_parameters` table provides a clean summary of how each test
+item functioned, with human-readable labels instead of raw parameter
+indices:
+
+``` r
+head(results$item_parameters)
+```
+
+      item difficulty_mean difficulty_SD difficulty_Rhat discrimination_mean
+    1    1       1.4077711     0.1535871            1.02           1.7290810
+    2    2      -0.5853984     0.1286397            1.01           1.3389519
+    3    3       2.9015853     0.2920419            1.01           2.5052113
+    4    4       1.5771029     0.1491429            1.01           0.9337544
+    5    5       2.1237524     0.1878747            1.01           1.7335323
+    6    6       4.0207219     0.4005289            1.02           1.9544232
+      discrimination_SD discrimination_Rhat
+    1         0.1923772                1.03
+    2         0.2152481                1.05
+    3         0.3164820                1.01
+    4         0.1911755                1.01
+    5         0.2215849                1.01
+    6         0.4345682                1.02
+
+Each item has two key properties:
+
+- **Discrimination (Slope)**: How effectively the item distinguishes
+  between students who possess the required skills and those who do not.
+  Higher values mean better differentiation.
+- **Difficulty (Intercept)**: The baseline difficulty of the item.
+  Higher values mean the question is harder overall.
+
+### Model Fit (WAIC)
+
+The Watanabe-Akaike Information Criterion (WAIC) provides a single
+number summarizing how well the model fits the data. Lower values
+indicate better fit. This is especially useful if you want to compare
+models (e.g., DINA vs. DINO) later on.
+
+``` r
+results$WAIC
+```
+
+    [1] 29474.06
+
+### Grouping Students by Mastery Patterns (Optional)
+
+If you want to classify students into discrete latent classes based on
+their mastery profiles, you can pass `return_groups = TRUE` to
+[`run_pgdcm_auto()`](../reference/run_pgdcm_auto.md):
+
+``` r
+results <- run_pgdcm_auto(
+    config = config,
+    prefix = "DINA_DTMR",
+    return_groups = TRUE
+)
+```
+
+This adds a `group_patterns` field to the results, which organizes
+students into exhaustive mastery pattern groups (e.g., all students who
+mastered skills 1 and 3 but not 2 and 4). By default, a probability
+threshold of 0.5 is used to classify mastery — you can adjust this with
+the `threshold` argument.
+
+> **Warning**
+>
+> The number of possible mastery patterns grows as $2^{K}$ where $K$ is
+> the number of skills. For models with many attributes, this can
+> produce a very large number of groups.
+
+> **Auto-Saved Output Files**
+>
+> [`run_pgdcm_auto()`](../reference/run_pgdcm_auto.md) automatically
+> saves several CSV files to your working directory using the `prefix`
+> you specified:
+>
+> - `DINA_DTMR_skill_profiles.csv` — Mastery probabilities for every
+>   student.
+> - `DINA_DTMR_item_parameters.csv` — Item discrimination and difficulty
+>   estimates.
+> - `DINA_DTMR_mapped_parameters.csv` — Full parameter summary with
+>   human-readable names.
+>
+> You can open these directly in Excel or any spreadsheet tool for
+> further analysis.
+
+### Going Deeper: Raw MCMC Diagnostics
+
+The outputs above are derived from the underlying Bayesian posterior
+distribution. If you want to inspect the raw MCMC chains directly — for
+example, to check convergence or visualize credible intervals — the
+`MCMCvis` package is a great tool for this.
+
+``` r
 library(MCMCvis)
 ```
 
-### Numerical Analytics
-
-By passing our raw MCMC `samples` into the
-[`MCMCsummary()`](https://rdrr.io/pkg/MCMCvis/man/MCMCsummary.html)
-function, we can collapse the complex distributions into a clean summary
-table that provides point estimates and measures of numerical
-uncertainty.
-
-The `lambda` parameters in our model capture the properties of the test
-items themselves. For each test item $j$:
-
-- **`lambda[j, 1]` (Discrimination / Slope)**: Represents how
-  effectively the item distinguishes between participants who possess
-  the required skills and those who do not. A higher value indicates the
-  item strongly differentiates between mastery states.
-- **`lambda[j, 2]` (Difficulty / Intercept)**: Represents the baseline
-  difficulty of the item. A higher value typically means the question is
-  inherently harder to answer correctly overall.
-
-*(There are also other parameter families estimated in the graphical
-model that capture the **attribute network** itself. For example,
-`beta_root` parameters represent the baseline prevalence of foundational
-“root” skills in the population. The `theta` parameters function
-similarly to `lambda`, but are applied to higher-level skills, carrying
-their own dependencies and baseline difficulties.)*
-
-We can extract a numerical summary matrix specifically for our `lambda`
-parameters to inspect how the test items functioned:
+The `lambda` parameters capture the raw item properties. For each test
+item $j$, `lambda[j, 1]` is the discrimination (slope) and
+`lambda[j, 2]` is the difficulty (intercept).
 
 ``` r
 # Retrieve a numerical summary table specifically for the 'lambda' item parameters
@@ -222,44 +325,25 @@ head(res) # only a few rows from res are displayed here.
 ```
 
                       mean        sd      2.5%       50%    97.5% Rhat n.eff
-    lambda[1, 1] 1.7512409 0.2142891 1.3824153 1.7402970 2.247491 1.43    68
-    lambda[2, 1] 1.3103394 0.2119471 0.8939294 1.3198143 1.698902 1.02   151
-    lambda[3, 1] 2.4237264 0.2828668 1.9031875 2.4225588 2.967375 1.08    51
-    lambda[4, 1] 0.9529481 0.1925619 0.5754743 0.9500665 1.327190 1.01   107
-    lambda[5, 1] 1.7350918 0.2272166 1.3164859 1.7212369 2.187425 1.03    71
-    lambda[6, 1] 1.9637383 0.4919925 1.1386391 1.9218624 3.056010 1.14    39
+    lambda[1, 1] 1.7290810 0.1923772 1.3537706 1.7274241 2.109067 1.03   512
+    lambda[2, 1] 1.3389519 0.2152481 0.9292727 1.3358068 1.767134 1.05   934
+    lambda[3, 1] 2.5052113 0.3164820 1.9328485 2.4877870 3.193183 1.01   179
+    lambda[4, 1] 0.9337544 0.1911755 0.5769390 0.9329804 1.328390 1.01   572
+    lambda[5, 1] 1.7335323 0.2215849 1.3186263 1.7288180 2.188279 1.01   369
+    lambda[6, 1] 1.9544232 0.4345682 1.1549475 1.9382027 2.856814 1.02   239
 
 **How to Read the Table:**
 
-- **`mean`**: The expected value or best estimate for the parameter.
-  This conceptually corresponds to the traditional point estimate you
-  would obtain in a frequentist approach.
-- **`2.5%` and `97.5%`**: These bounds define the **95% Credible
-  Interval**. In Bayesian inference, this means there is a 95%
-  probability that the true underlying parameter value falls within this
-  specific range.
-- **`Rhat`**: A convergence diagnostic (Gelman-Rubin statistic). If
-  `Rhat` is greater than 1.1, it generally indicates the MCMC chains
-  have not yet converged, and you may need to substantially increase the
-  `niter` (number of iterations) in your estimation step. Sometimes
-  `Rhat` values remain greater than 1.1 due to an underlying model
-  misspecification. This issue can typically be identified if you
-  continue to increase the number of iterations and observe no
-  improvement in the convergence diagnostics.
+- **`mean`**: The expected value (best estimate) for the parameter.
+- **`2.5%` and `97.5%`**: The **95% Credible Interval** — there is a 95%
+  probability the true value falls within this range.
+- **`Rhat`**: A convergence diagnostic (Gelman-Rubin statistic). Values
+  greater than 1.1 suggest the chains have not yet converged and you may
+  need to increase `niter`.
 
-### Visual Analytics
-
-Reviewing hundreds of rows in a table can be exhausting. MCMC
-visualization functions like
+MCMC visualization functions like
 [`MCMCplot()`](https://rdrr.io/pkg/MCMCvis/man/MCMCplot.html) can
-transform these parameter boundaries into intuitive visual “Caterpillar
-Plots”.
-
-*Note: Because we estimated 54 item parameters for this dataset,
-plotting them all simultaneously can vertically cramp the screen.
-Standard R plotting packages (like `MCMCvis`) may auto-truncate the
-Y-axis labels to fit the visual constraints, occasionally dropping some
-text labels to save space.*
+transform these into intuitive “Caterpillar Plots”:
 
 ``` r
 # Visually plot the 'lambda' parameter distributions
@@ -268,18 +352,16 @@ MCMCplot(results$samples, params = "lambda")
 
 ![](Beginner_Tutorial_files/figure-html/render-plot-1.png)
 
-**How to Interpret the Visuals:** Each dot represents the mean estimate
-for a specific parameter. The horizontal lines stretching outwards
-illustrate the 95% Credible Interval.
-
-- A wider line indicates high uncertainty (a broader credible interval)
-  for that parameter.
-- A shorter, narrower line indicates the model is highly confident in
-  its estimate (a tighter credible interval) for that parameter.
+**How to Interpret the Visuals:** Each dot represents the mean estimate.
+The horizontal lines show the 95% Credible Interval — wider lines mean
+more uncertainty, narrower lines mean higher confidence.
 
 > **Next Steps**
 >
-> Ready to dive deeper? Check out the [Advanced
-> Tutorial](https://coinslab.github.io/pgdcm/articles/Advanced_Tutorial.html)
-> to learn about customizing models, diagnosing chains, and configuring
-> the PGDCM engine natively.
+> - **Build your own models?** The [Model Specification
+>   Tutorial](https://coinslab.github.io/pgdcm/articles/Model_Specification_Tutorial.html)
+>   walks you through constructing custom competency and evidence models
+>   using Cytoscape.
+> - **Fine-tune the engine?** The [Advanced
+>   Tutorial](https://coinslab.github.io/pgdcm/articles/Advanced_Tutorial.html)
+>   covers customizing priors, MCMC sampling, and diagnostic workflows.

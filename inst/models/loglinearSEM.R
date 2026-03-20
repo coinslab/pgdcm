@@ -1,3 +1,15 @@
+calc_sem_input <- nimbleFunction(
+    run = function(beta_vec = double(1), cdm_vec = double(1), attr_vec = double(1), num_elements = double(0)) {
+        out <- 0.0
+        n <- num_elements
+        for(p in 1:n) {
+            out <- out + beta_vec[p] * cdm_vec[p] * attr_vec[p]
+        }
+        returnType(double(0))
+        return(out)
+    }
+)
+
 loglinearSEM <- nimbleCode({
     # --- Priors ---
 
@@ -36,7 +48,7 @@ loglinearSEM <- nimbleCode({
         if (attdim >= 2) {
             for (k in 2:attdim) {
                 # Depends on 1:(k-1)
-                linear_pred_att[i, k] <- alpha[k] + sum(beta[k, 1:(k - 1)] * CDMmatrix[k, 1:(k - 1)] * attributenodes[i, 1:(k - 1)])
+                linear_pred_att[i, k] <- alpha[k] + calc_sem_input(beta[k, 1:(k - 1)], CDMmatrix[k, 1:(k - 1)], attributenodes[i, 1:(k - 1)], k - 1)
 
                 if (SEMdoZscoreAttribute) {
                     attributenodes[i, k] ~ dnorm(mean = linear_pred_att[i, k], sd = 1)
@@ -56,7 +68,7 @@ loglinearSEM <- nimbleCode({
 
         # 1. Calc Input from Attributes (All tasks)
         for (j in 1:nrtasknodes) {
-            input_from_atts[i, j] <- sum(beta[attdim + j, 1:attdim] * CDMmatrix[attdim + j, 1:attdim] * attributenodes[i, 1:attdim])
+            input_from_atts[i, j] <- calc_sem_input(beta[attdim + j, 1:CDMattnodesmax], CDMmatrix[attdim + j, 1:CDMattnodesmax], attributenodes[i, 1:CDMattnodesmax], attdim)
         }
 
         # 2. Calc Input from Tasks

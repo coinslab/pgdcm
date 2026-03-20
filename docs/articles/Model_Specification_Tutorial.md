@@ -1,23 +1,77 @@
-# Competency and Evidence Knowledge Model Specification/ Building
+# Competency & Evidence Model Specification
 
 ## Introduction
 
-This tutorial walks through the PGDCM-Cytoscape workflow for visually
-constructing assessment models. PGDCM aligns closely with the
-**Evidence-Centered Design (ECD)** framework, which uses explicit models
-to connect what we want to measure with the behaviors we can observe:
+> **Learning Objectives**
+>
+> By the end of this tutorial, you will be able to:
+>
+> 1.  Understand the two core model components in PGDCM: the
+>     **Competency Model** and the **Evidence Model**.
+> 2.  Use Cytoscape to visually build, edit, and inspect your assessment
+>     network.
+> 3.  Push data from R into Cytoscape and pull completed models back
+>     into R.
+> 4.  Choose the right workflow (Scenario 1–4) based on the data you
+>     already have.
 
-- **Competency Model (Proficiency Model):** Represents the latent
-  (unobservable) knowledge, skills, or attributes we want to measure,
-  and how they relate to one another. In Cytoscape, these are your
-  “Attribute” nodes and the edges between them.
-- **Evidence Model:** Defines how observable behaviors (tasks/items)
-  provide evidence for those underlying competencies. In Cytoscape,
+### Why Do I Need This?
+
+Imagine you gave a group of students a math test with 10 questions. Some
+questions require algebra, some require geometry, and some require both.
+You want to figure out *which skills each student has mastered* — not
+just their total score.
+
+To do that, you need to tell the model two things:
+
+1.  **What skills exist and how they relate to each other** — this is
+    the **Competency Model** (also called the Proficiency Model).
+2.  **Which skills are needed for each test question** — this is the
+    **Evidence Model**.
+
+This tutorial shows you how to build both of these models visually using
+Cytoscape and the `pgdcm` R package.
+
+### Prerequisites
+
+> **Before You Start**
+>
+> - **R knowledge:** You should be comfortable running R scripts and
+>   installing packages.
+> - **Cytoscape installed:** Download it free from
+>   [cytoscape.org](https://cytoscape.org/).
+> - **Beginner Tutorial completed (recommended):** If you are new to
+>   `pgdcm`, work through the [Beginner Tutorial](Beginner_Tutorial.qmd)
+>   first to understand the modeling pipeline end-to-end.
+> - No prior knowledge of network science or psychometric modeling is
+>   required — we explain the key concepts as we go.
+
+### Key Concepts
+
+PGDCM aligns closely with the **Evidence-Centered Design (ECD)**
+framework, which uses explicit models to connect what we want to measure
+with the behaviors we can observe:
+
+- **Competency Model (Proficiency Model):** Represents the hidden
+  (unobservable) skills we want to measure and how they relate to one
+  another. In Cytoscape, these appear as “Attribute” nodes connected by
+  edges.
+- **Evidence Model:** Defines how observable behaviors (test questions /
+  items) provide evidence for those underlying skills. In Cytoscape,
   these are the edges pointing from “Attribute” nodes to “Task” (Item)
   nodes.
 
-We cover three common scenarios for getting network data into Cytoscape,
-editing these models visually, and pulling them back into R.
+### Which Scenario Should I Use?
+
+This tutorial covers four scenarios. Use the table below to jump to the
+one that matches your situation:
+
+| I already have…                             | Go to                                                                              | What it does                                                          |
+|---------------------------------------------|------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| Only raw item response data (no Q-matrix)   | [Scenario 1](#scenario-1-starting-from-task-data-building-models-from-scratch)     | Pushes item names to Cytoscape; you draw everything else by hand      |
+| A Q-matrix (items × skills)                 | [Scenario 2](#scenario-2-importing-an-existing-evidence-model-q-matrix)            | Auto-creates the Evidence Model; you draw skill relationships by hand |
+| A full adjacency matrix (all nodes & edges) | [Scenario 3](#scenario-3-importing-fully-specified-competency-and-evidence-models) | Auto-creates the full network; you assign node types                  |
+| Previously saved node & edge CSV files      | [Scenario 4](#scenario-4-importing-from-saved-node-and-edge-tables-csv)            | Rebuilds the model from CSV files                                     |
 
 Before running any script, ensure:
 
@@ -52,7 +106,7 @@ your R working directory.
 5.  Once loaded, Cytoscape will have all our custom Visual Styles ready
     to go.
 
-![](./importing_style.png)
+![](importing_style.png)
 
 Figure 1: Importing PGDCM Template
 
@@ -66,7 +120,7 @@ areas in Cytoscape:
     rearrange the layout to something that makes logical sense for your
     assessment.
 
-![](./panels.png)
+![](panels.png)
 
 Figure 2: Cytoscape Window
 
@@ -92,7 +146,7 @@ R pushed to Cytoscape.
 1.  Right-click anywhere in the empty space of the Network Canvas.
 2.  Select **Add \> Node**
 
-![](./add_node.png)
+![](add_node.png)
 
 Figure 3: Adding Node
 
@@ -103,39 +157,37 @@ Figure 3: Adding Node
     new name. The name will updated in both the graph as well as the
     tables.
 
-![](./rename_node.png)
+![](rename_node.png)
 
 Figure 4: Renaming Node
 
 4.  Enter the values for the `type` (attribute/task), and `compute`
     (`dina`, `dino`, or `continuous`) columns.
 
-#### Advanced: HO-DINA, IRT, and MIRT Specification
-
-By default, an Attribute with `dina` computing represents a discrete,
-binary skillset (Mastery vs. Non-Mastery). However, the PGDCM engine
-natively supports advanced continuous latent variables simply by
-modifying the `compute` column of your **root node** (a node with no
-incoming arrows) in the Node Table!
-
-If you change a root attribute’s `compute` value to `continuous` , the
-engine fundamentally changes how the model operates:
-
-- **Higher-Order DINA (HO-DINA):** If your network has a single
-  continuous root node pointing to discrete child attributes (which then
-  point to tasks), the root node represents a generalized latent ability
-  ($\theta$), while the discrete children represent specific sub-skills.
-- **Unidimensional IRT (Item Response Theory):** If you only have *one*
-  continuous root attribute and it points *directly* to all your task
-  nodes (bypassing any discrete sub-skills), the engine bypasses DINA
-  logic entirely and estimates a standard Unidimensional IRT model.
-- **Multidimensional IRT (MIRT):** If you have *multiple* continuous
-  root attributes pointing directly to your task nodes, the engine
-  estimates a Multidimensional Item Response Theory model.
-
-![](./edit_fields.png)
-
-Figure 5: Defining node type and compute
+> **Advanced: HO-DINA, IRT, and MIRT Specification**
+>
+> You can skip this section on a first read — it is only relevant if you
+> want to model **continuous** latent traits (like a general ability
+> score) rather than binary mastery.
+>
+> By default, an Attribute with `dina` as its compute method represents
+> a discrete, binary skill (Mastery vs. Non-Mastery). However, PGDCM
+> also supports continuous latent variables. You enable this by changing
+> the `compute` column of a **root node** (a node with no incoming
+> arrows) to `continuous`.
+>
+> Depending on your network structure, this produces different model
+> types:
+>
+> | Network structure                                  | Resulting model                                                                                                |
+> |----------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+> | One continuous root → discrete children → tasks    | **Higher-Order DINA (HO-DINA)**: the root represents general ability ($\theta$), children represent sub-skills |
+> | One continuous root → tasks directly (no children) | **Unidimensional IRT**: standard Item Response Theory model                                                    |
+> | Multiple continuous roots → tasks directly         | **Multidimensional IRT (MIRT)**                                                                                |
+>
+> ![](edit_fields.png)
+>
+> Figure 5: Defining node type and compute
 
 **To add a new Edge:**
 
@@ -227,6 +279,23 @@ head(edges_table1)
 # Save the network for later
 write_graph(myNetwork1, "Scenario1_network.graphml", format = "graphml")
 ```
+
+> **What should the output look like?**
+>
+> `head(nodes_table1)` will print a table like:
+>
+> | name | type      | compute |
+> |------|-----------|---------|
+> | Q1   | task      | dina    |
+> | Q2   | task      | dina    |
+> | A1   | attribute | dina    |
+>
+> `head(edges_table1)` will print a table like:
+>
+> | source | target |
+> |--------|--------|
+> | A1     | Q1     |
+> | A1     | Q2     |
 
 ## Scenario 2: Importing an Existing Evidence Model (Q-Matrix)
 
@@ -362,15 +431,13 @@ what we’ve drawn:
     every edge in your network.
 
 While it might be tempting to save these two `data.frames` directly as
-`.csv` files, **we strongly recommend against this**.
+`.csv` files, **we strongly recommend saving as `.graphml` instead**.
+Why?
 
-As the developers of this project, we recommend always saving your
-compiled work as a singular `.graphml` object. Not only does this format
-natively retain all the intricate attribute and structural binding
-information established through the Cytoscape process, but the
-`.graphml` standard ensures direct compatibility with the vast majority
-of existing advanced Bayesian network packages and modeling software
-across both R and Python!
+- The `.graphml` format preserves all node attributes, edge structure,
+  and layout information in a single file.
+- `.graphml` is an open standard compatible with most network analysis
+  tools in R and Python.
 
 ``` r
 # Pull the completed graph down from Cytoscape
@@ -429,3 +496,15 @@ push_to_cytoscape(
     edges = loaded_edges,
 )
 ```
+
+## What’s Next?
+
+Now that you have a fully specified model saved as a `.graphml` file,
+you are ready to run the analysis:
+
+- **New to PGDCM?** Start with the [Beginner
+  Tutorial](Beginner_Tutorial.qmd) to learn how to configure and run a
+  Bayesian MCMC model using your network.
+- **Ready for more?** The [Advanced Tutorial](Advanced_Tutorial.qmd)
+  covers convergence diagnostics, posterior predictive checks, and model
+  comparison.

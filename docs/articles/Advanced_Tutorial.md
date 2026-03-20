@@ -6,7 +6,8 @@
 >
 > To keep the example simpler for this tutorial, we assume an
 > independent skills model (i.e., there does not exist any dependencies
-> between the different skills).
+> between the different skills). For tutorials involving dependency
+> structures, see the package documentation site.
 
 If you are new to the package, we highly recommend starting with the
 [Beginner
@@ -35,7 +36,9 @@ options available in both `pgdcm` and `nimbleMCMC`.
 
 First, we will load the requisite packages and structural data. We will
 utilize the basic DTMR dataset and its corresponding Q-Matrix to
-demonstrate the manual estimation workflow.
+demonstrate the manual estimation workflow. For a gentler introduction
+to these setup steps, see the [Beginner
+Tutorial](https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html).
 
 ``` r
 library(nimble)
@@ -59,8 +62,10 @@ critical foundational setup function:
 
 - **Arguments**: Accepts an `igraph` object representing the Q-Matrix
   dependencies (`g`), the observational item response matrix (`X`), and
-  optionally a character specifying the framework (`compute`, e.g.,
-  “dina”, “dino”, “dinm”).
+  an optional `priors` list for custom prior specifications (see
+  [Section 8](#using-pgdcm-as-a-scoring-model)). The model type (e.g.,
+  DCM or SEM) is automatically detected from the graph structure via
+  [`determine_model_type()`](../reference/determine_model_type.md).
 - **Returns**: A list (which we saved to `config`) containing structural
   validation, prior constants (`config$constants`), isolated data matrix
   (`config$data`), initial values for MCMC (`config$inits`), and the
@@ -110,7 +115,7 @@ prior_ppc_results <- run_predictive_check(
     obs_X = config$data$X,
     posterior_samples = NULL, # Enforces PRIOR checking
     n_sim = 50,
-    prefix = NULL, # Forces the plot to render inline instead of drawing to a PDF
+    prefix = NULL, # NULL renders inline; set a string to save as PDF
     title = "PriorCheck"
 )
 ```
@@ -122,12 +127,19 @@ prior_ppc_results <- run_predictive_check(
     function know that this is a prior predictive check and not a
     posterior predictive check.
   - `n_sim`: The number of predictive datasets to simulate.
-  - `prefix` and `title`: Strings used to name the output report.
+  - `prefix`: If `NULL`, plots render inline to the active graphics
+    device (e.g., RStudio Plots pane or Quarto output). If a character
+    string is provided, the plots are saved to a PDF file using the
+    prefix in the filename.
+  - `title`: A label appended to the plot titles and filenames.
 - **Returns**: A quantitative list of simulated summary metrics
-  (`simMeans`, `simRowMeans`, `simColMeans`, etc.) and automatically
-  generates a diagnostic PDF plot in your working directory.
+  (`simMeans`, `simRowMeans`, `simColMeans`, etc.) and diagnostic plots
+  rendered either inline or saved to PDF depending on `prefix`.
 
-![](PriorCheck_Plot.png)
+![Prior predictive check diagnostic plots showing global mean histogram,
+score distributions, item percentage correct distributions, item
+accuracy scatter plot, and item co-occurrence scatter
+plot](PriorCheck_Plot.png)
 
 Prior Predictive Check Diagnostics
 
@@ -170,7 +182,7 @@ and apply custom block samplers or change hyperparameters before calling
 > **Note**
 >
 > *For the sake of testing/tutorial, the code below defaults to a fast
-> compilation format. In a rigorous real-world analysis, you migh have
+> compilation format. In a rigorous real-world analysis, you might have
 > to run over 10,000 iterations across 2-3 chains!*
 
 ``` r
@@ -189,7 +201,7 @@ mcmc_raw <- nimbleMCMC(
 )
 ```
 
-**Understanding the Execution Output**
+### Understanding the Execution Output
 
 Because we enabled the `summary` and `WAIC` flags in the function call
 above, [`nimbleMCMC()`](https://rdrr.io/pkg/nimble/man/nimbleMCMC.html)
@@ -212,6 +224,51 @@ will conclude its sampling process and return a composite list to the
       this penalty term describes the structural complexity and
       shrinkage of your model, penalizing overly parameterized networks
       that risk overfitting.
+
+``` r
+mcmc_raw$WAIC
+```
+
+    WAIC: 29483.86
+
+    pWAIC: 1828.96
+
+### Customizing the MCMC Sampler
+
+The [`nimbleMCMC()`](https://rdrr.io/pkg/nimble/man/nimbleMCMC.html)
+convenience wrapper used above handles model building and compilation
+internally. For even finer control—such as swapping out individual
+parameter samplers—you can use NIMBLE’s step-by-step workflow:
+
+``` r
+# 1. Build the model object
+model <- nimbleModel(
+    code = model_code,
+    constants = config$constants,
+    data = config$data,
+    inits = config$inits
+)
+
+# 2. Create a default MCMC configuration
+mcmc_conf <- configureMCMC(model, monitors = config$monitors)
+
+# 3. Inspect the current sampler assignments
+print(mcmc_conf$getSamplers())
+
+# 4. Customize: e.g., replace a specific sampler with a slice sampler
+# mcmc_conf$removeSamplers("beta_root[1]")
+# mcmc_conf$addSampler(target = "beta_root[1]", type = "slice")
+
+# 5. Build, compile, and run
+mcmc_built <- buildMCMC(mcmc_conf)
+cmodel <- compileNimble(model)
+cmcmc <- compileNimble(mcmc_built, project = model)
+samples <- runMCMC(cmcmc, niter = 2000, nburnin = 500, nchains = 2,
+                   samplesAsCodaMCMC = TRUE)
+```
+
+This approach lets you inspect and modify the exact sampler assigned to
+each parameter node before compilation.
 
 ## 5. Post-Processing and Convergence
 
@@ -260,13 +317,17 @@ print(paste("Algorithm fully converged:", convergence_diag$converged))
   parameter blocks have successfully stabilized beneath a 10% tolerance
   threshold (`< 0.1`).
 
+    Algorithm fully converged: FALSE
+
+    Max relative error: 18.3513
+
 ## 6. Posterior Predictive Checking
 
 Finally, the cornerstone of an advanced Bayesian workflow is the
 **Posterior Predictive Check (PPC)**. We run the exact same
 [`run_predictive_check()`](../reference/run_predictive_check.md)
 function from Step 3, but this time we provide it with our posterior
-predictice samples we got from the estimation procedure (res_clean).
+predictive samples we got from the estimation procedure (res_clean).
 
 ``` r
 post_ppc_results <- run_predictive_check(
@@ -279,7 +340,9 @@ post_ppc_results <- run_predictive_check(
 )
 ```
 
-![](PosteriorCheck_Plot.png)
+![Posterior predictive check diagnostic plots showing tightly fitted
+global mean histogram, overlapping score and item distributions, and
+scatter plots hugging the diagonal](PosteriorCheck_Plot.png)
 
 Posterior Predictive Check Diagnostics
 
@@ -311,8 +374,10 @@ While the beginner-friendly
 [`run_pgdcm_auto()`](../reference/run_pgdcm_auto.md) function
 automatically generates and saves `mapped_parameters.csv`,
 `skill_profiles.csv`, and `item_parameters.csv` directly to your working
-directory, advanced users executing manual MCMC chains must extract and
-build these tables themselves to maintain full control.
+directory (see the [Beginner
+Tutorial](https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html)
+for details), advanced users executing manual MCMC chains must extract
+and build these tables themselves to maintain full control.
 
 ``` r
 # 1. Generate the raw summary matrix
@@ -397,9 +462,16 @@ supply our calibrated posterior means, and lock them in place using an
 extremely small standard deviation (e.g., `1e-4`).
 
 ``` r
-# 1. Assume you have tables of calibrated means from a previous study:
-# calibrated_theta_means (Dimensions: K x 2 matrix)
-# calibrated_lambda_means (Dimensions: J x 2 matrix)
+# 1. Extract calibrated parameters from your previous estimation (Section 7)
+#    Filter mapped_results for theta (structural) and lambda (item) parameters
+theta_rows <- grepl("^theta", mapped_results$Parameter)
+lambda_rows <- grepl("^lambda", mapped_results$Parameter)
+
+# Reshape posterior means into the required K x 2 and J x 2 matrices
+K <- config$constants$nrattributenodes  # number of skills
+J <- config$constants$nrtasknodes       # number of items
+calibrated_theta_means <- matrix(mapped_results$mean[theta_rows], nrow = K, ncol = 2)
+calibrated_lambda_means <- matrix(mapped_results$mean[lambda_rows], nrow = J, ncol = 2)
 
 # 2. Build your highly informative scoring priors
 scoring_priors <- list(

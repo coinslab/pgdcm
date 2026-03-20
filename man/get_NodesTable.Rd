@@ -10,7 +10,7 @@ get_NodesTable(graph)
 \item{graph}{An \code{igraph} object.}
 }
 \value{
-A \code{data.frame} containing the nodes with columns \code{id}, \code{type}, and \code{compute}.
+A \code{data.frame} containing the nodes with columns \code{id}, \code{type}, \code{compute}, and optionally \code{description}.
 }
 \description{
 Extracts the vertex attributes from an \code{igraph} object and formats them

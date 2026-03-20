@@ -59,6 +59,37 @@ validate_graph_and_data <- function(graph, dataframe) {
     return(TRUE)
 }
 
+#' Validate Graph Compute Nodes
+#'
+#' Ensures that all nodes in the graph have a supported compute property.
+#'
+#' @param graph An \code{igraph} object.
+#'
+#' @return Boolean indicating if validation passed. Throws an error if unsupported nodes are found.
+#' @export
+validate_graph_compute_nodes <- function(graph) {
+    allowed_computes <- c("dina", "dino", "dinm", "zscore", "continuous", "percentile", "binary", "pattern")
+    node_computes <- tolower(V(graph)$compute)
+    node_names <- V(graph)$name
+    
+    invalid_indices <- which(!(node_computes %in% allowed_computes))
+    
+    if (length(invalid_indices) > 0) {
+        invalid_nodes <- node_names[invalid_indices]
+        invalid_types <- node_computes[invalid_indices]
+        
+        error_msg <- paste0(
+            "Validation Error: Unsupported compute node types detected.\n",
+            "The following nodes have illegal compute configurations:\n",
+            paste(paste("- Node '", invalid_nodes, "' has compute type '", invalid_types, "'", sep = ""), collapse = "\n"),
+            "\n\nSupported compute types are: ", paste(allowed_computes, collapse = ", ")
+        )
+        stop(error_msg, call. = FALSE)
+    }
+    
+    return(TRUE)
+}
+
 # ── Main Entry ───────────────────────────────────────────────────────────────
 #' Build Model Configuration
 #'
@@ -90,6 +121,8 @@ build_model_config <- function(graph, dataframe, priors = NULL) {
         stop("Graph/Data validation failed. See warnings above.")
     }
 
+    validate_graph_compute_nodes(graph)
+
     info <- get_graph_info(graph)
 
     # Align dataset columns with task nodes
@@ -109,6 +142,14 @@ build_model_config <- function(graph, dataframe, priors = NULL) {
 
     m_type <- determine_model_type(info)
     print(paste("Detected Model Type:", m_type))
+
+    # Structural Validation: DCMs cannot have continuous dependent attributes
+    if (m_type == "DCM" && info$nrattributenodes > info$nrbetaroot) {
+        dependent_computes <- info$attr_computes[(info$nrbetaroot + 1):info$nrattributenodes]
+        if (any(dependent_computes %in% c("zscore", "continuous", "percentile"))) {
+            stop("Validation Error: pgdcm does not support continuous or percentile dependent (non-root) attributes in a DCM model. These compute types must be restricted to root nodes (e.g., Higher-Order, MIRT).", call. = FALSE)
+        }
+    }
 
     # Helper function to find the model files whether running from source or installed package
     get_model_path <- function(filename) {

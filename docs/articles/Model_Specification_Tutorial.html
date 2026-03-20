@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Competency and Evidence Knowledge Model Specification/ Building • pgdcm</title>
+<title>Competency &amp; Evidence Model Specification • pgdcm</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="Model_Specification_Tutorial_files/libs/quarto-html/popper.min.js"></script><script src="Model_Specification_Tutorial_files/libs/quarto-html/tippy.umd.min.js"></script><link href="Model_Specification_Tutorial_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="Model_Specification_Tutorial_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Competency and Evidence Knowledge Model Specification/ Building">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Competency &amp; Evidence Model Specification">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -39,6 +39,9 @@
     <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Advanced_Tutorial.html">Advanced Tutorial</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
+    <li><a class="dropdown-item" href="../articles/Understanding_loglinearBN.html">Mathematical Foundations of the PGDCM Model</a></li>
   </ul>
 </li>
       </ul>
@@ -55,7 +58,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Competency and Evidence Knowledge Model Specification/ Building</h1>
+      <h1>Competency &amp; Evidence Model Specification</h1>
 
 
 
@@ -71,21 +74,91 @@
 
     <section class="section level2"><h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>This tutorial walks through the PGDCM-Cytoscape workflow for visually constructing assessment models. PGDCM aligns closely with the <strong>Evidence-Centered Design (ECD)</strong> framework, which uses explicit models to connect what we want to measure with the behaviors we can observe:</p>
+<div>
+<blockquote>
+<p><strong>Learning Objectives</strong></p>
+<p>By the end of this tutorial, you will be able to:</p>
+<ol type="1">
+<li>Understand the two core model components in PGDCM: the <strong>Competency Model</strong> and the <strong>Evidence Model</strong>.</li>
+<li>Use Cytoscape to visually build, edit, and inspect your assessment network.</li>
+<li>Push data from R into Cytoscape and pull completed models back into R.</li>
+<li>Choose the right workflow (Scenario 1–4) based on the data you already have.</li>
+</ol>
+</blockquote>
+</div>
+<section class="level2"><h3 id="why-do-i-need-this">Why Do I Need This?<a class="anchor" aria-label="anchor" href="#why-do-i-need-this"></a>
+</h3>
+<p>Imagine you gave a group of students a math test with 10 questions. Some questions require algebra, some require geometry, and some require both. You want to figure out <em>which skills each student has mastered</em> — not just their total score.</p>
+<p>To do that, you need to tell the model two things:</p>
+<ol type="1">
+<li>
+<strong>What skills exist and how they relate to each other</strong> — this is the <strong>Competency Model</strong> (also called the Proficiency Model).</li>
+<li>
+<strong>Which skills are needed for each test question</strong> — this is the <strong>Evidence Model</strong>.</li>
+</ol>
+<p>This tutorial shows you how to build both of these models visually using Cytoscape and the <code>pgdcm</code> R package.</p>
+</section><section class="level2"><h3 id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a>
+</h3>
+<div>
+<blockquote>
+<p><strong>Before You Start</strong></p>
 <ul>
 <li>
-<strong>Competency Model (Proficiency Model):</strong> Represents the latent (unobservable) knowledge, skills, or attributes we want to measure, and how they relate to one another. In Cytoscape, these are your “Attribute” nodes and the edges between them.</li>
+<strong>R knowledge:</strong> You should be comfortable running R scripts and installing packages.</li>
 <li>
-<strong>Evidence Model:</strong> Defines how observable behaviors (tasks/items) provide evidence for those underlying competencies. In Cytoscape, these are the edges pointing from “Attribute” nodes to “Task” (Item) nodes.</li>
+<strong>Cytoscape installed:</strong> Download it free from <a href="https://cytoscape.org/" class="external-link">cytoscape.org</a>.</li>
+<li>
+<strong>Beginner Tutorial completed (recommended):</strong> If you are new to <code>pgdcm</code>, work through the <a href="Beginner_Tutorial.qmd">Beginner Tutorial</a> first to understand the modeling pipeline end-to-end.</li>
+<li>No prior knowledge of network science or psychometric modeling is required — we explain the key concepts as we go.</li>
 </ul>
-<p>We cover three common scenarios for getting network data into Cytoscape, editing these models visually, and pulling them back into R.</p>
+</blockquote>
+</div>
+</section><section class="level2"><h3 id="key-concepts">Key Concepts<a class="anchor" aria-label="anchor" href="#key-concepts"></a>
+</h3>
+<p>PGDCM aligns closely with the <strong>Evidence-Centered Design (ECD)</strong> framework, which uses explicit models to connect what we want to measure with the behaviors we can observe:</p>
+<ul>
+<li>
+<strong>Competency Model (Proficiency Model):</strong> Represents the hidden (unobservable) skills we want to measure and how they relate to one another. In Cytoscape, these appear as “Attribute” nodes connected by edges.</li>
+<li>
+<strong>Evidence Model:</strong> Defines how observable behaviors (test questions / items) provide evidence for those underlying skills. In Cytoscape, these are the edges pointing from “Attribute” nodes to “Task” (Item) nodes.</li>
+</ul></section><section class="level2"><h3 id="which-scenario-should-i-use">Which Scenario Should I Use?<a class="anchor" aria-label="anchor" href="#which-scenario-should-i-use"></a>
+</h3>
+<p>This tutorial covers four scenarios. Use the table below to jump to the one that matches your situation:</p>
+<table class="table caption-top">
+<thead><tr class="header">
+<th>I already have…</th>
+<th>Go to</th>
+<th>What it does</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Only raw item response data (no Q-matrix)</td>
+<td><a href="#scenario-1-starting-from-task-data-building-models-from-scratch">Scenario 1</a></td>
+<td>Pushes item names to Cytoscape; you draw everything else by hand</td>
+</tr>
+<tr class="even">
+<td>A Q-matrix (items × skills)</td>
+<td><a href="#scenario-2-importing-an-existing-evidence-model-q-matrix">Scenario 2</a></td>
+<td>Auto-creates the Evidence Model; you draw skill relationships by hand</td>
+</tr>
+<tr class="odd">
+<td>A full adjacency matrix (all nodes &amp; edges)</td>
+<td><a href="#scenario-3-importing-fully-specified-competency-and-evidence-models">Scenario 3</a></td>
+<td>Auto-creates the full network; you assign node types</td>
+</tr>
+<tr class="even">
+<td>Previously saved node &amp; edge CSV files</td>
+<td><a href="#scenario-4-importing-from-saved-node-and-edge-tables-csv">Scenario 4</a></td>
+<td>Rebuilds the model from CSV files</td>
+</tr>
+</tbody>
+</table>
 <p>Before running any script, ensure:</p>
 <ol type="1">
 <li>
 <strong>Cytoscape</strong> is open and running on your machine.</li>
 <li>Cytoscape is listening on the default port: <code>http://localhost:1234/v1</code>.</li>
-</ol>
-<section class="level2"><h3 id="what-is-cytoscape">What is Cytoscape?<a class="anchor" aria-label="anchor" href="#what-is-cytoscape"></a>
+</ol></section><section class="level2"><h3 id="what-is-cytoscape">What is Cytoscape?<a class="anchor" aria-label="anchor" href="#what-is-cytoscape"></a>
 </h3>
 <p><a href="https://cytoscape.org/" class="external-link">Cytoscape</a> is an open-source software platform designed for visualizing complex networks and integrating them with attribute data. In the context of PGDCM, we use the <code>RCy3</code> package in R to automatically pass our graphmodels (Tasks and Attributes) directly into and from the Cytoscape application. This allows us to visually construct, verify, and document our Evidence and Proficiency models before finalizing them for analysis.</p>
 </section><section class="level2"><h3 id="getting-started-loading-the-pgdcm-cytoscape-template">Getting Started: Loading the PGDCM Cytoscape Template<a class="anchor" aria-label="anchor" href="#getting-started-loading-the-pgdcm-cytoscape-template"></a>
@@ -100,7 +173,7 @@
 </ol>
 <div id="fig-template" class="quarto-float quarto-figure quarto-figure-center">
 <figure class="quarto-float quarto-float-fig"><div aria-describedby="fig-template-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="./importing_style.png">
+<img src="importing_style.png">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-template-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure 1: Importing PGDCM Template
@@ -115,7 +188,7 @@ Figure 1: Importing PGDCM Template
 </ol>
 <div id="fig-panels" class="quarto-float quarto-figure quarto-figure-center">
 <figure class="quarto-float quarto-float-fig"><div aria-describedby="fig-panels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="./panels.png">
+<img src="panels.png">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-panels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure 2: Cytoscape Window
@@ -150,7 +223,7 @@ Figure 2: Cytoscape Window
 </ol>
 <div id="fig-adding-node" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig"><div aria-describedby="fig-adding-node-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="./add_node.png" class="quarto-figure quarto-figure-center" style="width:50.0%">
+<img src="add_node.png" class="quarto-figure quarto-figure-center" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adding-node-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure 3: Adding Node
@@ -161,7 +234,7 @@ Figure 3: Adding Node
 </ol>
 <div id="fig-rename-node" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig"><div aria-describedby="fig-rename-node-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="./rename_node.png" class="quarto-figure quarto-figure-center" style="width:50.0%">
+<img src="rename_node.png" class="quarto-figure quarto-figure-center" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rename-node-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure 4: Renaming Node
@@ -170,32 +243,54 @@ Figure 4: Renaming Node
 <ol start="4" type="1">
 <li>Enter the values for the <code>type</code> (attribute/task), and <code>compute</code> (<code>dina</code>, <code>dino</code>, or <code>continuous</code>) columns.</li>
 </ol>
-<section class="level3"><h4 id="advanced-ho-dina-irt-and-mirt-specification">Advanced: HO-DINA, IRT, and MIRT Specification<a class="anchor" aria-label="anchor" href="#advanced-ho-dina-irt-and-mirt-specification"></a>
-</h4>
-<p>By default, an Attribute with <code>dina</code> computing represents a discrete, binary skillset (Mastery vs. Non-Mastery). However, the PGDCM engine natively supports advanced continuous latent variables simply by modifying the <code>compute</code> column of your <strong>root node</strong> (a node with no incoming arrows) in the Node Table!</p>
-<p>If you change a root attribute’s <code>compute</code> value to <code>continuous</code> , the engine fundamentally changes how the model operates:</p>
-<ul>
-<li>
-<strong>Higher-Order DINA (HO-DINA):</strong> If your network has a single continuous root node pointing to discrete child attributes (which then point to tasks), the root node represents a generalized latent ability (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>), while the discrete children represent specific sub-skills.</li>
-<li>
-<strong>Unidimensional IRT (Item Response Theory):</strong> If you only have <em>one</em> continuous root attribute and it points <em>directly</em> to all your task nodes (bypassing any discrete sub-skills), the engine bypasses DINA logic entirely and estimates a standard Unidimensional IRT model.</li>
-<li>
-<strong>Multidimensional IRT (MIRT):</strong> If you have <em>multiple</em> continuous root attributes pointing directly to your task nodes, the engine estimates a Multidimensional Item Response Theory model.</li>
-</ul>
+<div>
+<blockquote>
+<p><strong>Advanced: HO-DINA, IRT, and MIRT Specification</strong></p>
+<p>You can skip this section on a first read — it is only relevant if you want to model <strong>continuous</strong> latent traits (like a general ability score) rather than binary mastery.</p>
+<p>By default, an Attribute with <code>dina</code> as its compute method represents a discrete, binary skill (Mastery vs. Non-Mastery). However, PGDCM also supports continuous latent variables. You enable this by changing the <code>compute</code> column of a <strong>root node</strong> (a node with no incoming arrows) to <code>continuous</code>.</p>
+<p>Depending on your network structure, this produces different model types:</p>
+<table class="table caption-top">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead><tr class="header">
+<th>Network structure</th>
+<th>Resulting model</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>One continuous root → discrete children → tasks</td>
+<td>
+<strong>Higher-Order DINA (HO-DINA)</strong>: the root represents general ability (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>), children represent sub-skills</td>
+</tr>
+<tr class="even">
+<td>One continuous root → tasks directly (no children)</td>
+<td>
+<strong>Unidimensional IRT</strong>: standard Item Response Theory model</td>
+</tr>
+<tr class="odd">
+<td>Multiple continuous roots → tasks directly</td>
+<td><strong>Multidimensional IRT (MIRT)</strong></td>
+</tr>
+</tbody>
+</table>
 <div id="fig-edit-fields" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig"><div aria-describedby="fig-edit-fields-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="./edit_fields.png" class="quarto-figure quarto-figure-center" style="width:50.0%">
+<img src="edit_fields.png" class="quarto-figure quarto-figure-center" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-edit-fields-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure 5: Defining node type and compute
 </figcaption></figure>
+</div>
+</blockquote>
 </div>
 <p><strong>To add a new Edge:</strong></p>
 <ol type="1">
 <li>Right-click on the <strong>Source</strong> node (the node the arrow should point <em>away</em> from).</li>
 <li>Select <strong>Add &gt; Edge</strong>.</li>
 <li>A line will attach to your cursor. Click on the <strong>Target</strong> node to complete the edge.</li>
-</ol></section></section><section class="level2"><h3 id="connecting-r-to-cytoscape">Connecting R to Cytoscape<a class="anchor" aria-label="anchor" href="#connecting-r-to-cytoscape"></a>
+</ol></section><section class="level2"><h3 id="connecting-r-to-cytoscape">Connecting R to Cytoscape<a class="anchor" aria-label="anchor" href="#connecting-r-to-cytoscape"></a>
 </h3>
 <p>Before passing any data, we need to ensure R can communicate with your active Cytoscape session. We do this by loading the <code>RCy3</code> package and “pinging” the default Cytoscape port.</p>
 <p>Our custom utility functions (like pushing models or formatting tables) are seamlessly integrated right into the primary <code>pgdcm</code> library.</p>
@@ -262,6 +357,53 @@ Figure 5: Defining node type and compute
 <span></span>
 <span><span class="co"># Save the network for later</span></span>
 <span><span class="fu"><a href="https://r.igraph.org/reference/write_graph.html" class="external-link">write_graph</a></span><span class="op">(</span><span class="va">myNetwork1</span>, <span class="st">"Scenario1_network.graphml"</span>, format <span class="op">=</span> <span class="st">"graphml"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div>
+<blockquote>
+<p><strong>What should the output look like?</strong></p>
+<p><code>head(nodes_table1)</code> will print a table like:</p>
+<table class="table caption-top">
+<thead><tr class="header">
+<th>name</th>
+<th>type</th>
+<th>compute</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Q1</td>
+<td>task</td>
+<td>dina</td>
+</tr>
+<tr class="even">
+<td>Q2</td>
+<td>task</td>
+<td>dina</td>
+</tr>
+<tr class="odd">
+<td>A1</td>
+<td>attribute</td>
+<td>dina</td>
+</tr>
+</tbody>
+</table>
+<p><code>head(edges_table1)</code> will print a table like:</p>
+<table class="table caption-top">
+<thead><tr class="header">
+<th>source</th>
+<th>target</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>A1</td>
+<td>Q1</td>
+</tr>
+<tr class="even">
+<td>A1</td>
+<td>Q2</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
 </div>
 </section></section><section class="section level2"><h2 id="scenario-2-importing-an-existing-evidence-model-q-matrix">Scenario 2: Importing an Existing Evidence Model (Q-Matrix)<a class="anchor" aria-label="anchor" href="#scenario-2-importing-an-existing-evidence-model-q-matrix"></a>
 </h2>
@@ -373,8 +515,12 @@ Figure 7: Using the Cytoscape interface we added an edge from A2 to A1. The add
 <li>
 <code>get_EdgesTable(myNetwork3)</code>: This extracts a standardized <code>data.frame</code> mapping the <code>source</code> node to the <code>target</code> node for every edge in your network.</li>
 </ol>
-<p>While it might be tempting to save these two <code>data.frames</code> directly as <code>.csv</code> files, <strong>we strongly recommend against this</strong>.</p>
-<p>As the developers of this project, we recommend always saving your compiled work as a singular <code>.graphml</code> object. Not only does this format natively retain all the intricate attribute and structural binding information established through the Cytoscape process, but the <code>.graphml</code> standard ensures direct compatibility with the vast majority of existing advanced Bayesian network packages and modeling software across both R and Python!</p>
+<p>While it might be tempting to save these two <code>data.frames</code> directly as <code>.csv</code> files, <strong>we strongly recommend saving as <code>.graphml</code> instead</strong>. Why?</p>
+<ul>
+<li>The <code>.graphml</code> format preserves all node attributes, edge structure, and layout information in a single file.</li>
+<li>
+<code>.graphml</code> is an open standard compatible with most network analysis tools in R and Python.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Pull the completed graph down from Cytoscape</span></span>
@@ -422,7 +568,15 @@ Figure 7: Using the Cytoscape interface we added an edge from A2 to A1. The add
 <span>    edges <span class="op">=</span> <span class="va">loaded_edges</span>,</span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
-</section></section><script id="quarto-html-after-body" type="application/javascript">
+</section></section><section class="section level2"><h2 id="whats-next">What’s Next?<a class="anchor" aria-label="anchor" href="#whats-next"></a>
+</h2>
+<p>Now that you have a fully specified model saved as a <code>.graphml</code> file, you are ready to run the analysis:</p>
+<ul>
+<li>
+<strong>New to PGDCM?</strong> Start with the <a href="Beginner_Tutorial.qmd">Beginner Tutorial</a> to learn how to configure and run a Bayesian MCMC model using your network.</li>
+<li>
+<strong>Ready for more?</strong> The <a href="Advanced_Tutorial.qmd">Advanced Tutorial</a> covers convergence diagnostics, posterior predictive checks, and model comparison.</li>
+</ul></section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);

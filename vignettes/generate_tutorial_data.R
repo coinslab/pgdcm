@@ -5,6 +5,8 @@ install.packages("dcmdata", lib = "locallib", repos = "https://cloud.r-project.o
 library(dcmdata, lib.loc = "locallib")
 library(nimble)
 devtools::load_all()
+nimbleOptions(buildInterfacesForCompiledNestedNimbleFunctions = FALSE)
+nimbleOptions(clearNimbleFunctionsAfterCompiling = TRUE)
 
 X <- dtmr_data
 Q <- dtmr_qmatrix
@@ -15,7 +17,10 @@ config <- build_model_config(g, X)
 results <- run_pgdcm_auto(
     config = config,
     estimation_config = list(niter = 10000, nburnin = 1000, chains = 2, prior_sims = NULL, post_sims = NULL),
-    prefix = "vignettes/DCM_Beginner_Workflow"
+    prefix = "vignettes/DCM_Beginner_Workflow",
+    return_groups = TRUE,
+    parallel = TRUE,
+    cores = 2
 )
 
 saveRDS(results, "vignettes/Beginner_Tutorial_Results.rds")

@@ -138,7 +138,8 @@ viewparentsandchildren <- function(theigraph, nodechoice) {
   nrnodes <- length(nodelist)
   for (k in 1:nrnodes) {
     nodeinfo <- V(theigraph)[nodelist[k]]$details
-    if (is.null(nodeinfo)) nodeinfo <- "No details"
+    if (is.null(nodeinfo) || is.na(nodeinfo)) nodeinfo <- V(theigraph)[nodelist[k]]$description
+    if (is.null(nodeinfo) || is.na(nodeinfo)) nodeinfo <- "No details"
     nodename <- V(theigraph)[nodelist[k]]$name
     print(paste0(nodename, ":  ", nodeinfo))
   }

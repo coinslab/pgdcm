@@ -113,3 +113,36 @@ build_from_node_edge_files <- function(NodesFile, EdgesFile) {
 
     return(g)
 }
+
+#' Build Graph for an IRT Model
+#'
+#' Constructs a single-attribute \code{igraph} object directly from a list of task names,
+#' bypassing the need for a Q-matrix file. All tasks are assumed to require the single ability.
+#'
+#' @param task_names Character vector. Names of the tasks (columns from the dataset).
+#' @param ability_name Character. Name of the single latent trait. Default is "Theta".
+#' @param default_task_compute Character. Default compute rule for tasks. Default is "dina".
+#'
+#' @return A topologically sorted \code{igraph} object representing the IRT structure.
+#' @export
+build_irt_graph <- function(task_names, ability_name = "Theta", default_task_compute = "dina") {
+    print(paste("Building IRT Graph with Ability:", ability_name))
+    
+    # In an IRT model, the attribute is a continuous latent ability ("zscore")
+    AttNodes <- create_node_df(c(ability_name), "Attribute", "zscore")
+    TaskNodes <- create_node_df(task_names, "Task", default_task_compute)
+    AllNodes <- rbind(AttNodes, TaskNodes)
+
+    # All tasks load onto the single ability
+    Edges <- data.frame(
+        from = rep(ability_name, length(task_names)),
+        to = task_names,
+        color = rep("black", length(task_names)),
+        stringsAsFactors = FALSE
+    )
+
+    g <- graph_from_data_frame(Edges, directed = TRUE, vertices = AllNodes)
+    g <- enforce_topo_sort(g)
+    
+    return(g)
+}

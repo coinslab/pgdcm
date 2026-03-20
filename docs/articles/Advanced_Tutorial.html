@@ -39,6 +39,9 @@
     <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Advanced_Tutorial.html">Advanced Tutorial</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
+    <li><a class="dropdown-item" href="../articles/Understanding_loglinearBN.html">Mathematical Foundations of the PGDCM Model</a></li>
   </ul>
 </li>
       </ul>
@@ -74,7 +77,7 @@
 <div>
 <blockquote>
 <p><strong>Note on Model Scope</strong></p>
-<p>To keep the example simpler for this tutorial, we assume an independent skills model (i.e., there does not exist any dependencies between the different skills).</p>
+<p>To keep the example simpler for this tutorial, we assume an independent skills model (i.e., there does not exist any dependencies between the different skills). For tutorials involving dependency structures, see the package documentation site.</p>
 </blockquote>
 </div>
 <p>If you are new to the package, we highly recommend starting with the <a href="https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html" class="external-link">Beginner Tutorial</a>. There, we introduce the <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> function, which was purposefully designed to offer a quick, automated, and streamlined approach to estimation.</p>
@@ -82,7 +85,7 @@
 <p>This advanced tutorial is tailored specifically for users who need that deeper level of control. In the following sections, we will conceptually deconstruct the automated pipeline. We will guide you through explicitly defining the Bayesian network architecture, executing the core <code>nimbleMCMC</code> sampling engine, and leveraging the granular configuration options available in both <code>pgdcm</code> and <code>nimbleMCMC</code>.</p>
 </section><section class="level2"><h2 id="environment-and-data-setup">1. Environment and Data Setup<a class="anchor" aria-label="anchor" href="#environment-and-data-setup"></a>
 </h2>
-<p>First, we will load the requisite packages and structural data. We will utilize the basic DTMR dataset and its corresponding Q-Matrix to demonstrate the manual estimation workflow.</p>
+<p>First, we will load the requisite packages and structural data. We will utilize the basic DTMR dataset and its corresponding Q-Matrix to demonstrate the manual estimation workflow. For a gentler introduction to these setup steps, see the <a href="https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html" class="external-link">Beginner Tutorial</a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-nimble.org" class="external-link">nimble</a></span><span class="op">)</span></span>
@@ -103,7 +106,7 @@
 <p>The <code><a href="../reference/build_model_config.html">build_model_config()</a></code> is a critical foundational setup function:</p>
 <ul>
 <li>
-<strong>Arguments</strong>: Accepts an <code>igraph</code> object representing the Q-Matrix dependencies (<code>g</code>), the observational item response matrix (<code>X</code>), and optionally a character specifying the framework (<code>compute</code>, e.g., “dina”, “dino”, “dinm”).</li>
+<strong>Arguments</strong>: Accepts an <code>igraph</code> object representing the Q-Matrix dependencies (<code>g</code>), the observational item response matrix (<code>X</code>), and an optional <code>priors</code> list for custom prior specifications (see <a href="#using-pgdcm-as-a-scoring-model">Section 8</a>). The model type (e.g., DCM or SEM) is automatically detected from the graph structure via <code><a href="../reference/determine_model_type.html">determine_model_type()</a></code>.</li>
 <li>
 <strong>Returns</strong>: A list (which we saved to <code>config</code>) containing structural validation, prior constants (<code>config$constants</code>), isolated data matrix (<code>config$data</code>), initial values for MCMC (<code>config$inits</code>), and the name of the dynamically generated model code file (<code>config$code_file</code>).</li>
 </ul></section><section class="level2"><h2 id="extracting-the-nimble-model-code">2. Extracting the NIMBLE Model Code<a class="anchor" aria-label="anchor" href="#extracting-the-nimble-model-code"></a>
@@ -134,7 +137,7 @@
 <span>    obs_X <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">X</span>,</span>
 <span>    posterior_samples <span class="op">=</span> <span class="cn">NULL</span>, <span class="co"># Enforces PRIOR checking</span></span>
 <span>    n_sim <span class="op">=</span> <span class="fl">50</span>,</span>
-<span>    prefix <span class="op">=</span> <span class="cn">NULL</span>, <span class="co"># Forces the plot to render inline instead of drawing to a PDF</span></span>
+<span>    prefix <span class="op">=</span> <span class="cn">NULL</span>, <span class="co"># NULL renders inline; set a string to save as PDF</span></span>
 <span>    title <span class="op">=</span> <span class="st">"PriorCheck"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -151,14 +154,16 @@
 <li>
 <code>n_sim</code>: The number of predictive datasets to simulate.</li>
 <li>
-<code>prefix</code> and <code>title</code>: Strings used to name the output report.</li>
+<code>prefix</code>: If <code>NULL</code>, plots render inline to the active graphics device (e.g., RStudio Plots pane or Quarto output). If a character string is provided, the plots are saved to a PDF file using the prefix in the filename.</li>
+<li>
+<code>title</code>: A label appended to the plot titles and filenames.</li>
 </ul>
 </li>
 <li>
-<strong>Returns</strong>: A quantitative list of simulated summary metrics (<code>simMeans</code>, <code>simRowMeans</code>, <code>simColMeans</code>, etc.) and automatically generates a diagnostic PDF plot in your working directory.</li>
+<strong>Returns</strong>: A quantitative list of simulated summary metrics (<code>simMeans</code>, <code>simRowMeans</code>, <code>simColMeans</code>, etc.) and diagnostic plots rendered either inline or saved to PDF depending on <code>prefix</code>.</li>
 </ul>
 <div class="quarto-figure quarto-figure-center">
-<figure><p><img src="PriorCheck_Plot.png"></p>
+<figure><p><img src="PriorCheck_Plot.png" style="width:100.0%" alt="Prior predictive check diagnostic plots showing global mean histogram, score distributions, item percentage correct distributions, item accuracy scatter plot, and item co-occurrence scatter plot"></p>
 <figcaption>Prior Predictive Check Diagnostics</figcaption></figure>
 </div>
 <section class="level3"><h3 id="explaining-the-prior-predictive-plots">Explaining the Prior Predictive Plots<a class="anchor" aria-label="anchor" href="#explaining-the-prior-predictive-plots"></a>
@@ -183,7 +188,7 @@
 <div>
 <blockquote>
 <p><strong>Note</strong></p>
-<p><em>For the sake of testing/tutorial, the code below defaults to a fast compilation format. In a rigorous real-world analysis, you migh have to run over 10,000 iterations across 2-3 chains!</em></p>
+<p><em>For the sake of testing/tutorial, the code below defaults to a fast compilation format. In a rigorous real-world analysis, you might have to run over 10,000 iterations across 2-3 chains!</em></p>
 </blockquote>
 </div>
 <div class="cell">
@@ -202,7 +207,8 @@
 <span>    WAIC <span class="op">=</span> <span class="cn">TRUE</span> <span class="co"># Calculate the Watanabe-Akaike Information Criterion</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
-<p><strong>Understanding the Execution Output</strong></p>
+<section class="level3"><h3 id="understanding-the-execution-output">Understanding the Execution Output<a class="anchor" aria-label="anchor" href="#understanding-the-execution-output"></a>
+</h3>
 <p>Because we enabled the <code>summary</code> and <code>WAIC</code> flags in the function call above, <code><a href="https://rdrr.io/pkg/nimble/man/nimbleMCMC.html" class="external-link">nimbleMCMC()</a></code> will conclude its sampling process and return a composite list to the <code>mcmc_raw</code> object containing three primary elements:</p>
 <ol type="1">
 <li>
@@ -218,12 +224,57 @@
 <strong>pWAIC</strong>: The estimated “effective number of parameters.” In complex hierarchical Bayesian networks like cognitive modeling, this penalty term describes the structural complexity and shrinkage of your model, penalizing overly parameterized networks that risk overfitting.</li>
 </ul>
 </li>
-</ol></section><section class="level2"><h2 id="post-processing-and-convergence">5. Post-Processing and Convergence<a class="anchor" aria-label="anchor" href="#post-processing-and-convergence"></a>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mcmc_raw</span><span class="op">$</span><span class="va">WAIC</span></span></code></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code><span><span class="va">WAIC</span><span class="op">:</span> <span class="fl">29483.86</span></span></code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code><span></span>
+<span><span class="va">pWAIC</span><span class="op">:</span> <span class="fl">1828.96</span></span></code></pre>
+</div>
+</div>
+</section><section class="level3"><h3 id="customizing-the-mcmc-sampler">Customizing the MCMC Sampler<a class="anchor" aria-label="anchor" href="#customizing-the-mcmc-sampler"></a>
+</h3>
+<p>The <code><a href="https://rdrr.io/pkg/nimble/man/nimbleMCMC.html" class="external-link">nimbleMCMC()</a></code> convenience wrapper used above handles model building and compilation internally. For even finer control—such as swapping out individual parameter samplers—you can use NIMBLE’s step-by-step workflow:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 1. Build the model object</span></span>
+<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nimble/man/nimbleModel.html" class="external-link">nimbleModel</a></span><span class="op">(</span></span>
+<span>    code <span class="op">=</span> <span class="va">model_code</span>,</span>
+<span>    constants <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">constants</span>,</span>
+<span>    data <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">data</span>,</span>
+<span>    inits <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">inits</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Create a default MCMC configuration</span></span>
+<span><span class="va">mcmc_conf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nimble/man/configureMCMC.html" class="external-link">configureMCMC</a></span><span class="op">(</span><span class="va">model</span>, monitors <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">monitors</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3. Inspect the current sampler assignments</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">mcmc_conf</span><span class="op">$</span><span class="fu">getSamplers</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 4. Customize: e.g., replace a specific sampler with a slice sampler</span></span>
+<span><span class="co"># mcmc_conf$removeSamplers("beta_root[1]")</span></span>
+<span><span class="co"># mcmc_conf$addSampler(target = "beta_root[1]", type = "slice")</span></span>
+<span></span>
+<span><span class="co"># 5. Build, compile, and run</span></span>
+<span><span class="va">mcmc_built</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nimble/man/buildMCMC.html" class="external-link">buildMCMC</a></span><span class="op">(</span><span class="va">mcmc_conf</span><span class="op">)</span></span>
+<span><span class="va">cmodel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nimble/man/compileNimble.html" class="external-link">compileNimble</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
+<span><span class="va">cmcmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nimble/man/compileNimble.html" class="external-link">compileNimble</a></span><span class="op">(</span><span class="va">mcmc_built</span>, project <span class="op">=</span> <span class="va">model</span><span class="op">)</span></span>
+<span><span class="va">samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nimble/man/runMCMC.html" class="external-link">runMCMC</a></span><span class="op">(</span><span class="va">cmcmc</span>, niter <span class="op">=</span> <span class="fl">2000</span>, nburnin <span class="op">=</span> <span class="fl">500</span>, nchains <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                   samplesAsCodaMCMC <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>This approach lets you inspect and modify the exact sampler assigned to each parameter node before compilation.</p>
+</section></section><section class="level2"><h2 id="post-processing-and-convergence">5. Post-Processing and Convergence<a class="anchor" aria-label="anchor" href="#post-processing-and-convergence"></a>
 </h2>
 <p>Once the sampler has finished executing, we isolate our posterior samples.</p>
 <p>When mapping complex hierarchical graphical networks recursively, mathematically unconnected structural placeholders are marked with <code>NA</code> to preserve the parent Q-Matrix dimensions. We filter these empty pathways out natively before validating model convergence to guarantee pure mathematical comparisons.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Convert raw samples to an MCMC list format</span></span>
 <span><span class="va">res_mcmc</span> <span class="op">&lt;-</span> <span class="fu">mcmc.list</span><span class="op">(</span><span class="va">mcmc_raw</span><span class="op">$</span><span class="va">samples</span><span class="op">)</span></span>
 <span></span>
@@ -236,7 +287,7 @@
 </ul>
 <p>We can now cleanly verify if our MCMC chains have successfully traversed the distribution and converged:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">convergence_diag</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/check_mcmc_convergence.html">check_mcmc_convergence</a></span><span class="op">(</span></span>
 <span>    chainlist <span class="op">=</span> <span class="va">res_clean</span>,</span>
 <span>    blocksize <span class="op">=</span> <span class="fl">50</span>,</span>
@@ -248,11 +299,21 @@
 <ul>
 <li>
 <code><a href="../reference/check_mcmc_convergence.html">check_mcmc_convergence()</a></code> accepts an <code>mcmc.list</code>, a block size to average across, and a burn-in iteration count. It conceptually evaluates chain stability by calculating moving block averages across the specified intervals. It returns a list of resulting stability metrics, including a strict boolean <code>converged</code> parameter indicating if the relative errors of all parameter blocks have successfully stabilized beneath a 10% tolerance threshold (<code>&lt; 0.1</code>).</li>
-</ul></section><section class="level2"><h2 id="posterior-predictive-checking">6. Posterior Predictive Checking<a class="anchor" aria-label="anchor" href="#posterior-predictive-checking"></a>
-</h2>
-<p>Finally, the cornerstone of an advanced Bayesian workflow is the <strong>Posterior Predictive Check (PPC)</strong>. We run the exact same <code><a href="../reference/run_predictive_check.html">run_predictive_check()</a></code> function from Step 3, but this time we provide it with our posterior predictice samples we got from the estimation procedure (res_clean).</p>
+</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
+<div class="cell-output cell-output-stdout">
+<pre><code>Algorithm fully converged: FALSE</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Max relative error: 18.3513</code></pre>
+</div>
+</div>
+</section><section class="level2"><h2 id="posterior-predictive-checking">6. Posterior Predictive Checking<a class="anchor" aria-label="anchor" href="#posterior-predictive-checking"></a>
+</h2>
+<p>Finally, the cornerstone of an advanced Bayesian workflow is the <strong>Posterior Predictive Check (PPC)</strong>. We run the exact same <code><a href="../reference/run_predictive_check.html">run_predictive_check()</a></code> function from Step 3, but this time we provide it with our posterior predictive samples we got from the estimation procedure (res_clean).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">post_ppc_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_predictive_check.html">run_predictive_check</a></span><span class="op">(</span></span>
 <span>    config <span class="op">=</span> <span class="va">config</span>,</span>
 <span>    obs_X <span class="op">=</span> <span class="va">config</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">X</span>,</span>
@@ -263,7 +324,7 @@
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="quarto-figure quarto-figure-center">
-<figure><p><img src="PosteriorCheck_Plot.png"></p>
+<figure><p><img src="PosteriorCheck_Plot.png" style="width:100.0%" alt="Posterior predictive check diagnostic plots showing tightly fitted global mean histogram, overlapping score and item distributions, and scatter plots hugging the diagonal"></p>
 <figcaption>Posterior Predictive Check Diagnostics</figcaption></figure>
 </div>
 <section class="level3"><h3 id="understanding-the-posterior-predictive-checking-results">Understanding the Posterior Predictive Checking Results<a class="anchor" aria-label="anchor" href="#understanding-the-posterior-predictive-checking-results"></a>
@@ -280,9 +341,9 @@
 <p>If the posterior predictive plots show significant deviations (for instance, the distributions don’t align, or scatter nodes sit far off the red line), this is diagnostic proof that your chosen psychological framework (like DINA) is structurally misspecified for this dataset, and you should likely attempt a different network framework like DINO or DINM.</p>
 </section></section><section class="level2"><h2 id="generating-summary-tables-and-assessing-accuracy">7. Generating Summary Tables and Assessing Accuracy<a class="anchor" aria-label="anchor" href="#generating-summary-tables-and-assessing-accuracy"></a>
 </h2>
-<p>While the beginner-friendly <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> function automatically generates and saves <code>mapped_parameters.csv</code>, <code>skill_profiles.csv</code>, and <code>item_parameters.csv</code> directly to your working directory, advanced users executing manual MCMC chains must extract and build these tables themselves to maintain full control.</p>
+<p>While the beginner-friendly <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> function automatically generates and saves <code>mapped_parameters.csv</code>, <code>skill_profiles.csv</code>, and <code>item_parameters.csv</code> directly to your working directory (see the <a href="https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html" class="external-link">Beginner Tutorial</a> for details), advanced users executing manual MCMC chains must extract and build these tables themselves to maintain full control.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1. Generate the raw summary matrix</span></span>
 <span><span class="va">mcmc_summ</span> <span class="op">&lt;-</span> <span class="fu">MCMCvis</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/MCMCvis/man/MCMCsummary.html" class="external-link">MCMCsummary</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">res_clean</span><span class="op">)</span></span>
 <span></span>
@@ -314,7 +375,7 @@
 <p>Once you have your <code>skill_profiles</code> matrix (either manually generated from the procedure above, or simply loaded from the <code>skill_profiles.csv</code> file automatically saved during the <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> workflow), you can quantitatively evaluate how well your model classified the students if you happen to possess a “ground truth” dataset.</p>
 <p>We can accomplish this using the <code><a href="../reference/assess_classification_accuracy.html">assess_classification_accuracy()</a></code> function.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Assess classification accuracy against known true profiles</span></span>
 <span><span class="va">accuracy_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/assess_classification_accuracy.html">assess_classification_accuracy</a></span><span class="op">(</span></span>
 <span>    skill_profiles <span class="op">=</span> <span class="va">skill_profiles</span>,</span>
@@ -337,10 +398,17 @@
 <p>A frequent use case in psychometrics is <strong>scoring</strong>. After successfully estimating and calibrating your structural and item parameters on a large sample, you may want to apply those fixed parameters to score subsequent (often smaller) datasets without recalculating the item difficulties.</p>
 <p>In a Bayesian framework, you “fix” a parameter by supplying it with a <strong>highly informative prior</strong> (a point distribution). By leveraging the <code>priors</code> argument in <code><a href="../reference/build_model_config.html">build_model_config()</a></code>, we can supply our calibrated posterior means, and lock them in place using an extremely small standard deviation (e.g., <code>1e-4</code>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># 1. Assume you have tables of calibrated means from a previous study:</span></span>
-<span><span class="co"># calibrated_theta_means (Dimensions: K x 2 matrix)</span></span>
-<span><span class="co"># calibrated_lambda_means (Dimensions: J x 2 matrix)</span></span>
+<div class="sourceCode cell-code" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 1. Extract calibrated parameters from your previous estimation (Section 7)</span></span>
+<span><span class="co">#    Filter mapped_results for theta (structural) and lambda (item) parameters</span></span>
+<span><span class="va">theta_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^theta"</span>, <span class="va">mapped_results</span><span class="op">$</span><span class="va">Parameter</span><span class="op">)</span></span>
+<span><span class="va">lambda_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^lambda"</span>, <span class="va">mapped_results</span><span class="op">$</span><span class="va">Parameter</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Reshape posterior means into the required K x 2 and J x 2 matrices</span></span>
+<span><span class="va">K</span> <span class="op">&lt;-</span> <span class="va">config</span><span class="op">$</span><span class="va">constants</span><span class="op">$</span><span class="va">nrattributenodes</span>  <span class="co"># number of skills</span></span>
+<span><span class="va">J</span> <span class="op">&lt;-</span> <span class="va">config</span><span class="op">$</span><span class="va">constants</span><span class="op">$</span><span class="va">nrtasknodes</span>       <span class="co"># number of items</span></span>
+<span><span class="va">calibrated_theta_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">mapped_results</span><span class="op">$</span><span class="va">mean</span><span class="op">[</span><span class="va">theta_rows</span><span class="op">]</span>, nrow <span class="op">=</span> <span class="va">K</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">calibrated_lambda_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">mapped_results</span><span class="op">$</span><span class="va">mean</span><span class="op">[</span><span class="va">lambda_rows</span><span class="op">]</span>, nrow <span class="op">=</span> <span class="va">J</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 2. Build your highly informative scoring priors</span></span>
 <span><span class="va">scoring_priors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>

@@ -28,7 +28,7 @@
 #'         passed into the logistic regression equation `ilogit(slope * value - intercept)`.
 # Define Helper Function for Mixed Logic
 calc_mixed_kernel <- nimbleFunction(
-    run = function(weights = double(1), attributes = double(1), nrbetaroot = double(0),
+    run = function(weights = double(1), attributes = double(1), num_attr = double(0), nrbetaroot = double(0),
                    isDINA = double(0), isDINO = double(0), isDINM = double(0)) {
         # Initialize accumulators for continuous and discrete parents
         sum_cont <- 0.0 # Sum of continuous attribute values (e.g. latent ability)
@@ -39,7 +39,7 @@ calc_mixed_kernel <- nimbleFunction(
         sum_input <- 0.0 # Total possible input weights (for DINM)
         has_cont <- 0.0 # Flag indicating if there's a continuous parent
 
-        n <- length(weights)
+        n <- num_attr
 
         # Loop through each prerequisite for this node
         for (p in 1:n) {
@@ -168,10 +168,12 @@ loglinearBN <- nimbleCode({
         if (nrattributenodes > nrbetaroot) {
             for (k in (nrbetaroot + 1):nrattributenodes) {
                 # Calculate Kernel using Custom Function to handle Mixed Inputs
-                # Pass vectors of length (k-1)
+                # Using 1:(k-1) properly ensures Nimble does not see a bidirectional DAG cycle. 
+                # Because k is dynamic in the loop, Nimble handles 1:1 boundaries correctly here without the C++ bug.
                 psival[i, k] <- calc_mixed_kernel(
                     weights = CDMmatrix[k, 1:(k - 1)],
                     attributes = attributenodes[i, 1:(k - 1)],
+                    num_attr = k - 1,
                     nrbetaroot = isContinuousHO * nrbetaroot, # Only treat roots as continuous if HO/MIRT/IRT
                     isDINA = isDINA[k],
                     isDINO = isDINO[k],
@@ -189,8 +191,9 @@ loglinearBN <- nimbleCode({
         for (j in 1:nrtasknodes) {
             # Task nodes use standard kernels
             phival[i, j] <- calc_mixed_kernel(
-                weights = CDMmatrix[nrattributenodes + j, 1:nrattributenodes],
-                attributes = attributenodes[i, 1:nrattributenodes],
+                weights = CDMmatrix[nrattributenodes + j, 1:CDMattnodesmax],
+                attributes = attributenodes[i, 1:CDMattnodesmax],
+                num_attr = nrattributenodes,
                 nrbetaroot = isContinuousHO * nrbetaroot, # Dynamically handle MIRT/IRT continuous inputs to items
                 isDINA = isDINA[nrattributenodes + j],
                 isDINO = isDINO[nrattributenodes + j],

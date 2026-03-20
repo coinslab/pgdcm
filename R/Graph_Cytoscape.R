@@ -30,12 +30,12 @@ push_to_cytoscape <- function(..., base.url = "http://localhost:1234/v1") {
 #'
 #' @param graph An \code{igraph} object.
 #'
-#' @return A \code{data.frame} containing the nodes with columns \code{id}, \code{type}, and \code{compute}.
+#' @return A \code{data.frame} containing the nodes with columns \code{id}, \code{type}, \code{compute}, and optionally \code{description}.
 #' @export
 get_NodesTable <- function(graph) {
     df <- as_data_frame(graph, what = "vertices")
     colnames(df)[colnames(df) == "name"] <- "id"
-    cols_to_keep <- intersect(c("id", "type", "compute"), colnames(df))
+    cols_to_keep <- intersect(c("id", "type", "compute", "description"), colnames(df))
     df[, cols_to_keep, drop = FALSE]
 }
 
@@ -225,8 +225,44 @@ pull_from_cytoscape <- function(network.title = NULL, base.url = "http://localho
         setCurrentNetwork(network = network.title, base.url = base.url)
     }
 
-    # Pull raw network
-    g_raw <- createIgraphFromNetwork(network = "current", base.url = base.url)
+    # Pull raw tables instead of createIgraphFromNetwork to intercept NAs
+    nodes_df <- getTableColumns("node", base.url = base.url)
+    edges_df <- getTableColumns("edge", base.url = base.url)
+
+    # Cytoscape sometimes fails to update 'source' and 'target' when user alters edges manually.
+    # The 'shared name' or 'name' column consistently reflects the true "source (interaction) target".
+    sn_col <- "shared name"
+    if (!(sn_col %in% colnames(edges_df))) sn_col <- "name"
+
+    # Always extract from shared name to prevent pulling stale source/target mappings
+    sn_vals <- edges_df[[sn_col]]
+
+    # Regex to extract assuming standard "source (interaction) target" format
+    fix_src <- sub("^(.*?)\\s+\\(.*?\\)\\s+(.*?)$", "\\1", sn_vals)
+    fix_target <- sub("^(.*?)\\s+\\(.*?\\)\\s+(.*?)$", "\\2", sn_vals)
+
+    edges_df$source <- fix_src
+    edges_df$target <- fix_target
+
+    # Push the synchronized columns back to Cytoscape so the UI table is consistent
+    fix_df <- data.frame(name = edges_df$name, source = fix_src, target = fix_target, stringsAsFactors = FALSE)
+    tryCatch({
+        loadTableData(fix_df, data.key.column = "name", table = "edge", table.key.column = "name", base.url = base.url)
+    }, error = function(e) { message("Warning: Could not sync source/target back to Cytoscape UI, but R graph is correct.") })
+
+    # Ensure source and target are the first two columns for igraph
+    cols <- colnames(edges_df)
+    edge_cols <- c("source", "target", setdiff(cols, c("source", "target")))
+    edges_df <- edges_df[, edge_cols]
+
+    # Convert nodes name to id if necessary
+    if ("name" %in% colnames(nodes_df)) {
+        cols <- colnames(nodes_df)
+        node_cols <- c("name", setdiff(cols, "name"))
+        nodes_df <- nodes_df[, node_cols]
+    }
+
+    g_raw <- graph_from_data_frame(d = edges_df, vertices = nodes_df, directed = TRUE)
     message(sprintf("✓ Pulled network from Cytoscape: %d nodes, %d edges", vcount(g_raw), ecount(g_raw)))
 
     # Enforce Topological Sort for Nimble Compatibility

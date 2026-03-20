@@ -11,13 +11,11 @@ configure_dcm(info, X, priors = NULL)
 
 \item{X}{A numeric matrix representing the observational participant data.}
 
-\item{priors}{Optional list of prior specifications. Can be provided as common pairs 
-(e.g., \code{list(beta = c(mean, std), theta = c(mean, std), lambda = c(mean, std))}) or individual parameter arrays 
+\item{priors}{Optional list of prior specifications. Can be provided as common pairs
+(e.g., \code{list(beta = c(mean, std), theta = c(mean, std), lambda = c(mean, std))}) or individual parameter arrays
 (e.g., \code{list(beta_mean = c(...), beta_std = c(...), theta_mean = matrix(...), ...)}).
-Semantic meanings: \code{beta} represents the root attributes (initial probabilities), \code{theta} represents 
-structural attribute transitions (dependencies between skills), and \code{lambda} represents item parameters 
-(slopes and intercepts). If \code{NULL}, default priors (mean 0, std 2) are generated. Passing a standard deviation of 
-\code{0.0001} or similar effectively acts as a point distribution, enabling the use of \code{pgdcm} 
+If \code{NULL}, default priors (mean 0, std 2) are generated. Passing a standard deviation of
+\code{0.0001} or similar effectively acts as a point distribution, enabling the use of \code{pgdcm}
 as a scoring-only model when parameter means are supplied from a previous calibration.}
 }
 \value{

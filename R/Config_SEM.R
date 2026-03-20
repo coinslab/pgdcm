@@ -42,7 +42,8 @@ configure_sem <- function(info, X, priors = NULL) {
         SEMdoBinaryAttribute = as.numeric("binary" %in% att_computes),
         SEMdoZscoreTask = as.numeric("zscore" %in% task_computes || "continuous" %in% task_computes),
         SEMdoPercentileTask = as.numeric("percentile" %in% task_computes),
-        SEMdoBinaryTask = as.numeric("binary" %in% task_computes)
+        SEMdoBinaryTask = as.numeric("binary" %in% task_computes),
+        CDMattnodesmax = max(2, info$nrattributenodes)
     )
 
     # Prior generation
@@ -83,9 +84,9 @@ configure_sem <- function(info, X, priors = NULL) {
     }
 
     if (constants$SEMdoBinaryAttribute || constants$SEMdoPercentileAttribute) {
-        attributenodes_init <- matrix(rbinom(nrparticipants * info$nrattributenodes, 1, 0.5), nrow = nrparticipants, ncol = info$nrattributenodes)
+        attributenodes_init <- matrix(rbinom(nrparticipants * constants$CDMattnodesmax, 1, 0.5), nrow = nrparticipants, ncol = constants$CDMattnodesmax)
     } else {
-        attributenodes_init <- matrix(rnorm(nrparticipants * info$nrattributenodes), nrow = nrparticipants, ncol = info$nrattributenodes)
+        attributenodes_init <- matrix(rnorm(nrparticipants * constants$CDMattnodesmax), nrow = nrparticipants, ncol = constants$CDMattnodesmax)
     }
 
     inits <- list(

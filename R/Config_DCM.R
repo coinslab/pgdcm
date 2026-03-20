@@ -39,7 +39,8 @@ configure_dcm <- function(info, X, priors = NULL) {
         isDINA = info$isDINA,
         isDINO = info$isDINO,
         isDINM = info$isDINM,
-        isContinuousHO = is_continuous_ho
+        isContinuousHO = is_continuous_ho,
+        CDMattnodesmax = max(2, info$nrattributenodes)
     )
 
     # Prior generation
@@ -97,7 +98,7 @@ configure_dcm <- function(info, X, priors = NULL) {
         lambda_init[j, 2] <- rnorm(1, 0, 1)
     }
 
-    attributenodes_init <- matrix(rbinom(nrparticipants * info$nrattributenodes, 1, 0.5), nrow = nrparticipants, ncol = info$nrattributenodes)
+    attributenodes_init <- matrix(rbinom(nrparticipants * constants$CDMattnodesmax, 1, 0.5), nrow = nrparticipants, ncol = constants$CDMattnodesmax)
 
     # If continuous roots, enforce continuous initialization
     if (constants$isContinuousHO == 1) {

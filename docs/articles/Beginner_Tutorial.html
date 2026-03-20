@@ -39,6 +39,9 @@
     <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Advanced_Tutorial.html">Advanced Tutorial</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
+    <li><a class="dropdown-item" href="../articles/Understanding_loglinearBN.html">Mathematical Foundations of the PGDCM Model</a></li>
   </ul>
 </li>
       </ul>
@@ -109,10 +112,21 @@
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">dtmr_data</span></span>
 <span><span class="va">Q</span> <span class="op">&lt;-</span> <span class="va">dtmr_qmatrix</span></span></code></pre></div>
 </div>
+<p>It is always good practice to verify the dimensions and inspect a few rows to make sure everything loaded correctly:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># X should be N (students) x J (items)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span><span class="op">)</span> <span class="co"># first 6 columns</span></span>
+<span></span>
+<span><span class="co"># Q should be J (items) x K (skills)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">Q</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">Q</span><span class="op">)</span></span></code></pre></div>
+</div>
 <p>The <code>pgdcm</code> package mathematically treats modern psychometric models as probabilistic graphical models (specifically, Directed Acyclic Graphs or Bayesian Networks). Because of this, we must first convert our standard Q-Matrix into a Directed Acyclic Graph (<code>g</code>) that represents the underlying node dependencies—i.e., the dependencies between the skills and the tasks/test items. The <code><a href="../reference/QMatrix2iGraph.html">QMatrix2iGraph()</a></code> function handles this graphical conversion automatically for us.</p>
 <p>Once we have constructed the core network graph, several model parameters must be defined to establish the active modeling environment for NIMBLE. This includes validating topological constraints, isolating constants required for <code>nimble</code> inference calculations, and setting initial values for the model parameters. The <code><a href="../reference/build_model_config.html">build_model_config()</a></code> function handles all of this heavy lifting.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Restructure Matrix to an iGraph object</span></span>
 <span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/QMatrix2iGraph.html">QMatrix2iGraph</a></span><span class="op">(</span><span class="va">Q</span><span class="op">)</span></span>
 <span></span>
@@ -130,7 +144,7 @@
 <p>In a traditional Bayesian workflow, setting up the configuration for both the model and the MCMC sampler requires a non-trivial amount of code. To keep the process streamlined and robust, the <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> function automates this step. It initializes the model with sensible default values, runs the MCMC sampler for you, and saves the results directly to your working directory.</p>
 <p><em>Note: MCMC algorithms construct a Markov chain to recursively explore the unknown probability distributions of our parameters. Evaluating these complex prior-likelihood constraints across thousands of iterations is computationally intensive and can realistically slow down documentation rendering. Therefore, it is standard workflow practice to execute and save your chain results to disk via <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> locally, and load them for post-model fitting inference or analysis.</em></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto</a></span><span class="op">(</span></span>
 <span>    config <span class="op">=</span> <span class="va">config</span>,</span>
 <span>    prefix <span class="op">=</span> <span class="st">"DINA_DTMR"</span> <span class="co"># You can give any name here. This prefix is used while saving</span></span>
@@ -146,9 +160,9 @@
 <p>Under the hood, <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> handles several complex configurations so you don’t have to manually code them. The function configures the MCMC algorithmic engine with the following default parameters:</p>
 <ul>
 <li>
-<strong><code>niter = 2000</code></strong>: The total number of MCMC samples to draw per chain.</li>
+<strong><code>niter = 1000</code></strong>: The total number of MCMC samples to draw per chain.</li>
 <li>
-<strong><code>nburnin = 500</code></strong>: The number of initial samples to discard. MCMC algorithms take time to traverse towards the high-probability region; discarding early “burn-in” samples ensures we only analyze parameters after they have reached a stable state.</li>
+<strong><code>nburnin = 100</code></strong>: The number of initial samples to discard. MCMC algorithms take time to traverse towards the high-probability region; discarding early “burn-in” samples ensures we only analyze parameters after they have reached a stable state.</li>
 <li>
 <strong><code>chains = 2</code></strong>: The algorithm runs two independent sampling processes simultaneously to ensure they both converge onto the same distribution.</li>
 </ul>
@@ -161,57 +175,140 @@
 </ul>
 </blockquote>
 </div>
-</section><section class="level2"><h2 id="interpreting-the-bayesian-output">4. Interpreting the Bayesian Output<a class="anchor" aria-label="anchor" href="#interpreting-the-bayesian-output"></a>
+</section><section class="level2"><h2 id="interpreting-the-results">4. Interpreting the Results<a class="anchor" aria-label="anchor" href="#interpreting-the-results"></a>
 </h2>
-<p>Unlike standard frequentist statistics which often output a single “best guess” point estimate, Bayesian inference through MCMC outputs <strong>thousands of plausible values drawn from the joint posterior distribution</strong>. This fundamental difference allows us to naturally extract comprehensive metrics like the <strong>posterior mean</strong> and <strong>credible intervals</strong> to formally quantify our uncertainty.</p>
-<p>To easily read and interpret these distributions, we will load our cached <code>.rds</code> file and use the <code>MCMCvis</code> package.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Load our pre-cached exact results from the pipeline above</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"Beginner_Tutorial_Results.rds"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/caseyyoungflesh/MCMCvis" class="external-link">MCMCvis</a></span><span class="op">)</span></span></code></pre></div>
-</div>
-<section class="level3"><h3 id="numerical-analytics">Numerical Analytics<a class="anchor" aria-label="anchor" href="#numerical-analytics"></a>
+<p>The <code>results</code> object returned by <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> includes several pre-computed, beginner-friendly outputs. Let’s start with the two most useful: <strong>skill profiles</strong> and <strong>item parameters</strong>.</p>
+<section class="level3"><h3 id="who-mastered-what-skill-profiles">Who Mastered What? (Skill Profiles)<a class="anchor" aria-label="anchor" href="#who-mastered-what-skill-profiles"></a>
 </h3>
-<p>By passing our raw MCMC <code>samples</code> into the <code><a href="https://rdrr.io/pkg/MCMCvis/man/MCMCsummary.html" class="external-link">MCMCsummary()</a></code> function, we can collapse the complex distributions into a clean summary table that provides point estimates and measures of numerical uncertainty.</p>
-<p>The <code>lambda</code> parameters in our model capture the properties of the test items themselves. For each test item <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>:</p>
-<ul>
-<li>
-<strong><code>lambda[j, 1]</code> (Discrimination / Slope)</strong>: Represents how effectively the item distinguishes between participants who possess the required skills and those who do not. A higher value indicates the item strongly differentiates between mastery states.</li>
-<li>
-<strong><code>lambda[j, 2]</code> (Difficulty / Intercept)</strong>: Represents the baseline difficulty of the item. A higher value typically means the question is inherently harder to answer correctly overall.</li>
-</ul>
-<p><em>(There are also other parameter families estimated in the graphical model that capture the <strong>attribute network</strong> itself. For example, <code>beta_root</code> parameters represent the baseline prevalence of foundational “root” skills in the population. The <code>theta</code> parameters function similarly to <code>lambda</code>, but are applied to higher-level skills, carrying their own dependencies and baseline difficulties.)</em></p>
-<p>We can extract a numerical summary matrix specifically for our <code>lambda</code> parameters to inspect how the test items functioned:</p>
+<p>The <code>skill_profiles</code> table is an <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>×</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">N \times K</annotation></semantics></math> matrix showing the estimated probability of mastery for each student on each skill. Values close to 1 indicate likely mastery; values close to 0 indicate likely non-mastery.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Each row = one student, each column = one skill</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">skill_profiles</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       referent_units partitioning_iterating appropriateness
+000809   9.999444e-01              0.9986111      0.79872222
+000994   2.627778e-02              0.9671111      0.88455556
+002427   9.333333e-03              0.9618889      0.88227778
+003128   9.999444e-01              0.9923333      0.74172222
+006198   5.555556e-05              0.9937222      0.01722222
+008702   5.328333e-01              0.9921667      0.97222222
+       multiplicative_comparison
+000809                 0.9997778
+000994                 0.9883889
+002427                 0.9872222
+003128                 0.9995556
+006198                 0.9758333
+008702                 0.4034444</code></pre>
+</div>
+</div>
+</section><section class="level3"><h3 id="how-did-the-items-perform-item-parameters">How Did the Items Perform? (Item Parameters)<a class="anchor" aria-label="anchor" href="#how-did-the-items-perform-item-parameters"></a>
+</h3>
+<p>The <code>item_parameters</code> table provides a clean summary of how each test item functioned, with human-readable labels instead of raw parameter indices:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">item_parameters</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  item difficulty_mean difficulty_SD difficulty_Rhat discrimination_mean
+1    1       1.4077711     0.1535871            1.02           1.7290810
+2    2      -0.5853984     0.1286397            1.01           1.3389519
+3    3       2.9015853     0.2920419            1.01           2.5052113
+4    4       1.5771029     0.1491429            1.01           0.9337544
+5    5       2.1237524     0.1878747            1.01           1.7335323
+6    6       4.0207219     0.4005289            1.02           1.9544232
+  discrimination_SD discrimination_Rhat
+1         0.1923772                1.03
+2         0.2152481                1.05
+3         0.3164820                1.01
+4         0.1911755                1.01
+5         0.2215849                1.01
+6         0.4345682                1.02</code></pre>
+</div>
+</div>
+<p>Each item has two key properties:</p>
+<ul>
+<li>
+<strong>Discrimination (Slope)</strong>: How effectively the item distinguishes between students who possess the required skills and those who do not. Higher values mean better differentiation.</li>
+<li>
+<strong>Difficulty (Intercept)</strong>: The baseline difficulty of the item. Higher values mean the question is harder overall.</li>
+</ul></section><section class="level3"><h3 id="model-fit-waic">Model Fit (WAIC)<a class="anchor" aria-label="anchor" href="#model-fit-waic"></a>
+</h3>
+<p>The Watanabe-Akaike Information Criterion (WAIC) provides a single number summarizing how well the model fits the data. Lower values indicate better fit. This is especially useful if you want to compare models (e.g., DINA vs. DINO) later on.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">results</span><span class="op">$</span><span class="va">WAIC</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 29474.06</code></pre>
+</div>
+</div>
+</section><section class="level3"><h3 id="grouping-students-by-mastery-patterns-optional">Grouping Students by Mastery Patterns (Optional)<a class="anchor" aria-label="anchor" href="#grouping-students-by-mastery-patterns-optional"></a>
+</h3>
+<p>If you want to classify students into discrete latent classes based on their mastery profiles, you can pass <code>return_groups = TRUE</code> to <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto</a></span><span class="op">(</span></span>
+<span>    config <span class="op">=</span> <span class="va">config</span>,</span>
+<span>    prefix <span class="op">=</span> <span class="st">"DINA_DTMR"</span>,</span>
+<span>    return_groups <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>This adds a <code>group_patterns</code> field to the results, which organizes students into exhaustive mastery pattern groups (e.g., all students who mastered skills 1 and 3 but not 2 and 4). By default, a probability threshold of 0.5 is used to classify mastery — you can adjust this with the <code>threshold</code> argument.</p>
+<div>
+<blockquote>
+<p><strong>Warning</strong></p>
+<p>The number of possible mastery patterns grows as <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>2</mn><mi>K</mi></msup><annotation encoding="application/x-tex">2^K</annotation></semantics></math> where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math> is the number of skills. For models with many attributes, this can produce a very large number of groups.</p>
+</blockquote>
+</div>
+<div>
+<blockquote>
+<p><strong>Auto-Saved Output Files</strong></p>
+<p><code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> automatically saves several CSV files to your working directory using the <code>prefix</code> you specified:</p>
+<ul>
+<li>
+<code>DINA_DTMR_skill_profiles.csv</code> — Mastery probabilities for every student.</li>
+<li>
+<code>DINA_DTMR_item_parameters.csv</code> — Item discrimination and difficulty estimates.</li>
+<li>
+<code>DINA_DTMR_mapped_parameters.csv</code> — Full parameter summary with human-readable names.</li>
+</ul>
+<p>You can open these directly in Excel or any spreadsheet tool for further analysis.</p>
+</blockquote>
+</div>
+</section><section class="level3"><h3 id="going-deeper-raw-mcmc-diagnostics">Going Deeper: Raw MCMC Diagnostics<a class="anchor" aria-label="anchor" href="#going-deeper-raw-mcmc-diagnostics"></a>
+</h3>
+<p>The outputs above are derived from the underlying Bayesian posterior distribution. If you want to inspect the raw MCMC chains directly — for example, to check convergence or visualize credible intervals — the <code>MCMCvis</code> package is a great tool for this.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/caseyyoungflesh/MCMCvis" class="external-link">MCMCvis</a></span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>The <code>lambda</code> parameters capture the raw item properties. For each test item <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>, <code>lambda[j, 1]</code> is the discrimination (slope) and <code>lambda[j, 2]</code> is the difficulty (intercept).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Retrieve a numerical summary table specifically for the 'lambda' item parameters</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MCMCvis/man/MCMCsummary.html" class="external-link">MCMCsummary</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">samples</span>, params <span class="op">=</span> <span class="st">"lambda"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="co"># only a few rows from res are displayed here.</span></span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                  mean        sd      2.5%       50%    97.5% Rhat n.eff
-lambda[1, 1] 1.7512409 0.2142891 1.3824153 1.7402970 2.247491 1.43    68
-lambda[2, 1] 1.3103394 0.2119471 0.8939294 1.3198143 1.698902 1.02   151
-lambda[3, 1] 2.4237264 0.2828668 1.9031875 2.4225588 2.967375 1.08    51
-lambda[4, 1] 0.9529481 0.1925619 0.5754743 0.9500665 1.327190 1.01   107
-lambda[5, 1] 1.7350918 0.2272166 1.3164859 1.7212369 2.187425 1.03    71
-lambda[6, 1] 1.9637383 0.4919925 1.1386391 1.9218624 3.056010 1.14    39</code></pre>
+lambda[1, 1] 1.7290810 0.1923772 1.3537706 1.7274241 2.109067 1.03   512
+lambda[2, 1] 1.3389519 0.2152481 0.9292727 1.3358068 1.767134 1.05   934
+lambda[3, 1] 2.5052113 0.3164820 1.9328485 2.4877870 3.193183 1.01   179
+lambda[4, 1] 0.9337544 0.1911755 0.5769390 0.9329804 1.328390 1.01   572
+lambda[5, 1] 1.7335323 0.2215849 1.3186263 1.7288180 2.188279 1.01   369
+lambda[6, 1] 1.9544232 0.4345682 1.1549475 1.9382027 2.856814 1.02   239</code></pre>
 </div>
 </div>
 <p><strong>How to Read the Table:</strong></p>
 <ul>
 <li>
-<strong><code>mean</code></strong>: The expected value or best estimate for the parameter. This conceptually corresponds to the traditional point estimate you would obtain in a frequentist approach.</li>
+<strong><code>mean</code></strong>: The expected value (best estimate) for the parameter.</li>
 <li>
-<strong><code>2.5%</code> and <code>97.5%</code></strong>: These bounds define the <strong>95% Credible Interval</strong>. In Bayesian inference, this means there is a 95% probability that the true underlying parameter value falls within this specific range.</li>
+<strong><code>2.5%</code> and <code>97.5%</code></strong>: The <strong>95% Credible Interval</strong> — there is a 95% probability the true value falls within this range.</li>
 <li>
-<strong><code>Rhat</code></strong>: A convergence diagnostic (Gelman-Rubin statistic). If <code>Rhat</code> is greater than 1.1, it generally indicates the MCMC chains have not yet converged, and you may need to substantially increase the <code>niter</code> (number of iterations) in your estimation step. Sometimes <code>Rhat</code> values remain greater than 1.1 due to an underlying model misspecification. This issue can typically be identified if you continue to increase the number of iterations and observe no improvement in the convergence diagnostics.</li>
-</ul></section><section class="level3"><h3 id="visual-analytics">Visual Analytics<a class="anchor" aria-label="anchor" href="#visual-analytics"></a>
-</h3>
-<p>Reviewing hundreds of rows in a table can be exhausting. MCMC visualization functions like <code><a href="https://rdrr.io/pkg/MCMCvis/man/MCMCplot.html" class="external-link">MCMCplot()</a></code> can transform these parameter boundaries into intuitive visual “Caterpillar Plots”.</p>
-<p><em>Note: Because we estimated 54 item parameters for this dataset, plotting them all simultaneously can vertically cramp the screen. Standard R plotting packages (like <code>MCMCvis</code>) may auto-truncate the Y-axis labels to fit the visual constraints, occasionally dropping some text labels to save space.</em></p>
+<strong><code>Rhat</code></strong>: A convergence diagnostic (Gelman-Rubin statistic). Values greater than 1.1 suggest the chains have not yet converged and you may need to increase <code>niter</code>.</li>
+</ul>
+<p>MCMC visualization functions like <code><a href="https://rdrr.io/pkg/MCMCvis/man/MCMCplot.html" class="external-link">MCMCplot()</a></code> can transform these into intuitive “Caterpillar Plots”:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Visually plot the 'lambda' parameter distributions</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/MCMCvis/man/MCMCplot.html" class="external-link">MCMCplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">samples</span>, params <span class="op">=</span> <span class="st">"lambda"</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
@@ -221,15 +318,16 @@ lambda[6, 1] 1.9637383 0.4919925 1.1386391 1.9218624 3.056010 1.14    39</code><
 </div>
 </div>
 </div>
-<p><strong>How to Interpret the Visuals:</strong> Each dot represents the mean estimate for a specific parameter. The horizontal lines stretching outwards illustrate the 95% Credible Interval.</p>
-<ul>
-<li>A wider line indicates high uncertainty (a broader credible interval) for that parameter.</li>
-<li>A shorter, narrower line indicates the model is highly confident in its estimate (a tighter credible interval) for that parameter.</li>
-</ul>
+<p><strong>How to Interpret the Visuals:</strong> Each dot represents the mean estimate. The horizontal lines show the 95% Credible Interval — wider lines mean more uncertainty, narrower lines mean higher confidence.</p>
 <div>
 <blockquote>
 <p><strong>Next Steps</strong></p>
-<p>Ready to dive deeper? Check out the <a href="https://coinslab.github.io/pgdcm/articles/Advanced_Tutorial.html" class="external-link">Advanced Tutorial</a> to learn about customizing models, diagnosing chains, and configuring the PGDCM engine natively.</p>
+<ul>
+<li>
+<strong>Build your own models?</strong> The <a href="https://coinslab.github.io/pgdcm/articles/Model_Specification_Tutorial.html" class="external-link">Model Specification Tutorial</a> walks you through constructing custom competency and evidence models using Cytoscape.</li>
+<li>
+<strong>Fine-tune the engine?</strong> The <a href="https://coinslab.github.io/pgdcm/articles/Advanced_Tutorial.html" class="external-link">Advanced Tutorial</a> covers customizing priors, MCMC sampling, and diagnostic workflows.</li>
+</ul>
 </blockquote>
 </div>
 </section></section><script id="quarto-html-after-body" type="application/javascript">
