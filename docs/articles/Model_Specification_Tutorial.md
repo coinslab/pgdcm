@@ -208,17 +208,14 @@ adding edges) naturally remain in your primary Evidence/Competency
 model.
 
 1.  **Select target nodes:** Highlight the nodes you want to focus on.
-    (*Tip:* Select a node, then use **Select \\ Nodes \\ First Neighbors
-    of Selected Nodes \\ Undirected** or `Cmd+6`/`Ctrl+6` to grab its
-    connections).
-2.  **Invert selection:** Go to **Select \\ Nodes \\ Invert Node
-    Selection** and **Select \\ Edges \\ Invert Edge Selection**.
-3.  **Hide the rest:** Right-click the empty canvas space and choose
-    **Hide Selected Nodes and Edges** (or go to **View \\ Hide Selected
-    Nodes and Edges**).
-4.  **Make your edits:** You can now simply adjust the layout, move
+    (*Tip:* Select a node, then use \*\*Select \\ Nodes \\ First
+    Neighbors of Selected Nodes).
+2.  **Hide the rest:** Right-click the empty canvas space and choose
+    **Hide Unselected Nodes and Edges** (or go to **View \\ Hide
+    Unselected Nodes and Edges**).
+3.  **Make your edits:** You can now simply adjust the layout, move
     nodes, add edges, or edit attributes on this isolated sub-network.
-5.  **Zoom out back to the full network:** When finished, choose **View
+4.  **Zoom out back to the full network:** When finished, choose **View
     \\ Show All Nodes and Edges**. All your new edits and coordinates
     will neatly integrate back into the main network!
 

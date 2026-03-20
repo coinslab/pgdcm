@@ -6,14 +6,19 @@ visualization.
 ## Usage
 
 ``` r
-push_to_cytoscape(..., base.url = "http://localhost:1234/v1")
+push_to_cytoscape(network, ..., base.url = "http://localhost:1234/v1")
 ```
 
 ## Arguments
 
+- network:
+
+  An `igraph` object or a `data.frame` of nodes.
+
 - ...:
 
-  Arguments passed to `createNetworkFromDataFrames`.
+  Additional arguments passed to `createNetworkFromIgraph` or
+  `createNetworkFromDataFrames`.
 
 - base.url:
 
