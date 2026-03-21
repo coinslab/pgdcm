@@ -19,6 +19,7 @@
 #' @param prefix Character. Descriptor prefix used for saving generated reports. Defaults to a timestamped string based on the model type.
 #' @param threshold Numeric. The mastery probability threshold to use for latent class grouping. Default is 0.5.
 #' @param return_groups Logical. If \code{TRUE}, the model groups participants into exhaustive latent classes (Caution: Scales exponentially with attributes). Default is \code{FALSE}.
+#' @param estimate Logical. If \code{TRUE} (default), MCMC estimation is performed. If \code{FALSE}, estimation is skipped (e.g., to only run prior predictive checks).
 #'
 #' @return A comprehensive list containing:
 #' \itemize{
@@ -37,7 +38,8 @@ run_pgdcm_auto <- function(config,
                            estimation_config = list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NULL, post_sims = NULL),
                            prefix = NULL,
                            threshold = 0.5,
-                           return_groups = FALSE) {
+                           return_groups = FALSE,
+                           estimate = TRUE) {
     if (is.null(prefix)) {
         prefix <- paste0(config$type, "_", format(Sys.time(), "%Y%m%d_%H%M%S"))
     }
@@ -50,6 +52,22 @@ run_pgdcm_auto <- function(config,
         prior_res <- run_predictive_check(config, config$data$X, posterior_samples = NULL, n_sim = estimation_config$prior_sims, prefix = prefix, title = "PriorPPC")
     } else {
         print("\n--- 1. Skipping Prior Predictive Check ---")
+    }
+
+    if (!estimate) {
+        print("\n--- Estimation Skipped (estimate = FALSE) ---")
+        print("\nPipeline Complete!")
+        return(list(
+            mcmc_out = NULL,
+            samples = NULL,
+            mapped_parameters = NULL,
+            skill_profiles = NULL,
+            item_parameters = NULL,
+            group_patterns = NULL,
+            prior_ppc = prior_res,
+            post_ppc = NULL,
+            WAIC = NULL
+        ))
     }
 
     print("\n--- 2. Executing MCMC Inference ---")
