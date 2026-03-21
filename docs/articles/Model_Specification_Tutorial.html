@@ -45,6 +45,7 @@
     <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Advanced_Tutorial.html">Advanced Tutorial</a></li>
+    <li><a class="dropdown-item" href="../articles/Cookbook.html">Model Cookbook</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
     <li><a class="dropdown-item" href="../articles/Understanding_loglinearBN.html">Mathematical Foundations of the PGDCM Model</a></li>
@@ -93,13 +94,13 @@
 </div>
 <section class="level2"><h3 id="why-do-i-need-this">Why Do I Need This?<a class="anchor" aria-label="anchor" href="#why-do-i-need-this"></a>
 </h3>
-<p>Imagine you gave a group of students a math test with 10 questions. Some questions require algebra, some require geometry, and some require both. You want to figure out <em>which skills each student has mastered</em> — not just their total score.</p>
+<p>Imagine you gave a group of students a math test with 10 questions. Some questions require algebra, some require geometry, and some require both. You want to figure out <em>which skills each student has mastered</em> - not just their total score.</p>
 <p>To do that, you need to tell the model two things:</p>
 <ol type="1">
 <li>
-<strong>What skills exist and how they relate to each other</strong> — this is the <strong>Competency Model</strong> (also called the Proficiency Model).</li>
+<strong>What skills exist and how they relate to each other</strong> - this is the <strong>Competency Model</strong> (also called the Proficiency Model).</li>
 <li>
-<strong>Which skills are needed for each test question</strong> — this is the <strong>Evidence Model</strong>.</li>
+<strong>Which skills are needed for each test question</strong> - this is the <strong>Evidence Model</strong>.</li>
 </ol>
 <p>This tutorial shows you how to build both of these models visually using Cytoscape and the <code>pgdcm</code> R package.</p>
 </section><section class="level2"><h3 id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a>
@@ -114,7 +115,7 @@
 <strong>Cytoscape installed:</strong> Download it free from <a href="https://cytoscape.org/" class="external-link">cytoscape.org</a>.</li>
 <li>
 <strong>Beginner Tutorial completed (recommended):</strong> If you are new to <code>pgdcm</code>, work through the <a href="Beginner_Tutorial.qmd">Beginner Tutorial</a> first to understand the modeling pipeline end-to-end.</li>
-<li>No prior knowledge of network science or psychometric modeling is required — we explain the key concepts as we go.</li>
+<li>No prior knowledge of network science or psychometric modeling is required - we explain the key concepts as we go.</li>
 </ul>
 </blockquote>
 </div>
@@ -158,33 +159,33 @@
 </tr>
 </tbody>
 </table>
-<p>Before running any script, ensure:</p>
-<ol type="1">
-<li>
-<strong>Cytoscape</strong> is open and running on your machine.</li>
-<li>Cytoscape is listening on the default port: <code>http://localhost:1234/v1</code>.</li>
-</ol></section><section class="level2"><h3 id="what-is-cytoscape">What is Cytoscape?<a class="anchor" aria-label="anchor" href="#what-is-cytoscape"></a>
+<p>Before running any script, ensure that <strong>Cytoscape</strong> is open and running on your machine.</p>
+</section><section class="level2"><h3 id="what-is-cytoscape">What is Cytoscape?<a class="anchor" aria-label="anchor" href="#what-is-cytoscape"></a>
 </h3>
 <p><a href="https://cytoscape.org/" class="external-link">Cytoscape</a> is an open-source software platform designed for visualizing complex networks and integrating them with attribute data. In the context of PGDCM, we use the <code>RCy3</code> package in R to automatically pass our graphmodels (Tasks and Attributes) directly into and from the Cytoscape application. This allows us to visually construct, verify, and document our Evidence and Proficiency models before finalizing them for analysis.</p>
+</section><section class="level2"><h3 id="connecting-r-to-cytoscape">Connecting R to Cytoscape<a class="anchor" aria-label="anchor" href="#connecting-r-to-cytoscape"></a>
+</h3>
+<p>Before passing any data, we need to ensure R can communicate with your active Cytoscape session. We do this by loading the <code>RCy3</code> package and “pinging” the default Cytoscape port. Depending on if you are in Mac or Windows, you may need to change the default port. If the cytoscapePing didn’t work try getting rid of <code>/v1</code> from the cytoPort URL.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load required libraries</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cytoscape/RCy3" class="external-link">RCy3</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r.igraph.org/" class="external-link">igraph</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://readxl.tidyverse.org" class="external-link">readxl</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pgdcm</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Verify connection to Cytoscape</span></span>
+<span><span class="va">cytoPort</span> <span class="op">&lt;-</span> <span class="st">"http://localhost:1234/v1"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/RCy3/man/cytoscapePing.html" class="external-link">cytoscapePing</a></span><span class="op">(</span><span class="va">cytoPort</span><span class="op">)</span></span></code></pre></div>
+</div>
 </section><section class="level2"><h3 id="getting-started-loading-the-pgdcm-cytoscape-template">Getting Started: Loading the PGDCM Cytoscape Template<a class="anchor" aria-label="anchor" href="#getting-started-loading-the-pgdcm-cytoscape-template"></a>
 </h3>
 <p>To ensure your networks are styled correctly right off the bat, you need to load the custom PGDCM Cytoscape Session template. The <code>pgdcm</code> package provides a handy utility function to extract this template directly to your R working directory.</p>
 <ol type="1">
 <li>In your R console, run <code><a href="../reference/get_Cyto_template.html">get_Cyto_template()</a></code> to download <code>PGDCM_template.cys</code> into your working directory.</li>
-<li>Launch Cytoscape.</li>
-<li>Go to <strong>File &gt; Import &gt; Network from File..</strong> (or press <code>Ctrl+L</code> / <code>Cmd+L</code>). (see <a href="#fig-template" class="quarto-xref">Figure 1</a>)</li>
-<li>Locate and select the <code>PGDCM_template.cys</code> file you just downloaded.</li>
-<li>Once loaded, Cytoscape will have all our custom Visual Styles ready to go.</li>
+<li>Navigate to your project folder using your file explorer and double click on the <code>PGDCM_template.cys</code> file. This should load Cytoscape with the pre-built Network formatting and styling compatible with <code>pgdcm</code> library.</li>
 </ol>
-<div id="fig-template" class="quarto-float quarto-figure quarto-figure-center">
-<figure class="quarto-float quarto-float-fig"><div aria-describedby="fig-template-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="importing_style.png">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-template-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure 1: Importing PGDCM Template
-</figcaption></figure>
-</div>
-</section><section class="level2"><h3 id="navigating-the-cytoscape-interface">Navigating the Cytoscape Interface<a class="anchor" aria-label="anchor" href="#navigating-the-cytoscape-interface"></a>
+<!-- ![Importing PGDCM Template](importing_style.png){#fig-template} --></section><section class="level2"><h3 id="navigating-the-cytoscape-interface">Navigating the Cytoscape Interface<a class="anchor" aria-label="anchor" href="#navigating-the-cytoscape-interface"></a>
 </h3>
 <p>While building PGDCM models, you will primarily interact with three areas in Cytoscape:</p>
 <ol type="1">
@@ -196,7 +197,7 @@ Figure 1: Importing PGDCM Template
 <img src="panels.png">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-panels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure 2: Cytoscape Window
+Figure 1: Cytoscape Window
 </figcaption></figure>
 </div>
 <ol start="2" type="1">
@@ -231,7 +232,7 @@ Figure 2: Cytoscape Window
 <img src="add_node.png" class="quarto-figure quarto-figure-center" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adding-node-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure 3: Adding Node
+Figure 2: Adding Node
 </figcaption></figure>
 </div>
 <ol start="3" type="1">
@@ -242,7 +243,7 @@ Figure 3: Adding Node
 <img src="rename_node.png" class="quarto-figure quarto-figure-center" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rename-node-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure 4: Renaming Node
+Figure 3: Renaming Node
 </figcaption></figure>
 </div>
 <ol start="4" type="1">
@@ -251,7 +252,7 @@ Figure 4: Renaming Node
 <div>
 <blockquote>
 <p><strong>Advanced: HO-DINA, IRT, and MIRT Specification</strong></p>
-<p>You can skip this section on a first read — it is only relevant if you want to model <strong>continuous</strong> latent traits (like a general ability score) rather than binary mastery.</p>
+<p>You can skip this section on a first read - it is only relevant if you want to model <strong>continuous</strong> latent traits (like a general ability score) rather than binary mastery.</p>
 <p>By default, an Attribute with <code>dina</code> as its compute method represents a discrete, binary skill (Mastery vs. Non-Mastery). However, PGDCM also supports continuous latent variables. You enable this by changing the <code>compute</code> column of a <strong>root node</strong> (a node with no incoming arrows) to <code>continuous</code>.</p>
 <p>Depending on your network structure, this produces different model types:</p>
 <table class="table caption-top">
@@ -285,7 +286,7 @@ Figure 4: Renaming Node
 <img src="edit_fields.png" class="quarto-figure quarto-figure-center" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-edit-fields-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure 5: Defining node type and compute
+Figure 4: Defining node type and compute
 </figcaption></figure>
 </div>
 </blockquote>
@@ -302,28 +303,12 @@ Figure 5: Defining node type and compute
 <li>
 <strong>Select target nodes:</strong> Highlight the nodes you want to focus on. (<em>Tip:</em> Select a node, then use **Select \&gt; Nodes \&gt; First Neighbors of Selected Nodes).</li>
 <li>
-<strong>Hide the rest:</strong> Right-click the empty canvas space and choose <strong>Hide Unselected Nodes and Edges</strong> (or go to <strong>View \&gt; Hide Unselected Nodes and Edges</strong>).</li>
+<strong>Hide the rest:</strong> From the Cytoscape Menu, **Select \&gt; Nodes \&gt; Hide Unselected Nodes.</li>
 <li>
 <strong>Make your edits:</strong> You can now simply adjust the layout, move nodes, add edges, or edit attributes on this isolated sub-network.</li>
 <li>
-<strong>Zoom out back to the full network:</strong> When finished, choose <strong>View \&gt; Show All Nodes and Edges</strong>. All your new edits and coordinates will neatly integrate back into the main network!</li>
-</ol></section><section class="level2"><h3 id="connecting-r-to-cytoscape">Connecting R to Cytoscape<a class="anchor" aria-label="anchor" href="#connecting-r-to-cytoscape"></a>
-</h3>
-<p>Before passing any data, we need to ensure R can communicate with your active Cytoscape session. We do this by loading the <code>RCy3</code> package and “pinging” the default Cytoscape port.</p>
-<p>Our custom utility functions (like pushing models or formatting tables) are seamlessly integrated right into the primary <code>pgdcm</code> library.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Load required libraries</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cytoscape/RCy3" class="external-link">RCy3</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r.igraph.org/" class="external-link">igraph</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://readxl.tidyverse.org" class="external-link">readxl</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pgdcm</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Verify connection to Cytoscape</span></span>
-<span><span class="va">cytoPort</span> <span class="op">&lt;-</span> <span class="st">"http://localhost:1234/v1"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/RCy3/man/cytoscapePing.html" class="external-link">cytoscapePing</a></span><span class="op">(</span><span class="va">cytoPort</span><span class="op">)</span></span></code></pre></div>
-</div>
-</section></section><section class="section level2"><h2 id="scenario-1-starting-from-task-data-building-models-from-scratch">Scenario 1: Starting from Task Data (Building Models from Scratch)<a class="anchor" aria-label="anchor" href="#scenario-1-starting-from-task-data-building-models-from-scratch"></a>
+<strong>Zoom out back to the full network:</strong> When finished, go to the Cytoscape Menu, **Select \&gt; Nodes \&gt; Show All Nodes. All your new edits and coordinates will neatly integrate back into the main network!</li>
+</ol></section></section><section class="section level2"><h2 id="scenario-1-starting-from-task-data-building-models-from-scratch">Scenario 1: Starting from Task Data (Building Models from Scratch)<a class="anchor" aria-label="anchor" href="#scenario-1-starting-from-task-data-building-models-from-scratch"></a>
 </h2>
 <p>In this scenario, you start with just a raw response matrix (often an Excel file). The columns represent tasks (items). There are no attribute nodes or edges yet, meaning neither the Competency nor the Evidence model exists.</p>
 <p>Our goal is to push the task nodes into Cytoscape, manually build the rest of the network (attribute nodes and all edges), and then pull the completed graph back to R.</p>
@@ -445,7 +430,7 @@ Figure 5: Defining node type and compute
 <img src="q2graph.png" class="quarto-figure quarto-figure-center" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-q2graph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure 6: The Graph rendered in Cytoscape based on the Q-Matrix that we pushed to Cytoscape from R.
+Figure 5: The Graph rendered in Cytoscape based on the Q-Matrix that we pushed to Cytoscape from R.
 </figcaption></figure>
 </div>
 </section><section class="section level2"><h2 id="scenario-2-continued-graphically-defining-the-competency-model">Scenario 2 (Continued): Graphically Defining the Competency Model<a class="anchor" aria-label="anchor" href="#scenario-2-continued-graphically-defining-the-competency-model"></a>
@@ -467,7 +452,7 @@ Figure 6: The Graph rendered in Cytoscape based on the Q-Matrix that we pushed 
 <img src="proficiencyModel.png" class="quarto-figure quarto-figure-center" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-prof-model-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure 7: Using the Cytoscape interface we added an edge from A2 to A1. The added edge is highlighted in bright red.
+Figure 6: Using the Cytoscape interface we added an edge from A2 to A1. The added edge is highlighted in bright red.
 </figcaption></figure>
 </div>
 <section class="level2"><h3 id="pulling-the-network-back-and-save">Pulling the Network Back and Save<a class="anchor" aria-label="anchor" href="#pulling-the-network-back-and-save"></a>

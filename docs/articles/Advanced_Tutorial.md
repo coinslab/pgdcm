@@ -7,7 +7,7 @@
 > To keep the example simpler for this tutorial, we assume an
 > independent skills model (i.e., there does not exist any dependencies
 > between the different skills). For tutorials involving dependency
-> structures, see the package documentation site.
+> structures, see the [Model CookBook](Cookbook.md).
 
 If you are new to the package, we highly recommend starting with the
 [Beginner
@@ -169,7 +169,7 @@ classroom of students would score:
 
 *(Note: Because we used uninformed priors internally in the package, you
 should expect these prior predictive checks to look very dispersed and
-potentially mismatched from the black actual data lines—this is normal
+potentially mismatched from the black actual data lines-this is normal
 before training!)*
 
 ## 4. Manual MCMC Execution
@@ -237,8 +237,8 @@ mcmc_raw$WAIC
 
 The [`nimbleMCMC()`](https://rdrr.io/pkg/nimble/man/nimbleMCMC.html)
 convenience wrapper used above handles model building and compilation
-internally. For even finer control—such as swapping out individual
-parameter samplers—you can use NIMBLE’s step-by-step workflow:
+internally. For even finer control-such as swapping out individual
+parameter samplers-you can use NIMBLE’s step-by-step workflow:
 
 ``` r
 # 1. Build the model object

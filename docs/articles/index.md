@@ -8,6 +8,7 @@
   PGDCM](Beginner_Tutorial.md):
 - [Advanced Customization via the NIMBLE MCMC
   Engine](Advanced_Tutorial.md):
+- [Model Cookbook](Cookbook.md):
 
 ### Theory
 

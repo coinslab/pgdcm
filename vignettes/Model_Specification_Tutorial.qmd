@@ -9,78 +9,87 @@ vignette: >
 
 # Introduction
 
-::: {.callout-tip}
+::: callout-tip
 ## Learning Objectives
 
 By the end of this tutorial, you will be able to:
 
-1. Understand the two core model components in PGDCM: the **Competency Model** and the **Evidence Model**.
-2. Use Cytoscape to visually build, edit, and inspect your assessment network.
-3. Push data from R into Cytoscape and pull completed models back into R.
-4. Choose the right workflow (Scenario 1–4) based on the data you already have.
+1.  Understand the two core model components in PGDCM: the **Competency Model** and the **Evidence Model**.
+2.  Use Cytoscape to visually build, edit, and inspect your assessment network.
+3.  Push data from R into Cytoscape and pull completed models back into R.
+4.  Choose the right workflow (Scenario 1–4) based on the data you already have.
 :::
 
 ## Why Do I Need This?
 
-Imagine you gave a group of students a math test with 10 questions. Some questions require algebra, some require geometry, and some require both. You want to figure out *which skills each student has mastered* — not just their total score.
+Imagine you gave a group of students a math test with 10 questions. Some questions require algebra, some require geometry, and some require both. You want to figure out *which skills each student has mastered* - not just their total score.
 
 To do that, you need to tell the model two things:
 
-1. **What skills exist and how they relate to each other** — this is the **Competency Model** (also called the Proficiency Model).
-2. **Which skills are needed for each test question** — this is the **Evidence Model**.
+1.  **What skills exist and how they relate to each other** - this is the **Competency Model** (also called the Proficiency Model).
+2.  **Which skills are needed for each test question** - this is the **Evidence Model**.
 
 This tutorial shows you how to build both of these models visually using Cytoscape and the `pgdcm` R package.
 
 ## Prerequisites
 
-::: {.callout-warning}
+::: callout-warning
 ## Before You Start
 
-- **R knowledge:** You should be comfortable running R scripts and installing packages.
-- **Cytoscape installed:** Download it free from [cytoscape.org](https://cytoscape.org/).
-- **Beginner Tutorial completed (recommended):** If you are new to `pgdcm`, work through the [Beginner Tutorial](Beginner_Tutorial.qmd) first to understand the modeling pipeline end-to-end.
-- No prior knowledge of network science or psychometric modeling is required — we explain the key concepts as we go.
+-   **R knowledge:** You should be comfortable running R scripts and installing packages.
+-   **Cytoscape installed:** Download it free from [cytoscape.org](https://cytoscape.org/).
+-   **Beginner Tutorial completed (recommended):** If you are new to `pgdcm`, work through the [Beginner Tutorial](Beginner_Tutorial.qmd) first to understand the modeling pipeline end-to-end.
+-   No prior knowledge of network science or psychometric modeling is required - we explain the key concepts as we go.
 :::
 
 ## Key Concepts
 
 PGDCM aligns closely with the **Evidence-Centered Design (ECD)** framework, which uses explicit models to connect what we want to measure with the behaviors we can observe:
 
-*   **Competency Model (Proficiency Model):** Represents the hidden (unobservable) skills we want to measure and how they relate to one another. In Cytoscape, these appear as "Attribute" nodes connected by edges.
-*   **Evidence Model:** Defines how observable behaviors (test questions / items) provide evidence for those underlying skills. In Cytoscape, these are the edges pointing from "Attribute" nodes to "Task" (Item) nodes.
+-   **Competency Model (Proficiency Model):** Represents the hidden (unobservable) skills we want to measure and how they relate to one another. In Cytoscape, these appear as "Attribute" nodes connected by edges.
+-   **Evidence Model:** Defines how observable behaviors (test questions / items) provide evidence for those underlying skills. In Cytoscape, these are the edges pointing from "Attribute" nodes to "Task" (Item) nodes.
 
 ## Which Scenario Should I Use?
 
 This tutorial covers four scenarios. Use the table below to jump to the one that matches your situation:
 
 | I already have… | Go to | What it does |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | Only raw item response data (no Q-matrix) | [Scenario 1](#scenario-1-starting-from-task-data-building-models-from-scratch) | Pushes item names to Cytoscape; you draw everything else by hand |
 | A Q-matrix (items × skills) | [Scenario 2](#scenario-2-importing-an-existing-evidence-model-q-matrix) | Auto-creates the Evidence Model; you draw skill relationships by hand |
 | A full adjacency matrix (all nodes & edges) | [Scenario 3](#scenario-3-importing-fully-specified-competency-and-evidence-models) | Auto-creates the full network; you assign node types |
 | Previously saved node & edge CSV files | [Scenario 4](#scenario-4-importing-from-saved-node-and-edge-tables-csv) | Rebuilds the model from CSV files |
 
-Before running any script, ensure:
-
-1.  **Cytoscape** is open and running on your machine.
-2.  Cytoscape is listening on the default port: `http://localhost:1234/v1`.
-
+Before running any script, ensure that **Cytoscape** is open and running on your machine.
 
 ## What is Cytoscape?
 
 [Cytoscape](https://cytoscape.org/) is an open-source software platform designed for visualizing complex networks and integrating them with attribute data. In the context of PGDCM, we use the `RCy3` package in R to automatically pass our graphmodels (Tasks and Attributes) directly into and from the Cytoscape application. This allows us to visually construct, verify, and document our Evidence and Proficiency models before finalizing them for analysis.
+
+## Connecting R to Cytoscape
+
+Before passing any data, we need to ensure R can communicate with your active Cytoscape session. We do this by loading the `RCy3` package and "pinging" the default Cytoscape port. Depending on if you are in Mac or Windows, you may need to change the default port. If the cytoscapePing didn't work try getting rid of `/v1` from the cytoPort URL.
+
+```{r setup, message=FALSE, warning=FALSE, eval=FALSE}
+# Load required libraries
+library(RCy3)
+library(igraph)
+library(readxl)
+library(pgdcm)
+
+# Verify connection to Cytoscape
+cytoPort <- "http://localhost:1234/v1"
+cytoscapePing(cytoPort)
+```
 
 ## Getting Started: Loading the PGDCM Cytoscape Template
 
 To ensure your networks are styled correctly right off the bat, you need to load the custom PGDCM Cytoscape Session template. The `pgdcm` package provides a handy utility function to extract this template directly to your R working directory.
 
 1.  In your R console, run `get_Cyto_template()` to download `PGDCM_template.cys` into your working directory.
-2.  Launch Cytoscape.
-3.  Go to **File \> Import \> Network from File..** (or press `Ctrl+L` / `Cmd+L`). (see @fig-template)
-4.  Locate and select the `PGDCM_template.cys` file you just downloaded.
-5.  Once loaded, Cytoscape will have all our custom Visual Styles ready to go.
+2.  Navigate to your project folder using your file explorer and double click on the `PGDCM_template.cys` file. This should load Cytoscape with the pre-built Network formatting and styling compatible with `pgdcm` library.
 
-![Importing PGDCM Template](importing_style.png){#fig-template}
+<!-- ![Importing PGDCM Template](importing_style.png){#fig-template} -->
 
 ## Navigating the Cytoscape Interface
 
@@ -118,14 +127,14 @@ In several scenarios, you will need to manually augment the network that R pushe
 ::: {.callout-note collapse="true"}
 ## Advanced: HO-DINA, IRT, and MIRT Specification
 
-You can skip this section on a first read — it is only relevant if you want to model **continuous** latent traits (like a general ability score) rather than binary mastery.
+You can skip this section on a first read - it is only relevant if you want to model **continuous** latent traits (like a general ability score) rather than binary mastery.
 
 By default, an Attribute with `dina` as its compute method represents a discrete, binary skill (Mastery vs. Non-Mastery). However, PGDCM also supports continuous latent variables. You enable this by changing the `compute` column of a **root node** (a node with no incoming arrows) to `continuous`.
 
 Depending on your network structure, this produces different model types:
 
 | Network structure | Resulting model |
-|---|---|
+|------------------------------------|------------------------------------|
 | One continuous root → discrete children → tasks | **Higher-Order DINA (HO-DINA)**: the root represents general ability ($\theta$), children represent sub-skills |
 | One continuous root → tasks directly (no children) | **Unidimensional IRT**: standard Item Response Theory model |
 | Multiple continuous roots → tasks directly | **Multidimensional IRT (MIRT)** |
@@ -143,30 +152,12 @@ Depending on your network structure, this produces different model types:
 
 When working with large, complex networks, the Cytoscape canvas can become a tangled "hairball." If you need to focus on a specific sub-network (e.g., a single attribute and its connected tasks), you can temporarily hide the rest of the network without creating a separate Cytoscape network object. This guarantees all structural edits (like adding edges) naturally remain in your primary Evidence/Competency model.
 
-1. **Select target nodes:** Highlight the nodes you want to focus on. (*Tip:* Select a node, then use **Select \\> Nodes \\> First Neighbors of Selected Nodes).
-2. **Hide the rest:** Right-click the empty canvas space and choose **Hide Unselected Nodes and Edges** (or go to **View \\> Hide Unselected Nodes and Edges**).
-3. **Make your edits:** You can now simply adjust the layout, move nodes, add edges, or edit attributes on this isolated sub-network.
-4. **Zoom out back to the full network:** When finished, choose **View \\> Show All Nodes and Edges**. All your new edits and coordinates will neatly integrate back into the main network!
+1.  **Select target nodes:** Highlight the nodes you want to focus on. (*Tip:* Select a node, then use \*\*Select \\\> Nodes \\\> First Neighbors of Selected Nodes).
+2.  **Hide the rest:** From the Cytoscape Menu, \*\*Select \\\> Nodes \\\> Hide Unselected Nodes.
+3.  **Make your edits:** You can now simply adjust the layout, move nodes, add edges, or edit attributes on this isolated sub-network.
+4.  **Zoom out back to the full network:** When finished, go to the Cytoscape Menu, \*\*Select \\\> Nodes \\\> Show All Nodes. All your new edits and coordinates will neatly integrate back into the main network!
 
-## Connecting R to Cytoscape
-
-Before passing any data, we need to ensure R can communicate with your active Cytoscape session. We do this by loading the `RCy3` package and "pinging" the default Cytoscape port.
-
-Our custom utility functions (like pushing models or formatting tables) are seamlessly integrated right into the primary `pgdcm` library.
-
-```{r setup, message=FALSE, warning=FALSE, eval=FALSE}
-# Load required libraries
-library(RCy3)
-library(igraph)
-library(readxl)
-library(pgdcm)
-
-# Verify connection to Cytoscape
-cytoPort <- "http://localhost:1234/v1"
-cytoscapePing(cytoPort)
-```
-
-# Scenario 1: Starting from Task Data (Building Models from Scratch)
+# Scenario 1: Starting from Task Data (Building Models from Scratch) {#scenario-1-starting-from-task-data-building-models-from-scratch}
 
 In this scenario, you start with just a raw response matrix (often an Excel file). The columns represent tasks (items). There are no attribute nodes or edges yet, meaning neither the Competency nor the Evidence model exists.
 
@@ -192,13 +183,13 @@ Tasks2CytoNodes(task_names)
 
 At this point, switch to your Cytoscape window.
 
-::: {.callout-note}
+::: callout-note
 ## Cytoscape Node Construction
 
-1. You should see standalone task nodes on your canvas.
-2. Add attribute nodes (e.g., A1, A2). Make sure to set their `type` column to `attribute` in the Node Table.
-3. Draw edges from attributes to task nodes (the Evidence model).
-4. Draw edges between attributes (the Proficiency model).
+1.  You should see standalone task nodes on your canvas.
+2.  Add attribute nodes (e.g., A1, A2). Make sure to set their `type` column to `attribute` in the Node Table.
+3.  Draw edges from attributes to task nodes (the Evidence model).
+4.  Draw edges between attributes (the Proficiency model).
 :::
 
 ## Step 3: Pull Network Back and Save
@@ -226,11 +217,11 @@ write_graph(myNetwork1, "Scenario1_network.graphml", format = "graphml")
 
 `head(nodes_table1)` will print a table like:
 
-| name | type | compute |
-|------|------|---------|
-| Q1   | task | dina    |
-| Q2   | task | dina    |
-| A1   | attribute | dina |
+| name | type      | compute |
+|------|-----------|---------|
+| Q1   | task      | dina    |
+| Q2   | task      | dina    |
+| A1   | attribute | dina    |
 
 `head(edges_table1)` will print a table like:
 
@@ -240,11 +231,11 @@ write_graph(myNetwork1, "Scenario1_network.graphml", format = "graphml")
 | A1     | Q2     |
 :::
 
-# Scenario 2: Importing an Existing Evidence Model (Q-Matrix)
+# Scenario 2: Importing an Existing Evidence Model (Q-Matrix) {#scenario-2-importing-an-existing-evidence-model-q-matrix}
 
 In this scenario, you have a **Q-Matrix**. The first column lists task names, and the remaining columns list attribute names. A value of `1` indicates that a specific attribute is required to complete a specific task. This explicitly defines the **Evidence Model** (edges from Attributes to Tasks).
 
-We will push this Q-Matrix to Cytoscape, which will automatically draw the task nodes, attribute nodes, and evidence edges for us. 
+We will push this Q-Matrix to Cytoscape, which will automatically draw the task nodes, attribute nodes, and evidence edges for us.
 
 We'll use a mock Q-Matrix for this example. We use the helper `QMatrix2CytoNodes()` which automatically builds the graph and pushes it. Note that `QMatrix2CytoNodes()` calls `QMatrix2iGraph()` internally, which you can use if you only want the `igraph` object without pushing it.
 
@@ -269,12 +260,12 @@ Once the Evidence Model is pushed to Cytoscape, you can graphically define the *
 
 Switch to your Cytoscape window.
 
-::: {.callout-note}
+::: callout-note
 ## Adding Proficiency Edges
 
-1. The Task nodes, Attribute nodes, and the evidence edges (Attribute → Task) are already drawn.
-2. Verify the layout.
-3. Draw the proficiency model (edges *between* attributes).
+1.  The Task nodes, Attribute nodes, and the evidence edges (Attribute → Task) are already drawn.
+2.  Verify the layout.
+3.  Draw the proficiency model (edges *between* attributes).
 :::
 
 ![Using the Cytoscape interface we added an edge from A2 to A1. The added edge is highlighted in bright red.](proficiencyModel.png){#fig-prof-model fig-align="center" width="50%"}
@@ -296,7 +287,7 @@ knitr::kable(edges_table2, caption = "Edges Table")
 # write_graph(myNetwork2, "Scenario2_network.graphml", format = "graphml")
 ```
 
-# Scenario 3: Importing Fully Specified Competency and Evidence Models
+# Scenario 3: Importing Fully Specified Competency and Evidence Models {#scenario-3-importing-fully-specified-competency-and-evidence-models}
 
 In this scenario, you have a full **Adjacency Matrix** detailing all edges between all nodes. This matrix fully defines both the Competency Model (attribute-to-attribute edges) and the Evidence Model (attribute-to-task edges). The first column contains all node names (both tasks and attributes). The remaining columns are identically named. A `1` indicates a directed edge from the Row node to the Column node.
 
@@ -323,29 +314,28 @@ g_adj <- AdjMatrix2CytoNodes(Adj_mock, title = "Scenario3_AdjMatrix")
 
 Switch to your Cytoscape window.
 
-::: {.callout-note}
+::: callout-note
 ## Assigning Node Types
 
-1. The network structure (both nodes and all edges) is drawn automatically.
-2. Open the Node Table in Cytoscape. The `type` column will be blank (or `NA`).
-3. Manually assign `"attribute"` or `"task"` to each node.
-4. Modify the layout or tweak edges if required.
+1.  The network structure (both nodes and all edges) is drawn automatically.
+2.  Open the Node Table in Cytoscape. The `type` column will be blank (or `NA`).
+3.  Manually assign `"attribute"` or `"task"` to each node.
+4.  Modify the layout or tweak edges if required.
 :::
 
 ## Extracting Data and Saving Your Model
 
-Once your model visualization is complete, you must pull it back into R. 
+Once your model visualization is complete, you must pull it back into R.
 
 We can then use two functions to directly inspect the tabular details of what we've drawn:
 
-1. `get_NodesTable(myNetwork3)`: This extracts a standardized `data.frame` of every single node in your graph, including its `name`, structural `type` (attribute or task), and  `compute` methodology (DINA, DINO, etc.).
-2. `get_EdgesTable(myNetwork3)`: This extracts a standardized `data.frame` mapping the `source` node to the `target` node for every edge in your network.
+1.  `get_NodesTable(myNetwork3)`: This extracts a standardized `data.frame` of every single node in your graph, including its `name`, structural `type` (attribute or task), and `compute` methodology (DINA, DINO, etc.).
+2.  `get_EdgesTable(myNetwork3)`: This extracts a standardized `data.frame` mapping the `source` node to the `target` node for every edge in your network.
 
 While it might be tempting to save these two `data.frames` directly as `.csv` files, **we strongly recommend saving as `.graphml` instead**. Why?
 
-
-- The `.graphml` format preserves all node attributes, edge structure, and layout information in a single file.
-- `.graphml` is an open standard compatible with most network analysis tools in R and Python.
+-   The `.graphml` format preserves all node attributes, edge structure, and layout information in a single file.
+-   `.graphml` is an open standard compatible with most network analysis tools in R and Python.
 
 ```{r scen3-pull, eval=FALSE}
 # Pull the completed graph down from Cytoscape
@@ -362,9 +352,9 @@ knitr::kable(edges_table3, caption = "Edges Data")
 write_graph(myNetwork3, "Final_Competency_Model.graphml", format = "graphml")
 ```
 
-# Scenario 4: Importing from Saved Node and Edge Tables (CSV)
+# Scenario 4: Importing from Saved Node and Edge Tables (CSV) {#scenario-4-importing-from-saved-node-and-edge-tables-csv}
 
-In this scenario, you might have previously saved your `nodes_table` and `edges_table` to `.csv` files (perhaps bypassing GraphML initially or intending to make bulk edits in Excel before re-importing). 
+In this scenario, you might have previously saved your `nodes_table` and `edges_table` to `.csv` files (perhaps bypassing GraphML initially or intending to make bulk edits in Excel before re-importing).
 
 ## Step 1: Rebuild the Model Object in R
 
@@ -384,7 +374,7 @@ myNetwork4 <- build_from_node_edge_files(
 
 ## Step 2: (Optional) Push the Network Back to Cytoscape
 
-If you realized you still need to make *visual* edits to your model, you can instantly push these raw tables back directly into the Cytoscape canvas using the  `push_to_cytoscape()` wrapper.
+If you realized you still need to make *visual* edits to your model, you can instantly push these raw tables back directly into the Cytoscape canvas using the `push_to_cytoscape()` wrapper.
 
 ```{r scen4-push, eval=FALSE}
 # Load the CSVs as raw data.frames
@@ -402,5 +392,5 @@ push_to_cytoscape(
 
 Now that you have a fully specified model saved as a `.graphml` file, you are ready to run the analysis:
 
-- **New to PGDCM?** Start with the [Beginner Tutorial](Beginner_Tutorial.qmd) to learn how to configure and run a Bayesian MCMC model using your network.
-- **Ready for more?** The [Advanced Tutorial](Advanced_Tutorial.qmd) covers convergence diagnostics, posterior predictive checks, and model comparison.
+-   **New to PGDCM?** Start with the [Beginner Tutorial](Beginner_Tutorial.qmd) to learn how to configure and run a Bayesian MCMC model using your network.
+-   **Ready for more?** The [Advanced Tutorial](Advanced_Tutorial.qmd) covers convergence diagnostics, posterior predictive checks, and model comparison.

@@ -62,7 +62,7 @@ dim(Q)
 head(Q)
 ```
 
-The `pgdcm` package mathematically treats modern psychometric models as probabilistic graphical models (specifically, Directed Acyclic Graphs or Bayesian Networks). Because of this, we must first convert our standard Q-Matrix into a Directed Acyclic Graph (`g`) that represents the underlying node dependencies—i.e., the dependencies between the skills and the tasks/test items. The `QMatrix2iGraph()` function handles this graphical conversion automatically for us.
+The `pgdcm` package mathematically treats modern psychometric models as probabilistic graphical models (specifically, Directed Acyclic Graphs or Bayesian Networks). Because of this, we must first convert our standard Q-Matrix into a Directed Acyclic Graph (`g`) that represents the underlying node dependencies-i.e., the dependencies between the skills and the tasks/test items. The `QMatrix2iGraph()` function handles this graphical conversion automatically for us.
 
 Once we have constructed the core network graph, several model parameters must be defined to establish the active modeling environment for NIMBLE. This includes validating topological constraints, isolating constants required for `nimble` inference calculations, and setting initial values for the model parameters. The `build_model_config()` function handles all of this heavy lifting.
 
@@ -75,10 +75,17 @@ g <- QMatrix2iGraph(Q)
 config <- build_model_config(g, X)
 ```
 
-It is important to note that by default, `build_model_config()` assumes a **DINA** (Deterministic Input, Noisy "And" gate) compute type. This implies a strict, non-compensatory cognitive framework—meaning a student *must* possess all required skills dictated by the Q-Matrix to likely answer an item correctly; mastering just one or a few required skills provides no additional benefit. If your assessment follows a different theoretic framework, you can overwrite this by supplying options like `compute = "dino"` or `compute = "dinm"`:
+It is important to note that by default, `QMatrix2iGraph()` assigns a **DINA** (Deterministic Input, Noisy "And" gate) compute type to all nodes. This implies a strict, non-compensatory cognitive framework-meaning a student *must* possess all required skills dictated by the Q-Matrix to likely answer an item correctly; mastering just one or a few required skills provides no additional benefit. If your assessment follows a different theoretical framework, you can specify this at graph construction time by supplying the `compute` argument to `QMatrix2iGraph()`:
+
+```r
+# Example: use a compensatory framework instead
+g <- QMatrix2iGraph(Q, compute = "dino")
+```
 
 -   **`compute = "dino"` (Deterministic Input, Noisy "Or" gate)**: Assumes a fully compensatory framework. Here, possessing *at least one* of the required skills is sufficient to likely answer the item correctly.
 -   **`compute = "dinm"` (Deterministic Input, Noisy "Mixed")**: Assumes a proportional or additive framework. In this model, each additional required skill a student masters incrementally increases their probability of answering correctly.
+
+The downstream `build_model_config()` function reads the compute type directly from the graph's node attributes, so there is no need to specify it again at the configuration stage.
 
 ## 3. Estimation Pipeline
 
@@ -164,7 +171,7 @@ results <- run_pgdcm_auto(
 )
 ```
 
-This adds a `group_patterns` field to the results, which organizes students into exhaustive mastery pattern groups (e.g., all students who mastered skills 1 and 3 but not 2 and 4). By default, a probability threshold of 0.5 is used to classify mastery — you can adjust this with the `threshold` argument.
+This adds a `group_patterns` field to the results, which organizes students into exhaustive mastery pattern groups (e.g., all students who mastered skills 1 and 3 but not 2 and 4). By default, a probability threshold of 0.5 is used to classify mastery - you can adjust this with the `threshold` argument.
 
 ::: {.callout-warning}
 The number of possible mastery patterns grows as $2^K$ where $K$ is the number of skills. For models with many attributes, this can produce a very large number of groups.
@@ -175,16 +182,16 @@ The number of possible mastery patterns grows as $2^K$ where $K$ is the number o
 
 `run_pgdcm_auto()` automatically saves several CSV files to your working directory using the `prefix` you specified:
 
--   `DINA_DTMR_skill_profiles.csv` — Mastery probabilities for every student.
--   `DINA_DTMR_item_parameters.csv` — Item discrimination and difficulty estimates.
--   `DINA_DTMR_mapped_parameters.csv` — Full parameter summary with human-readable names.
+-   `DINA_DTMR_skill_profiles.csv` - Mastery probabilities for every student.
+-   `DINA_DTMR_item_parameters.csv` - Item discrimination and difficulty estimates.
+-   `DINA_DTMR_mapped_parameters.csv` - Full parameter summary with human-readable names.
 
 You can open these directly in Excel or any spreadsheet tool for further analysis.
 :::
 
 ### Going Deeper: Raw MCMC Diagnostics
 
-The outputs above are derived from the underlying Bayesian posterior distribution. If you want to inspect the raw MCMC chains directly — for example, to check convergence or visualize credible intervals — the `MCMCvis` package is a great tool for this.
+The outputs above are derived from the underlying Bayesian posterior distribution. If you want to inspect the raw MCMC chains directly - for example, to check convergence or visualize credible intervals - the `MCMCvis` package is a great tool for this.
 
 ```{r load-mcmcvis, message=FALSE, warning=FALSE}
 #| eval: false
@@ -202,7 +209,7 @@ head(res) # only a few rows from res are displayed here.
 **How to Read the Table:**
 
 -   **`mean`**: The expected value (best estimate) for the parameter.
--   **`2.5%` and `97.5%`**: The **95% Credible Interval** — there is a 95% probability the true value falls within this range.
+-   **`2.5%` and `97.5%`**: The **95% Credible Interval** - there is a 95% probability the true value falls within this range.
 -   **`Rhat`**: A convergence diagnostic (Gelman-Rubin statistic). Values greater than 1.1 suggest the chains have not yet converged and you may need to increase `niter`.
 
 MCMC visualization functions like `MCMCplot()` can transform these into intuitive "Caterpillar Plots":
@@ -212,7 +219,7 @@ MCMC visualization functions like `MCMCplot()` can transform these into intuitiv
 MCMCplot(results$samples, params = "lambda")
 ```
 
-**How to Interpret the Visuals:** Each dot represents the mean estimate. The horizontal lines show the 95% Credible Interval — wider lines mean more uncertainty, narrower lines mean higher confidence.
+**How to Interpret the Visuals:** Each dot represents the mean estimate. The horizontal lines show the 95% Credible Interval - wider lines mean more uncertainty, narrower lines mean higher confidence.
 
 ::: callout-note
 ## Next Steps

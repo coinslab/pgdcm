@@ -24,7 +24,7 @@ what the model is doing mathematically. We will walk through:
 
 ## 1. The Big Picture: Everything is a Bayesian Network
 
-A `pgdcm` model is a **Directed Acyclic Graph (DAG)** — a network of
+A `pgdcm` model is a **Directed Acyclic Graph (DAG)** - a network of
 nodes connected by directional arrows, with no cycles. There are two
 kinds of nodes:
 
@@ -49,7 +49,7 @@ configuration of latent skills for each student?**
 ### Topological Ordering
 
 Because the graph is acyclic, we can always arrange nodes in a
-**topological order** — an ordering where every parent appears before
+**topological order** - an ordering where every parent appears before
 its children. The `pgdcm` package enforces this automatically via
 [`enforce_topo_sort()`](../reference/enforce_topo_sort.md). This
 ordering is critical because it means we can process nodes from left to
@@ -102,7 +102,7 @@ condensed input changes. Think of it as the “sensitivity” of the node:
   *discriminating* between students who have the prerequisite skills and
   those who do not. The probability jumps rapidly from near 0 to near 1.
 - A **small slope** (e.g., $a_{v} = 0.5$) means the node is a weak
-  discriminator — even students with all the right skills only have a
+  discriminator - even students with all the right skills only have a
   moderately higher probability of success.
 
 In the `pgdcm` code, item slopes are stored in `lambda[j, 1]` and
@@ -113,7 +113,7 @@ higher probability (never inverted).
 
 ### 2.3 The Intercept ($b_{v}$): Difficulty / Base-Rate
 
-The **intercept** controls the *baseline difficulty* of the node — how
+The **intercept** controls the *baseline difficulty* of the node - how
 hard it is to “pass” even when the condensation rule provides no
 information. Specifically:
 
@@ -159,7 +159,7 @@ We detail each rule in the next section.
 
 ## 3. The Three Condensation Rules (Pure Discrete Case)
 
-To build intuition, let us first consider the **pure discrete** case —
+To build intuition, let us first consider the **pure discrete** case -
 where all parent attributes are binary (0 or 1). We will extend to
 continuous parents later.
 
@@ -273,7 +273,7 @@ val_dinm <- sum_total / max(1, sum_input)
 
 ## 4. Root Attributes: Where Skills Originate
 
-Every DAG has **root nodes** — nodes with no incoming arrows (no
+Every DAG has **root nodes** - nodes with no incoming arrows (no
 parents). In a `pgdcm` model, these are the “foundational” attributes.
 How they are modeled depends on a critical configuration flag:
 `isContinuousHO`.
@@ -291,9 +291,9 @@ probability depends only on the intercept $\beta_{m}$. This parameter
 represents the **population-level difficulty of mastering this skill**:
 
 - $\beta_{m} = 0$: the skill is mastered by about 50% of the population.
-- $\beta_{m} > 0$ (positive): the skill is mastered by *fewer* than 50%
-  — it is a difficult skill.
-- $\beta_{m} < 0$ (negative): the skill is mastered by *more* than 50% —
+- $\beta_{m} > 0$ (positive): the skill is mastered by *fewer* than
+  50% - it is a difficult skill.
+- $\beta_{m} < 0$ (negative): the skill is mastered by *more* than 50% -
   it is an easy/common skill.
 
 In the code, this parameter is `beta_root[m]`, with a normal prior:
@@ -314,7 +314,7 @@ This is the standard identification constraint used in IRT: fixing the
 mean to 0 and the variance to 1 ensures the model is identifiable
 (otherwise, we could shift and scale the ability axis without changing
 any observable quantity). In this case, no `beta_root` parameter is
-estimated — the ability values themselves are directly estimated for
+estimated - the ability values themselves are directly estimated for
 each student.
 
 Importantly, **the rest of the model doesn’t change**. When these
@@ -325,8 +325,8 @@ the logistic equation naturally adapts.
 
 ## 5. Case Studies: How the Graph Topology Creates Different Models
 
-Now we show how simply changing the graph structure—without altering any
-model code—creates fundamentally different psychometric models.
+Now we show how simply changing the graph structure-without altering any
+model code-creates fundamentally different psychometric models.
 
 ### 5.1 Traditional DCM (Flat Q-Matrix)
 
@@ -369,7 +369,7 @@ $$\psi_{j}^{\text{DINA}} = \alpha_{i,1} \cdot \alpha_{i,2}$$
 states).
 
 Note that `theta` parameters are **absent** in this flat case. The
-`theta` parameters only exist for *dependent* (non-root) attributes —
+`theta` parameters only exist for *dependent* (non-root) attributes -
 nodes that have parent attributes feeding into them. Since all
 attributes here are independent roots, there are no
 attribute-to-attribute transitions to parameterize.
@@ -401,16 +401,16 @@ attributes that receive input from $A_{1}$.
 
     Here:
 
-    - $\theta_{k,1}$ (`theta[k, 1]`) is the **transition slope** — how
+    - $\theta_{k,1}$ (`theta[k, 1]`) is the **transition slope** - how
       strongly mastery of the parent skills influences whether the
       student masters skill $k$. A large value means that parent mastery
       is highly predictive of child mastery.
-    - $\theta_{k,2}$ (`theta[k, 2]`) is the **transition intercept** —
+    - $\theta_{k,2}$ (`theta[k, 2]`) is the **transition intercept** -
       the baseline difficulty of mastering skill $k$, independent of
       parent skills. A large positive value means this skill is hard to
       acquire even when all parent skills are mastered.
 
-3.  **Items:** Same as the flat case — items see the binary attribute
+3.  **Items:** Same as the flat case - items see the binary attribute
     values and apply the condensation rule + lambda parameters.
 
 **Estimated parameters:**
@@ -424,7 +424,7 @@ attributes that receive input from $A_{1}$.
 | `lambda[j, 2]`         | $\lambda_{j2}$ |          $J$          | Item difficulty                                                   |
 | `attributenodes[i, k]` | $\alpha_{ik}$  |     $N \times K$      | Each student’s binary mastery state on each skill                 |
 
-This is the case where `theta` parameters first appear — **whenever
+This is the case where `theta` parameters first appear - **whenever
 attributes have parent attributes**, the model needs parameters to
 describe those transitions.
 
@@ -465,8 +465,8 @@ $b_{j} = \lambda_{j2}$ is the item difficulty.
 
 | Parameter              |   Symbol   | Count | Meaning                                                                                               |
 |:-----------------------|:----------:|:-----:|:------------------------------------------------------------------------------------------------------|
-| `lambda[j, 1]`         |  $a_{j}$   |  $J$  | Item discrimination — how steeply the item’s probability curve rises with ability                     |
-| `lambda[j, 2]`         |  $b_{j}$   |  $J$  | Item difficulty — the ability level at which a student has a 50% chance of success (when $a_{j} = 1$) |
+| `lambda[j, 1]`         |  $a_{j}$   |  $J$  | Item discrimination - how steeply the item’s probability curve rises with ability                     |
+| `lambda[j, 2]`         |  $b_{j}$   |  $J$  | Item difficulty - the ability level at which a student has a 50% chance of success (when $a_{j} = 1$) |
 | `attributenodes[i, 1]` | $\eta_{i}$ |  $N$  | Each student’s latent ability (a continuous real number, centered at 0)                               |
 
 > **Interpreting the Difficulty Parameter $b_{j}$ in IRT**
@@ -480,7 +480,7 @@ $b_{j} = \lambda_{j2}$ is the item difficulty.
 > alternative parameterization found in many Bayesian IRT
 > implementations.
 
-**No `beta_root` or `theta` parameters are estimated** in IRT mode —
+**No `beta_root` or `theta` parameters are estimated** in IRT mode -
 there are no discrete roots (so no `beta_root`) and no dependent
 attributes (so no `theta`).
 
@@ -541,9 +541,9 @@ child attributes have `compute = "dina"` (discrete). This gives
 This model type demonstrates the full mixed continuous-discrete
 capability of `loglinearBN`. The network has **three layers**:
 
-**Layer 1 — General Ability (Root):** $$\eta_{i} \sim \mathcal{N}(0,1)$$
+**Layer 1 - General Ability (Root):** $$\eta_{i} \sim \mathcal{N}(0,1)$$
 
-**Layer 2 — Discrete Skills (Dependent Attributes):**
+**Layer 2 - Discrete Skills (Dependent Attributes):**
 
 Each dependent attribute $A_{k}$ depends on the general ability $\eta$
 through a logistic regression. The condensation rule passes $\eta_{i}$
@@ -572,7 +572,7 @@ where:
   student needs higher general ability to have a reasonable chance of
   mastering the skill.
 
-**Layer 3 — Items (Observed):**
+**Layer 3 - Items (Observed):**
 
 Item responses depend on the discrete skill states $\alpha_{ik}$. Since
 the **roots are continuous** but items may only see the discrete child
@@ -601,7 +601,7 @@ through the skill-level logistic regressions.
 
 > **Why Higher-Order Models?**
 >
-> In a flat DCM, skills are estimated independently — the model does not
+> In a flat DCM, skills are estimated independently - the model does not
 > know or care whether a student who masters “Addition” is also likely
 > to master “Subtraction.” A higher-order model introduces explicit
 > statistical dependence: skills that load heavily on general ability
@@ -638,7 +638,7 @@ $$\psi^{\text{Gated-DINA}} = \begin{cases}
 **Semantic meaning:** The student must first pass the discrete skills
 “gatekeeper.” Only if they possess every required binary skill does
 their continuous ability actually count. Otherwise, no amount of general
-ability can help — the gate is shut.
+ability can help - the gate is shut.
 
 ### Gated DINO (Mixed Disjunctive)
 
@@ -663,7 +663,7 @@ proportionally alongside discrete (0/1) values.
 
 > **Why $-10$ as the Closed-Gate Penalty?**
 >
-> The value $-10$ is not arbitrary — it is chosen so that
+> The value $-10$ is not arbitrary - it is chosen so that
 > $\text{logit}^{-1}\left( a \cdot (-10) - b \right)$ is vanishingly
 > small for any reasonable slope $a > 0$. For example, with $a = 1$ and
 > $b = 0$: $\text{logit}^{-1}(-10) \approx 0.0000454$. This effectively
@@ -674,7 +674,7 @@ proportionally alongside discrete (0/1) values.
 
 ## 7. The Complete Prior Structure
 
-Every unknown parameter in the model is given a **prior distribution** —
+Every unknown parameter in the model is given a **prior distribution** -
 a mathematical statement of our beliefs before seeing any data. The
 priors in `loglinearBN` are:
 
@@ -690,7 +690,7 @@ prior centered at 50% mastery rate, allowing the data to speak.
 $$\theta_{k,1} \sim \text{TN}\left( \mu_{\theta_{k,1}},\sigma_{\theta_{k,1}},0,\infty \right)\quad\text{(slope, positive only)}$$$$\theta_{k,2} \sim \mathcal{N}\left( \mu_{\theta_{k,2}},\sigma_{\theta_{k,2}} \right)\quad\text{(intercept)}$$
 
 The truncated normal $\text{TN}(\cdot,\cdot,0,\infty)$ ensures slopes
-are positive — more prerequisite mastery should always *increase* (never
+are positive - more prerequisite mastery should always *increase* (never
 decrease) the probability of mastering the dependent skill.
 
 ### Item Parameters
@@ -740,9 +740,9 @@ different psychometric models purely through graph configuration:
 
 The entire switching logic is governed by two things:
 
-1.  **Graph topology** — which nodes are roots, which are dependent, and
+1.  **Graph topology** - which nodes are roots, which are dependent, and
     which are tasks.
-2.  **The `compute` attribute** on each node — `"dina"`, `"dino"`,
+2.  **The `compute` attribute** on each node - `"dina"`, `"dino"`,
     `"dinm"`, or `"zscore"`/`"continuous"`.
 
 The [`build_model_config()`](../reference/build_model_config.md)
@@ -752,7 +752,7 @@ changes.
 
 ------------------------------------------------------------------------
 
-## 9. Appendix: Quick Reference — Parameter Mapping
+## 9. Appendix: Quick Reference - Parameter Mapping
 
 When you run
 [`map_pgdcm_parameters()`](../reference/map_pgdcm_parameters.md) after

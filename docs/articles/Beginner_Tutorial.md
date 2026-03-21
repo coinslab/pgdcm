@@ -79,7 +79,7 @@ The `pgdcm` package mathematically treats modern psychometric models as
 probabilistic graphical models (specifically, Directed Acyclic Graphs or
 Bayesian Networks). Because of this, we must first convert our standard
 Q-Matrix into a Directed Acyclic Graph (`g`) that represents the
-underlying node dependencies—i.e., the dependencies between the skills
+underlying node dependencies-i.e., the dependencies between the skills
 and the tasks/test items. The
 [`QMatrix2iGraph()`](../reference/QMatrix2iGraph.md) function handles
 this graphical conversion automatically for us.
@@ -101,14 +101,20 @@ config <- build_model_config(g, X)
 ```
 
 It is important to note that by default,
-[`build_model_config()`](../reference/build_model_config.md) assumes a
-**DINA** (Deterministic Input, Noisy “And” gate) compute type. This
-implies a strict, non-compensatory cognitive framework—meaning a student
+[`QMatrix2iGraph()`](../reference/QMatrix2iGraph.md) assigns a **DINA**
+(Deterministic Input, Noisy “And” gate) compute type to all nodes. This
+implies a strict, non-compensatory cognitive framework-meaning a student
 *must* possess all required skills dictated by the Q-Matrix to likely
 answer an item correctly; mastering just one or a few required skills
 provides no additional benefit. If your assessment follows a different
-theoretic framework, you can overwrite this by supplying options like
-`compute = "dino"` or `compute = "dinm"`:
+theoretical framework, you can specify this at graph construction time
+by supplying the `compute` argument to
+[`QMatrix2iGraph()`](../reference/QMatrix2iGraph.md):
+
+``` r
+# Example: use a compensatory framework instead
+g <- QMatrix2iGraph(Q, compute = "dino")
+```
 
 - **`compute = "dino"` (Deterministic Input, Noisy “Or” gate)**: Assumes
   a fully compensatory framework. Here, possessing *at least one* of the
@@ -117,6 +123,11 @@ theoretic framework, you can overwrite this by supplying options like
   proportional or additive framework. In this model, each additional
   required skill a student masters incrementally increases their
   probability of answering correctly.
+
+The downstream
+[`build_model_config()`](../reference/build_model_config.md) function
+reads the compute type directly from the graph’s node attributes, so
+there is no need to specify it again at the configuration stage.
 
 ## 3. Estimation Pipeline
 
@@ -278,7 +289,7 @@ results <- run_pgdcm_auto(
 This adds a `group_patterns` field to the results, which organizes
 students into exhaustive mastery pattern groups (e.g., all students who
 mastered skills 1 and 3 but not 2 and 4). By default, a probability
-threshold of 0.5 is used to classify mastery — you can adjust this with
+threshold of 0.5 is used to classify mastery - you can adjust this with
 the `threshold` argument.
 
 > **Warning**
@@ -293,11 +304,11 @@ the `threshold` argument.
 > saves several CSV files to your working directory using the `prefix`
 > you specified:
 >
-> - `DINA_DTMR_skill_profiles.csv` — Mastery probabilities for every
+> - `DINA_DTMR_skill_profiles.csv` - Mastery probabilities for every
 >   student.
-> - `DINA_DTMR_item_parameters.csv` — Item discrimination and difficulty
+> - `DINA_DTMR_item_parameters.csv` - Item discrimination and difficulty
 >   estimates.
-> - `DINA_DTMR_mapped_parameters.csv` — Full parameter summary with
+> - `DINA_DTMR_mapped_parameters.csv` - Full parameter summary with
 >   human-readable names.
 >
 > You can open these directly in Excel or any spreadsheet tool for
@@ -306,8 +317,8 @@ the `threshold` argument.
 ### Going Deeper: Raw MCMC Diagnostics
 
 The outputs above are derived from the underlying Bayesian posterior
-distribution. If you want to inspect the raw MCMC chains directly — for
-example, to check convergence or visualize credible intervals — the
+distribution. If you want to inspect the raw MCMC chains directly - for
+example, to check convergence or visualize credible intervals - the
 `MCMCvis` package is a great tool for this.
 
 ``` r
@@ -335,7 +346,7 @@ head(res) # only a few rows from res are displayed here.
 **How to Read the Table:**
 
 - **`mean`**: The expected value (best estimate) for the parameter.
-- **`2.5%` and `97.5%`**: The **95% Credible Interval** — there is a 95%
+- **`2.5%` and `97.5%`**: The **95% Credible Interval** - there is a 95%
   probability the true value falls within this range.
 - **`Rhat`**: A convergence diagnostic (Gelman-Rubin statistic). Values
   greater than 1.1 suggest the chains have not yet converged and you may
@@ -353,7 +364,7 @@ MCMCplot(results$samples, params = "lambda")
 ![](Beginner_Tutorial_files/figure-html/render-plot-1.png)
 
 **How to Interpret the Visuals:** Each dot represents the mean estimate.
-The horizontal lines show the 95% Credible Interval — wider lines mean
+The horizontal lines show the 95% Credible Interval - wider lines mean
 more uncertainty, narrower lines mean higher confidence.
 
 > **Next Steps**

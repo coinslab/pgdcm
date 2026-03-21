@@ -45,6 +45,7 @@
     <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Advanced_Tutorial.html">Advanced Tutorial</a></li>
+    <li><a class="dropdown-item" href="../articles/Cookbook.html">Model Cookbook</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
     <li><a class="dropdown-item" href="../articles/Understanding_loglinearBN.html">Mathematical Foundations of the PGDCM Model</a></li>
@@ -82,7 +83,7 @@
 <div>
 <blockquote>
 <p><strong>Note on Model Scope</strong></p>
-<p>To keep the example simpler for this tutorial, we assume an independent skills model (i.e., there does not exist any dependencies between the different skills). For tutorials involving dependency structures, see the package documentation site.</p>
+<p>To keep the example simpler for this tutorial, we assume an independent skills model (i.e., there does not exist any dependencies between the different skills). For tutorials involving dependency structures, see the <a href="Cookbook.html">Model CookBook</a>.</p>
 </blockquote>
 </div>
 <p>If you are new to the package, we highly recommend starting with the <a href="https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html" class="external-link">Beginner Tutorial</a>. There, we introduce the <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> function, which was purposefully designed to offer a quick, automated, and streamlined approach to estimation.</p>
@@ -186,7 +187,7 @@
 <li>
 <strong>Item Co-occurrence</strong>: A scatter plot comparing the observed versus simulated second-order moments, revealing how accurately the model captured the frequency with which pairs of items were answered correctly together.</li>
 </ol>
-<p><em>(Note: Because we used uninformed priors internally in the package, you should expect these prior predictive checks to look very dispersed and potentially mismatched from the black actual data lines—this is normal before training!)</em></p>
+<p><em>(Note: Because we used uninformed priors internally in the package, you should expect these prior predictive checks to look very dispersed and potentially mismatched from the black actual data lines-this is normal before training!)</em></p>
 </section></section><section class="level2"><h2 id="manual-mcmc-execution">4. Manual MCMC Execution<a class="anchor" aria-label="anchor" href="#manual-mcmc-execution"></a>
 </h2>
 <p>Now, we will execute the NIMBLE engine manually. By doing this explicitly, you have the freedom to intercept the configuration object and apply custom block samplers or change hyperparameters before calling <code><a href="https://rdrr.io/pkg/nimble/man/nimbleMCMC.html" class="external-link">nimbleMCMC()</a></code>.</p>
@@ -245,7 +246,7 @@
 </div>
 </section><section class="level3"><h3 id="customizing-the-mcmc-sampler">Customizing the MCMC Sampler<a class="anchor" aria-label="anchor" href="#customizing-the-mcmc-sampler"></a>
 </h3>
-<p>The <code><a href="https://rdrr.io/pkg/nimble/man/nimbleMCMC.html" class="external-link">nimbleMCMC()</a></code> convenience wrapper used above handles model building and compilation internally. For even finer control—such as swapping out individual parameter samplers—you can use NIMBLE’s step-by-step workflow:</p>
+<p>The <code><a href="https://rdrr.io/pkg/nimble/man/nimbleMCMC.html" class="external-link">nimbleMCMC()</a></code> convenience wrapper used above handles model building and compilation internally. For even finer control-such as swapping out individual parameter samplers-you can use NIMBLE’s step-by-step workflow:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 1. Build the model object</span></span>

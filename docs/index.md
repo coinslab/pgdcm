@@ -8,23 +8,35 @@ Decision Processes).
 
 Currently supported models include:
 
-- Diagnostic Classification Models (DCM)
-- Higher-order Diagnostic Classification Models (HDCM)
-- Multidimensional Item Response Theory (MIRT) Models
-- Item Response Theory (IRT) Models
-- Structural Equation Models (SEM)
+- Diagnostic Classification Models (DCM) with dichotomous responses
+- Higher-order Diagnostic Classification Models (HDCM) with dichotomous
+  responses
+- Multidimensional Item Response Theory (MIRT) Models with dichotomous
+  responses
+- Item Response Theory (IRT) Models with dichotomous responses
+- Linear and Logistic Structural Equation Models (SEM) with continuous
+  responses
 
-We currently use [Cytoscape](https://cytoscape.org/) for graph building
-and [NIMBLE](https://r-nimble.org/) for Markov Chain Monte Carlo (MCMC)
-estimation. However, a core design philosophy of `pgdcm` is
-extensibility, allowing developers to swap out the MCMC sampler with
-other estimation algorithms in the future.
+We currently use [Cytoscape](https://cytoscape.org/) to provide a
+powerful graphical user-interface for directed graph construction and
+viewing, [igraph](https://igraph.org/r/) for graph processing and
+manipulation functions, and [NIMBLE](https://r-nimble.org/) for Markov
+Chain Monte Carlo (MCMC) estimation in R. This extensibility allows
+developers to not only make full use of the wide variety of existing
+estimation and inference algorithms NIMBLE but additionally provides
+mechanisms for custom user-developed estimation and inference
+algorithms.
 
 To interact with the graph building component, you will need to have
 Cytoscape installed and running on your system, as well as the **RCy3**
-R package. Using the Cytoscape template file that we provide ensures
-that the graph is built correctly for the estimation engine. Once a
-graph is built in Cytoscape, we use `igraph` for other operations.
+R package. Using the Cytoscape template file that we provide supports
+correct construction of the probabilistic graphical model. Once
+Cytoscape is running, the user may import the probabilistic graphical
+model specifications using a spreadsheet/CSV format, create the
+probabilistic graphical model directly within the Cytoscape environment,
+or edit an existing probabilistic graphical model within Cytoscape. The
+resulting probabilistic graphical model is then exported from Cytoscape
+and can then be processed by `NIMBLE` and `igraph`.
 
 We also provide many `igraph` edit functions in this package that can be
 used for graph building and graph editing. These are especially useful

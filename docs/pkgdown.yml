@@ -4,6 +4,7 @@ pkgdown_sha: ~
 articles:
   Advanced_Tutorial: Advanced_Tutorial.html
   Beginner_Tutorial: Beginner_Tutorial.html
+  Cookbook: Cookbook.html
   Model_Specification_Tutorial: Model_Specification_Tutorial.html
   Understanding_loglinearBN: Understanding_loglinearBN.html
-last_built: 2026-03-20T21:04Z
+last_built: 2026-03-21T18:08Z

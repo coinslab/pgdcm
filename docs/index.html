@@ -45,6 +45,7 @@
     <li><a class="dropdown-item" href="articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
     <li><a class="dropdown-item" href="articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
     <li><a class="dropdown-item" href="articles/Advanced_Tutorial.html">Advanced Tutorial</a></li>
+    <li><a class="dropdown-item" href="articles/Cookbook.html">Model Cookbook</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
     <li><a class="dropdown-item" href="articles/Understanding_loglinearBN.html">Mathematical Foundations of the PGDCM Model</a></li>
@@ -70,14 +71,14 @@
 <p>PGDCM is a unified framework for building and estimating several psychometric models within the probabilistic graphical modeling framework (i.e., treating these psychometric models as special cases of Bayesian networks, Hidden Markov Models, or Partially Observed Markov Decision Processes).</p>
 <p>Currently supported models include:</p>
 <ul>
-<li>Diagnostic Classification Models (DCM)</li>
-<li>Higher-order Diagnostic Classification Models (HDCM)</li>
-<li>Multidimensional Item Response Theory (MIRT) Models</li>
-<li>Item Response Theory (IRT) Models</li>
-<li>Structural Equation Models (SEM)</li>
+<li>Diagnostic Classification Models (DCM) with dichotomous responses</li>
+<li>Higher-order Diagnostic Classification Models (HDCM) with dichotomous responses</li>
+<li>Multidimensional Item Response Theory (MIRT) Models with dichotomous responses</li>
+<li>Item Response Theory (IRT) Models with dichotomous responses</li>
+<li>Linear and Logistic Structural Equation Models (SEM) with continuous responses</li>
 </ul>
-<p>We currently use <a href="https://cytoscape.org/" class="external-link">Cytoscape</a> for graph building and <a href="https://r-nimble.org/" class="external-link">NIMBLE</a> for Markov Chain Monte Carlo (MCMC) estimation. However, a core design philosophy of <code>pgdcm</code> is extensibility, allowing developers to swap out the MCMC sampler with other estimation algorithms in the future.</p>
-<p>To interact with the graph building component, you will need to have Cytoscape installed and running on your system, as well as the <strong>RCy3</strong> R package. Using the Cytoscape template file that we provide ensures that the graph is built correctly for the estimation engine. Once a graph is built in Cytoscape, we use <code>igraph</code> for other operations.</p>
+<p>We currently use <a href="https://cytoscape.org/" class="external-link">Cytoscape</a> to provide a powerful graphical user-interface for directed graph construction and viewing, <a href="https://igraph.org/r/" class="external-link">igraph</a> for graph processing and manipulation functions, and <a href="https://r-nimble.org/" class="external-link">NIMBLE</a> for Markov Chain Monte Carlo (MCMC) estimation in R. This extensibility allows developers to not only make full use of the wide variety of existing estimation and inference algorithms NIMBLE but additionally provides mechanisms for custom user-developed estimation and inference algorithms.</p>
+<p>To interact with the graph building component, you will need to have Cytoscape installed and running on your system, as well as the <strong>RCy3</strong> R package. Using the Cytoscape template file that we provide supports correct construction of the probabilistic graphical model. Once Cytoscape is running, the user may import the probabilistic graphical model specifications using a spreadsheet/CSV format, create the probabilistic graphical model directly within the Cytoscape environment, or edit an existing probabilistic graphical model within Cytoscape. The resulting probabilistic graphical model is then exported from Cytoscape and can then be processed by <code>NIMBLE</code> and <code>igraph</code>.</p>
 <p>We also provide many <code>igraph</code> edit functions in this package that can be used for graph building and graph editing. These are especially useful if you prefer a code-based workflow instead of Cytoscape, or if you want to eliminate the dependency on Cytoscape entirely.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -128,7 +129,7 @@
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"remotes"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"coinslab/pgdcm"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"coinslab/pgdcm"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 </div>

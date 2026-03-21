@@ -10,7 +10,7 @@ vignette: >
 ::: {.callout-warning}
 ## Note on Model Scope
 
-To keep the example simpler for this tutorial, we assume an independent skills model (i.e., there does not exist any dependencies between the different skills). For tutorials involving dependency structures, see the package documentation site.
+To keep the example simpler for this tutorial, we assume an independent skills model (i.e., there does not exist any dependencies between the different skills). For tutorials involving dependency structures, see the [Model CookBook](https://coinslab.github.io/pgdcm/articles/Cookbook.html).
 :::
 
 If you are new to the package, we highly recommend starting with the [Beginner Tutorial](https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html). There, we introduce the `run_pgdcm_auto()` function, which was purposefully designed to offer a quick, automated, and streamlined approach to estimation.
@@ -118,7 +118,7 @@ Executing this function generates a multifaceted diagnostic visualization showin
 4.  **Item Accuracy**: A scatter plot comparing the empirically observed percentage correct for a given item against the simulated percentage correct for that exact same item.
 5.  **Item Co-occurrence**: A scatter plot comparing the observed versus simulated second-order moments, revealing how accurately the model captured the frequency with which pairs of items were answered correctly together.
 
-*(Note: Because we used uninformed priors internally in the package, you should expect these prior predictive checks to look very dispersed and potentially mismatched from the black actual data lines—this is normal before training!)*
+*(Note: Because we used uninformed priors internally in the package, you should expect these prior predictive checks to look very dispersed and potentially mismatched from the black actual data lines-this is normal before training!)*
 
 ## 4. Manual MCMC Execution
 
@@ -171,7 +171,7 @@ cat(paste("\npWAIC:", round(cached_results$mcmc_raw$WAIC$pWAIC, 2)))
 
 ### Customizing the MCMC Sampler
 
-The `nimbleMCMC()` convenience wrapper used above handles model building and compilation internally. For even finer control—such as swapping out individual parameter samplers—you can use NIMBLE's step-by-step workflow:
+The `nimbleMCMC()` convenience wrapper used above handles model building and compilation internally. For even finer control-such as swapping out individual parameter samplers-you can use NIMBLE's step-by-step workflow:
 
 ```{r}
 #| eval: false
@@ -268,7 +268,7 @@ If the chosen Diagnostic Classification Model (in this case, DINA) successfully 
 2.  **Score & Item Distributions**: The fluctuating blue simulation lines should overlay effectively perfectly onto the thick black observed data lines.
 3.  **Scatter Plots**: The blue nodes (item accuracy and co-occurrence representations) should hug tightly to the diagonal red equivalence line.
 
-If the posterior predictive plots show significant deviations (for instance, the distributions don't align, or scatter nodes sit far off the red line), this is diagnostic proof that your chosen psychological framework (like DINA) is structurally misspecified for this dataset, and you should likely attempt a different network framework like DINO or DINM.
+If the posterior predictive plots show significant deviations (for instance, the distributions don't align, or scatter nodes sit far off the red line), this is diagnostic proof that your chosen psychological framework (like DINA) is structurally misspecified for this dataset, and you should likely attempt a different compute type. Since the compute type is defined at graph construction time, you would rebuild the graph with a different `compute` argument—for example, `g <- QMatrix2iGraph(Q, compute = "dino")` or `g <- QMatrix2iGraph(Q, compute = "dinm")`—and then re-run the pipeline from `build_model_config()` onward.
 
 ## 7. Generating Summary Tables and Assessing Accuracy
 

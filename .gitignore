@@ -16,3 +16,4 @@ vignettes/renv/library/
 .deno/
 Rplots.pdf
 test_*.csv
+*.rds

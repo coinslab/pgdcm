@@ -19,14 +19,14 @@
 
 Imagine you gave a group of students a math test with 10 questions. Some
 questions require algebra, some require geometry, and some require both.
-You want to figure out *which skills each student has mastered* — not
+You want to figure out *which skills each student has mastered* - not
 just their total score.
 
 To do that, you need to tell the model two things:
 
-1.  **What skills exist and how they relate to each other** — this is
+1.  **What skills exist and how they relate to each other** - this is
     the **Competency Model** (also called the Proficiency Model).
-2.  **Which skills are needed for each test question** — this is the
+2.  **Which skills are needed for each test question** - this is the
     **Evidence Model**.
 
 This tutorial shows you how to build both of these models visually using
@@ -44,7 +44,7 @@ Cytoscape and the `pgdcm` R package.
 >   `pgdcm`, work through the [Beginner Tutorial](Beginner_Tutorial.qmd)
 >   first to understand the modeling pipeline end-to-end.
 > - No prior knowledge of network science or psychometric modeling is
->   required — we explain the key concepts as we go.
+>   required - we explain the key concepts as we go.
 
 ### Key Concepts
 
@@ -73,11 +73,8 @@ one that matches your situation:
 | A full adjacency matrix (all nodes & edges) | [Scenario 3](#scenario-3-importing-fully-specified-competency-and-evidence-models) | Auto-creates the full network; you assign node types                  |
 | Previously saved node & edge CSV files      | [Scenario 4](#scenario-4-importing-from-saved-node-and-edge-tables-csv)            | Rebuilds the model from CSV files                                     |
 
-Before running any script, ensure:
-
-1.  **Cytoscape** is open and running on your machine.
-2.  Cytoscape is listening on the default port:
-    `http://localhost:1234/v1`.
+Before running any script, ensure that **Cytoscape** is open and running
+on your machine.
 
 ### What is Cytoscape?
 
@@ -89,6 +86,26 @@ into and from the Cytoscape application. This allows us to visually
 construct, verify, and document our Evidence and Proficiency models
 before finalizing them for analysis.
 
+### Connecting R to Cytoscape
+
+Before passing any data, we need to ensure R can communicate with your
+active Cytoscape session. We do this by loading the `RCy3` package and
+“pinging” the default Cytoscape port. Depending on if you are in Mac or
+Windows, you may need to change the default port. If the cytoscapePing
+didn’t work try getting rid of `/v1` from the cytoPort URL.
+
+``` r
+# Load required libraries
+library(RCy3)
+library(igraph)
+library(readxl)
+library(pgdcm)
+
+# Verify connection to Cytoscape
+cytoPort <- "http://localhost:1234/v1"
+cytoscapePing(cytoPort)
+```
+
 ### Getting Started: Loading the PGDCM Cytoscape Template
 
 To ensure your networks are styled correctly right off the bat, you need
@@ -99,16 +116,10 @@ your R working directory.
 1.  In your R console, run
     [`get_Cyto_template()`](../reference/get_Cyto_template.md) to
     download `PGDCM_template.cys` into your working directory.
-2.  Launch Cytoscape.
-3.  Go to **File \> Import \> Network from File..** (or press `Ctrl+L` /
-    `Cmd+L`). (see [Figure 1](#fig-template))
-4.  Locate and select the `PGDCM_template.cys` file you just downloaded.
-5.  Once loaded, Cytoscape will have all our custom Visual Styles ready
-    to go.
-
-![](importing_style.png)
-
-Figure 1: Importing PGDCM Template
+2.  Navigate to your project folder using your file explorer and double
+    click on the `PGDCM_template.cys` file. This should load Cytoscape
+    with the pre-built Network formatting and styling compatible with
+    `pgdcm` library.
 
 ### Navigating the Cytoscape Interface
 
@@ -122,7 +133,7 @@ areas in Cytoscape:
 
 ![](panels.png)
 
-Figure 2: Cytoscape Window
+Figure 1: Cytoscape Window
 
 2.  **The Table Panel (Bottom):** This contains the **Node Table** and
     **Edge Table**.
@@ -148,7 +159,7 @@ R pushed to Cytoscape.
 
 ![](add_node.png)
 
-Figure 3: Adding Node
+Figure 2: Adding Node
 
 3.  A new node will appear. Immediately go to the **Node Table** at the
     bottom, find the new row (it usually has a generated name). To
@@ -159,14 +170,14 @@ Figure 3: Adding Node
 
 ![](rename_node.png)
 
-Figure 4: Renaming Node
+Figure 3: Renaming Node
 
 4.  Enter the values for the `type` (attribute/task), and `compute`
     (`dina`, `dino`, or `continuous`) columns.
 
 > **Advanced: HO-DINA, IRT, and MIRT Specification**
 >
-> You can skip this section on a first read — it is only relevant if you
+> You can skip this section on a first read - it is only relevant if you
 > want to model **continuous** latent traits (like a general ability
 > score) rather than binary mastery.
 >
@@ -187,7 +198,7 @@ Figure 4: Renaming Node
 >
 > ![](edit_fields.png)
 >
-> Figure 5: Defining node type and compute
+> Figure 4: Defining node type and compute
 
 **To add a new Edge:**
 
@@ -210,35 +221,14 @@ model.
 1.  **Select target nodes:** Highlight the nodes you want to focus on.
     (*Tip:* Select a node, then use \*\*Select \\ Nodes \\ First
     Neighbors of Selected Nodes).
-2.  **Hide the rest:** Right-click the empty canvas space and choose
-    **Hide Unselected Nodes and Edges** (or go to **View \\ Hide
-    Unselected Nodes and Edges**).
+2.  **Hide the rest:** From the Cytoscape Menu, \*\*Select \\ Nodes \\
+    Hide Unselected Nodes.
 3.  **Make your edits:** You can now simply adjust the layout, move
     nodes, add edges, or edit attributes on this isolated sub-network.
-4.  **Zoom out back to the full network:** When finished, choose **View
-    \\ Show All Nodes and Edges**. All your new edits and coordinates
-    will neatly integrate back into the main network!
-
-### Connecting R to Cytoscape
-
-Before passing any data, we need to ensure R can communicate with your
-active Cytoscape session. We do this by loading the `RCy3` package and
-“pinging” the default Cytoscape port.
-
-Our custom utility functions (like pushing models or formatting tables)
-are seamlessly integrated right into the primary `pgdcm` library.
-
-``` r
-# Load required libraries
-library(RCy3)
-library(igraph)
-library(readxl)
-library(pgdcm)
-
-# Verify connection to Cytoscape
-cytoPort <- "http://localhost:1234/v1"
-cytoscapePing(cytoPort)
-```
+4.  **Zoom out back to the full network:** When finished, go to the
+    Cytoscape Menu, \*\*Select \\ Nodes \\ Show All Nodes. All your new
+    edits and coordinates will neatly integrate back into the main
+    network!
 
 ## Scenario 1: Starting from Task Data (Building Models from Scratch)
 
@@ -352,7 +342,7 @@ g_qmatrix <- QMatrix2CytoNodes(Q_mock, title = "Scenario2_QMatrix")
 
 ![](q2graph.png)
 
-Figure 6: The Graph rendered in Cytoscape based on the Q-Matrix that we
+Figure 5: The Graph rendered in Cytoscape based on the Q-Matrix that we
 pushed to Cytoscape from R.
 
 ## Scenario 2 (Continued): Graphically Defining the Competency Model
@@ -372,7 +362,7 @@ Switch to your Cytoscape window.
 
 ![](proficiencyModel.png)
 
-Figure 7: Using the Cytoscape interface we added an edge from A2 to A1.
+Figure 6: Using the Cytoscape interface we added an edge from A2 to A1.
 The added edge is highlighted in bright red.
 
 ### Pulling the Network Back and Save

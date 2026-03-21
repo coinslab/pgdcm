@@ -16,6 +16,8 @@ navbar:
           href: articles/Beginner_Tutorial.html
         - text: Advanced Tutorial
           href: articles/Advanced_Tutorial.html
+        - text: Model Cookbook
+          href: articles/Cookbook.html
         - text: "---"
         - text: Theory
         - text: "Mathematical Foundations of the PGDCM Model"
@@ -26,6 +28,7 @@ articles:
       - Model_Specification_Tutorial
       - Beginner_Tutorial
       - Advanced_Tutorial
+      - Cookbook
   - title: "Theory"
     contents:
       - Understanding_loglinearBN
