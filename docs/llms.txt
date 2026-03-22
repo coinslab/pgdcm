@@ -1,5 +1,7 @@
 # PGDCM: Probabilistic Graphical Diagnostic Classification Models
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19163715.svg)](https://doi.org/10.5281/zenodo.19163715)
+
 PGDCM is a unified framework for building and estimating several
 psychometric models within the probabilistic graphical modeling
 framework (i.e., treating these psychometric models as special cases of
@@ -150,6 +152,21 @@ After installation, explore the tutorials in recommended order:
 | [Advanced Tutorial](https://coinslab.github.io/pgdcm/articles/Advanced_Tutorial.html)                       | Customizing priors, MCMC samplers, and diagnostic workflows |
 | [Model Cookbook](https://coinslab.github.io/pgdcm/articles/Cookbook.html)                                   | Copy-paste recipes for IRT, DCM, AH-DCM, and HO-DCM         |
 | [Scoring Cookbook](https://coinslab.github.io/pgdcm/articles/Scoring_Cookbook.html)                         | Operational calibration, scoring, and cross-validation      |
+
+## Citation
+
+If you use `pgdcm` in your research, please cite it as:
+
+``` bibtex
+@manual{pgdcm,
+  title = {pgdcm: Probabilistic Graphical Diagnostic Classification Models},
+  author = {Athul Sudheesh and Richard M. Golden},
+  year = {2026},
+  note = {R package version 0.1.0},
+  url = {https://github.com/coinslab/pgdcm},
+  doi = {10.5281/zenodo.19163715}
+}
+```
 
 # Package index
 
