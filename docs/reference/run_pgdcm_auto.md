@@ -14,7 +14,8 @@ run_pgdcm_auto(
     post_sims = NULL),
   prefix = NULL,
   threshold = 0.5,
-  return_groups = FALSE
+  return_groups = FALSE,
+  estimate = TRUE
 )
 ```
 
@@ -48,6 +49,12 @@ run_pgdcm_auto(
   Logical. If `TRUE`, the model groups participants into exhaustive
   latent classes (Caution: Scales exponentially with attributes).
   Default is `FALSE`.
+
+- estimate:
+
+  Logical. If `TRUE` (default), MCMC estimation is performed. If
+  `FALSE`, estimation is skipped (e.g., to only run prior predictive
+  checks).
 
 ## Value
 

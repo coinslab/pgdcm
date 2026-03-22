@@ -41,11 +41,14 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
-    <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
+<li><h6 class="dropdown-header" data-toc-skip>Tutorials</h6></li>
     <li><a class="dropdown-item" href="../articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
+    <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Advanced_Tutorial.html">Advanced Tutorial</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Cookbooks</h6></li>
     <li><a class="dropdown-item" href="../articles/Cookbook.html">Model Cookbook</a></li>
+    <li><a class="dropdown-item" href="../articles/Scoring_Cookbook.html">Scoring Cookbook</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
     <li><a class="dropdown-item" href="../articles/Understanding_loglinearBN.html">Mathematical Foundations of the PGDCM Model</a></li>
@@ -83,7 +86,7 @@
 <div>
 <blockquote>
 <p><strong>Note on Model Scope</strong></p>
-<p>To keep the example simpler for this tutorial, we assume an independent skills model (i.e., there does not exist any dependencies between the different skills). For tutorials involving dependency structures, see the <a href="Cookbook.html">Model CookBook</a>.</p>
+<p>To keep the example simpler for this tutorial, we assume an independent skills model (i.e., there does not exist any dependencies between the different skills). For tutorials involving dependency structures, see the <a href="https://coinslab.github.io/pgdcm/articles/Cookbook.html" class="external-link">Model CookBook</a>.</p>
 </blockquote>
 </div>
 <p>If you are new to the package, we highly recommend starting with the <a href="https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html" class="external-link">Beginner Tutorial</a>. There, we introduce the <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> function, which was purposefully designed to offer a quick, automated, and streamlined approach to estimation.</p>
@@ -344,7 +347,7 @@ Max relative error: 18.3513</code></pre>
 <li>
 <strong>Scatter Plots</strong>: The blue nodes (item accuracy and co-occurrence representations) should hug tightly to the diagonal red equivalence line.</li>
 </ol>
-<p>If the posterior predictive plots show significant deviations (for instance, the distributions don’t align, or scatter nodes sit far off the red line), this is diagnostic proof that your chosen psychological framework (like DINA) is structurally misspecified for this dataset, and you should likely attempt a different network framework like DINO or DINM.</p>
+<p>If the posterior predictive plots show significant deviations (for instance, the distributions don’t align, or scatter nodes sit far off the red line), this is diagnostic proof that your chosen psychological framework (like DINA) is structurally misspecified for this dataset, and you should likely attempt a different compute type. Since the compute type is defined at graph construction time, you would rebuild the graph with a different <code>compute</code> argument—for example, <code>g &lt;- QMatrix2iGraph(Q, compute = "dino")</code> or <code>g &lt;- QMatrix2iGraph(Q, compute = "dinm")</code>—and then re-run the pipeline from <code><a href="../reference/build_model_config.html">build_model_config()</a></code> onward.</p>
 </section></section><section class="level2"><h2 id="generating-summary-tables-and-assessing-accuracy">7. Generating Summary Tables and Assessing Accuracy<a class="anchor" aria-label="anchor" href="#generating-summary-tables-and-assessing-accuracy"></a>
 </h2>
 <p>While the beginner-friendly <code><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto()</a></code> function automatically generates and saves <code>mapped_parameters.csv</code>, <code>skill_profiles.csv</code>, and <code>item_parameters.csv</code> directly to your working directory (see the <a href="https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html" class="external-link">Beginner Tutorial</a> for details), advanced users executing manual MCMC chains must extract and build these tables themselves to maintain full control.</p>
@@ -405,42 +408,26 @@ Max relative error: 18.3513</code></pre>
 <p>In a Bayesian framework, you “fix” a parameter by supplying it with a <strong>highly informative prior</strong> (a point distribution). By leveraging the <code>priors</code> argument in <code><a href="../reference/build_model_config.html">build_model_config()</a></code>, we can supply our calibrated posterior means, and lock them in place using an extremely small standard deviation (e.g., <code>1e-4</code>).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># 1. Extract calibrated parameters from your previous estimation (Section 7)</span></span>
-<span><span class="co">#    Filter mapped_results for theta (structural) and lambda (item) parameters</span></span>
-<span><span class="va">theta_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^theta"</span>, <span class="va">mapped_results</span><span class="op">$</span><span class="va">Parameter</span><span class="op">)</span></span>
-<span><span class="va">lambda_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^lambda"</span>, <span class="va">mapped_results</span><span class="op">$</span><span class="va">Parameter</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># 1. Build scoring configuration from the previous calibrated model</span></span>
+<span><span class="co"># This helper automatically extracts structural dependencies, fixes item constraints,</span></span>
+<span><span class="co"># sizes root matrices appropriately, and binds tightly constrained priors.</span></span>
+<span><span class="va">config_scoring</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/build_scoring_config.html">build_scoring_config</a></span><span class="op">(</span>calib_results <span class="op">=</span> <span class="va">results</span>, </span>
+<span>                                       calib_config <span class="op">=</span> <span class="va">config</span>, </span>
+<span>                                       new_dataframe <span class="op">=</span> <span class="va">X_new_students</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Reshape posterior means into the required K x 2 and J x 2 matrices</span></span>
-<span><span class="va">K</span> <span class="op">&lt;-</span> <span class="va">config</span><span class="op">$</span><span class="va">constants</span><span class="op">$</span><span class="va">nrattributenodes</span>  <span class="co"># number of skills</span></span>
-<span><span class="va">J</span> <span class="op">&lt;-</span> <span class="va">config</span><span class="op">$</span><span class="va">constants</span><span class="op">$</span><span class="va">nrtasknodes</span>       <span class="co"># number of items</span></span>
-<span><span class="va">calibrated_theta_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">mapped_results</span><span class="op">$</span><span class="va">mean</span><span class="op">[</span><span class="va">theta_rows</span><span class="op">]</span>, nrow <span class="op">=</span> <span class="va">K</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">calibrated_lambda_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">mapped_results</span><span class="op">$</span><span class="va">mean</span><span class="op">[</span><span class="va">lambda_rows</span><span class="op">]</span>, nrow <span class="op">=</span> <span class="va">J</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 2. Build your highly informative scoring priors</span></span>
-<span><span class="va">scoring_priors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    <span class="co"># Keep the root attribute priors somewhat diffuse to allow new students to be scored</span></span>
-<span>    beta_mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
-<span>    beta_std <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>,</span>
-<span></span>
-<span>    <span class="co"># "Lock in" your previously calibrated structural parameters (K x 2 matrix)</span></span>
-<span>    theta_mean <span class="op">=</span> <span class="va">calibrated_theta_means</span>,</span>
-<span>    theta_std <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0.0001</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">calibrated_theta_means</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
-<span></span>
-<span>    <span class="co"># "Lock in" your previously calibrated item parameters (J x 2 matrix)</span></span>
-<span>    lambda_mean <span class="op">=</span> <span class="va">calibrated_lambda_means</span>,</span>
-<span>    lambda_std <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0.0001</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">calibrated_lambda_means</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 3. Compile the new config for the new dataset</span></span>
-<span><span class="va">config_scoring</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/build_model_config.html">build_model_config</a></span><span class="op">(</span><span class="va">g</span>, <span class="va">X_new_students</span>, priors <span class="op">=</span> <span class="va">scoring_priors</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 4. Execute the automated workflow (it will sample with fixed items)</span></span>
+<span><span class="co"># 2. Execute the automated workflow (it will sample with fixed items)</span></span>
 <span><span class="va">scoring_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto</a></span><span class="op">(</span><span class="va">config_scoring</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Profile the new students!</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">scoring_results</span><span class="op">$</span><span class="va">skill_profiles</span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>The MCMC sampler will essentially hold those parameters constant at your specified means while freely updating the posterior distributions of the new participants’ latent skills!</p>
+<div>
+<blockquote>
+<p><strong>Full Operational Workflow</strong></p>
+<p>For a complete end-to-end example of calibration, scoring, and cross-validation to detect overfitting, see the <a href="https://coinslab.github.io/pgdcm/articles/Scoring_Cookbook.html" class="external-link">Scoring Cookbook</a>.</p>
+</blockquote>
+</div>
 </section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);

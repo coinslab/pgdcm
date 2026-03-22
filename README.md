@@ -75,3 +75,15 @@ if (!requireNamespace("remotes", quietly = TRUE)) {
 }
 remotes::install_github("coinslab/pgdcm")
 ```
+
+## Getting Started
+
+After installation, explore the tutorials in recommended order:
+
+| Tutorial | Description |
+|:---------|:------------|
+| [Beginner Tutorial](https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html) | End-to-end introduction to Bayesian estimation with `pgdcm` |
+| [Model Specification Tutorial](https://coinslab.github.io/pgdcm/articles/Model_Specification_Tutorial.html) | Constructing competency and evidence models in Cytoscape |
+| [Advanced Tutorial](https://coinslab.github.io/pgdcm/articles/Advanced_Tutorial.html) | Customizing priors, MCMC samplers, and diagnostic workflows |
+| [Model Cookbook](https://coinslab.github.io/pgdcm/articles/Cookbook.html) | Copy-paste recipes for IRT, DCM, AH-DCM, and HO-DCM |
+| [Scoring Cookbook](https://coinslab.github.io/pgdcm/articles/Scoring_Cookbook.html) | Operational calibration, scoring, and cross-validation |

@@ -376,3 +376,7 @@ more uncertainty, narrower lines mean higher confidence.
 > - **Fine-tune the engine?** The [Advanced
 >   Tutorial](https://coinslab.github.io/pgdcm/articles/Advanced_Tutorial.html)
 >   covers customizing priors, MCMC sampling, and diagnostic workflows.
+> - **Score new examinees?** The [Scoring
+>   Cookbook](https://coinslab.github.io/pgdcm/articles/Scoring_Cookbook.html)
+>   demonstrates operational calibration-and-scoring pipelines with
+>   cross-validation.

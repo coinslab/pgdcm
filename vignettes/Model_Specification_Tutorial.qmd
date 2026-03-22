@@ -394,3 +394,4 @@ Now that you have a fully specified model saved as a `.graphml` file, you are re
 
 -   **New to PGDCM?** Start with the [Beginner Tutorial](Beginner_Tutorial.qmd) to learn how to configure and run a Bayesian MCMC model using your network.
 -   **Ready for more?** The [Advanced Tutorial](Advanced_Tutorial.qmd) covers convergence diagnostics, posterior predictive checks, and model comparison.
+-   **Deploying models?** The [Scoring Cookbook](Scoring_Cookbook.qmd) walks through calibration, operational scoring, and cross-validation.

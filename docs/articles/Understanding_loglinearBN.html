@@ -41,11 +41,14 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
-    <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
+<li><h6 class="dropdown-header" data-toc-skip>Tutorials</h6></li>
     <li><a class="dropdown-item" href="../articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
+    <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Advanced_Tutorial.html">Advanced Tutorial</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Cookbooks</h6></li>
     <li><a class="dropdown-item" href="../articles/Cookbook.html">Model Cookbook</a></li>
+    <li><a class="dropdown-item" href="../articles/Scoring_Cookbook.html">Scoring Cookbook</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
     <li><a class="dropdown-item" href="../articles/Understanding_loglinearBN.html">Mathematical Foundations of the PGDCM Model</a></li>
@@ -157,11 +160,12 @@ P(v_i = 1) = \text{logit}^{-1}\!\Big(\underbrace{a_v}_{\text{slope}} \cdot \unde
 <p>In the <code>pgdcm</code> code, item slopes are stored in <code>lambda[j, 1]</code> and attribute transition slopes are stored in <code>theta[k, 1]</code>. They are constrained to be <strong>positive</strong> via a truncated normal prior <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">TN</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>μ</mi><mo>,</mo><mi>σ</mi><mo>,</mo><mn>0</mn><mo>,</mo><mi>∞</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\text{TN}(\mu, \sigma, 0, \infty)</annotation></semantics></math>, ensuring that more skill always means higher probability (never inverted).</p>
 </section><section class="level3"><h3 id="the-intercept-b_v-difficulty-base-rate">2.3 The Intercept (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mi>v</mi></msub><annotation encoding="application/x-tex">b_v</annotation></semantics></math>): Difficulty / Base-Rate<a class="anchor" aria-label="anchor" href="#the-intercept-b_v-difficulty-base-rate"></a>
 </h3>
-<p>The <strong>intercept</strong> controls the <em>baseline difficulty</em> of the node - how hard it is to “pass” even when the condensation rule provides no information. Specifically:</p>
+<p>The <strong>intercept</strong> controls the <em>baseline difficulty</em> of the node - how hard it is to “pass” when the condensation rule (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ψ</mi><mi>v</mi></msub><annotation encoding="application/x-tex">\psi_v</annotation></semantics></math>) outputs exactly zero.</p>
+<p>Specifically:</p>
 <ul>
-<li>When <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ψ</mi><mi>v</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\psi_v = 0</annotation></semantics></math> (the condensation rule output is zero), the probability becomes <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mtext mathvariant="normal">logit</mtext><mrow><mi>−</mi><mn>1</mn></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>−</mi><msub><mi>b</mi><mi>v</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\text{logit}^{-1}(-b_v)</annotation></semantics></math>.</li>
-<li>A <strong>large positive</strong> <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mi>v</mi></msub><annotation encoding="application/x-tex">b_v</annotation></semantics></math> means the node is <em>difficult</em>: even with neutral inputs, the probability of success is low.</li>
-<li>A <strong>large negative</strong> <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mi>v</mi></msub><annotation encoding="application/x-tex">b_v</annotation></semantics></math> means the node is <em>easy</em>: even with neutral inputs, the probability of success is high.</li>
+<li>When <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ψ</mi><mi>v</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\psi_v = 0</annotation></semantics></math>, the probability resolves to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mtext mathvariant="normal">logit</mtext><mrow><mi>−</mi><mn>1</mn></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>−</mi><msub><mi>b</mi><mi>v</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\text{logit}^{-1}(-b_v)</annotation></semantics></math>.</li>
+<li>A <strong>large positive</strong> <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mi>v</mi></msub><annotation encoding="application/x-tex">b_v</annotation></semantics></math> means the node is <em>difficult</em>: the baseline probability of success is low (it is hard to guess, or hard for an average student).</li>
+<li>A <strong>large negative</strong> <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mi>v</mi></msub><annotation encoding="application/x-tex">b_v</annotation></semantics></math> means the node is <em>easy</em>: the baseline probability of success is high.</li>
 <li>At <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mi>v</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">b_v = 0</annotation></semantics></math>, the baseline probability is exactly 0.50.</li>
 </ul>
 <p>In the code, item intercepts are <code>lambda[j, 2]</code> and attribute intercepts are <code>theta[k, 2]</code>.</p>
@@ -384,9 +388,9 @@ P(v_i = 1) = \text{logit}^{-1}\!\Big(\underbrace{a_v}_{\text{slope}} \cdot \unde
 <p>In the code:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">val_dinm</span> <span class="op">&lt;-</span> <span class="va">sum_total</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">sum_input</span><span class="op">)</span></span></code></pre></div>
-<hr></section></section><section class="level2"><h2 id="root-attributes-where-skills-originate">4. Root Attributes: Where Skills Originate<a class="anchor" aria-label="anchor" href="#root-attributes-where-skills-originate"></a>
+<hr></section></section><section class="level2"><h2 id="root-attributes-base-rates-and-latent-abilities">4. Root Attributes: Base-Rates and Latent Abilities<a class="anchor" aria-label="anchor" href="#root-attributes-base-rates-and-latent-abilities"></a>
 </h2>
-<p>Every DAG has <strong>root nodes</strong> - nodes with no incoming arrows (no parents). In a <code>pgdcm</code> model, these are the “foundational” attributes. How they are modeled depends on a critical configuration flag: <code>isContinuousHO</code>.</p>
+<p>Every DAG has <strong>root nodes</strong> - nodes with no incoming arrows (no parents). In a <code>pgdcm</code> model, these are the “foundational” attributes. How they are modeled depends on an important configuration flag: <code>isContinuousHO</code>.</p>
 <section class="level3"><h3 id="standard-discrete-roots-iscontinuousho-0">4.1 Standard Discrete Roots (<code>isContinuousHO = 0</code>)<a class="anchor" aria-label="anchor" href="#standard-discrete-roots-iscontinuousho-0"></a>
 </h3>
 <p>When root attributes are discrete, each one is treated as an independent Bernoulli variable with its own base-rate probability. The model estimates a single parameter <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mi>m</mi></msub><annotation encoding="application/x-tex">\beta_m</annotation></semantics></math> for each root attribute <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>:</p>
@@ -472,7 +476,6 @@ P(\alpha_{im} = 1) = \text{logit}^{-1}(-\beta_m)
 </tr>
 </tbody>
 </table>
-<p><strong>Total structural parameters:</strong> <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mo>+</mo><mn>2</mn><mi>J</mi></mrow><annotation encoding="application/x-tex">K + 2J</annotation></semantics></math> (plus the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>×</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">N \times K</annotation></semantics></math> latent states).</p>
 <p>Note that <code>theta</code> parameters are <strong>absent</strong> in this flat case. The <code>theta</code> parameters only exist for <em>dependent</em> (non-root) attributes - nodes that have parent attributes feeding into them. Since all attributes here are independent roots, there are no attribute-to-attribute transitions to parameterize.</p>
 </section><section class="level3"><h3 id="hierarchical-dcm-bayesian-net-dcm-discrete-attribute-hierarchy">5.2 Hierarchical DCM / Bayesian Net DCM (Discrete Attribute Hierarchy)<a class="anchor" aria-label="anchor" href="#hierarchical-dcm-bayesian-net-dcm-discrete-attribute-hierarchy"></a>
 </h3>

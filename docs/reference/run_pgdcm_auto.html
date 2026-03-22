@@ -22,11 +22,14 @@ and generates posterior predictive checks."><meta property="og:image" content="/
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
-    <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><h6 class="dropdown-header" data-toc-skip>Tutorials</h6></li>
     <li><a class="dropdown-item" href="../articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
+    <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Advanced_Tutorial.html">Advanced Tutorial</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Cookbooks</h6></li>
     <li><a class="dropdown-item" href="../articles/Cookbook.html">Model Cookbook</a></li>
+    <li><a class="dropdown-item" href="../articles/Scoring_Cookbook.html">Scoring Cookbook</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
     <li><a class="dropdown-item" href="../articles/Understanding_loglinearBN.html">Mathematical Foundations of the PGDCM Model</a></li>
@@ -59,7 +62,8 @@ and generates posterior predictive checks.</p>
 <span>    post_sims <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
 <span>  prefix <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  return_groups <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  return_groups <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  estimate <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -88,6 +92,10 @@ Defaults to <code>list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NUL
 
 <dt id="arg-return-groups">return_groups<a class="anchor" aria-label="anchor" href="#arg-return-groups"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, the model groups participants into exhaustive latent classes (Caution: Scales exponentially with attributes). Default is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-estimate">estimate<a class="anchor" aria-label="anchor" href="#arg-estimate"></a></dt>
+<dd><p>Logical. If <code>TRUE</code> (default), MCMC estimation is performed. If <code>FALSE</code>, estimation is skipped (e.g., to only run prior predictive checks).</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -114,15 +114,18 @@ higher probability (never inverted).
 ### 2.3 The Intercept ($b_{v}$): Difficulty / Base-Rate
 
 The **intercept** controls the *baseline difficulty* of the node - how
-hard it is to “pass” even when the condensation rule provides no
-information. Specifically:
+hard it is to “pass” when the condensation rule ($\psi_{v}$) outputs
+exactly zero.
 
-- When $\psi_{v} = 0$ (the condensation rule output is zero), the
-  probability becomes $\text{logit}^{-1}\left( -b_{v} \right)$.
-- A **large positive** $b_{v}$ means the node is *difficult*: even with
-  neutral inputs, the probability of success is low.
-- A **large negative** $b_{v}$ means the node is *easy*: even with
-  neutral inputs, the probability of success is high.
+Specifically:
+
+- When $\psi_{v} = 0$, the probability resolves to
+  $\text{logit}^{-1}\left( -b_{v} \right)$.
+- A **large positive** $b_{v}$ means the node is *difficult*: the
+  baseline probability of success is low (it is hard to guess, or hard
+  for an average student).
+- A **large negative** $b_{v}$ means the node is *easy*: the baseline
+  probability of success is high.
 - At $b_{v} = 0$, the baseline probability is exactly 0.50.
 
 In the code, item intercepts are `lambda[j, 2]` and attribute intercepts
@@ -271,11 +274,11 @@ val_dinm <- sum_total / max(1, sum_input)
 
 ------------------------------------------------------------------------
 
-## 4. Root Attributes: Where Skills Originate
+## 4. Root Attributes: Base-Rates and Latent Abilities
 
 Every DAG has **root nodes** - nodes with no incoming arrows (no
 parents). In a `pgdcm` model, these are the “foundational” attributes.
-How they are modeled depends on a critical configuration flag:
+How they are modeled depends on an important configuration flag:
 `isContinuousHO`.
 
 ### 4.1 Standard Discrete Roots (`isContinuousHO = 0`)
@@ -364,9 +367,6 @@ $$\psi_{j}^{\text{DINA}} = \alpha_{i,1} \cdot \alpha_{i,2}$$
 | `lambda[j, 1]`         | $\lambda_{j1}$ |     $J$      | Item discrimination (how separable the masters vs. non-masters are) |
 | `lambda[j, 2]`         | $\lambda_{j2}$ |     $J$      | Item difficulty (baseline challenge level)                          |
 | `attributenodes[i, k]` | $\alpha_{ik}$  | $N \times K$ | Each student’s binary mastery state on each skill                   |
-
-**Total structural parameters:** $K + 2J$ (plus the $N \times K$ latent
-states).
 
 Note that `theta` parameters are **absent** in this flat case. The
 `theta` parameters only exist for *dependent* (non-root) attributes -

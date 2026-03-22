@@ -520,3 +520,5 @@ you are ready to run the analysis:
 - **Ready for more?** The [Advanced Tutorial](Advanced_Tutorial.qmd)
   covers convergence diagnostics, posterior predictive checks, and model
   comparison.
+- **Deploying models?** The [Scoring Cookbook](Scoring_Cookbook.qmd)
+  walks through calibration, operational scoring, and cross-validation.

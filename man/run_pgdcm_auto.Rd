@@ -10,7 +10,8 @@ run_pgdcm_auto(
     post_sims = NULL),
   prefix = NULL,
   threshold = 0.5,
-  return_groups = FALSE
+  return_groups = FALSE,
+  estimate = TRUE
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ Defaults to \code{list(niter = 1000, nburnin = 100, chains = 2, prior_sims = NUL
 \item{threshold}{Numeric. The mastery probability threshold to use for latent class grouping. Default is 0.5.}
 
 \item{return_groups}{Logical. If \code{TRUE}, the model groups participants into exhaustive latent classes (Caution: Scales exponentially with attributes). Default is \code{FALSE}.}
+
+\item{estimate}{Logical. If \code{TRUE} (default), MCMC estimation is performed. If \code{FALSE}, estimation is skipped (e.g., to only run prior predictive checks).}
 }
 \value{
 A comprehensive list containing:

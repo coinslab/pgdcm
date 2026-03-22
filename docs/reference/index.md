@@ -25,6 +25,8 @@
   Model
 - [`build_model_config()`](build_model_config.md) : Build Model
   Configuration
+- [`build_scoring_config()`](build_scoring_config.md) : Build Model
+  Configuration for Scoring
 - [`check_mcmc_convergence()`](check_mcmc_convergence.md) : Check MCMC
   Convergence
 - [`checklegaledges()`](checklegaledges.md) : Check Legal Edges

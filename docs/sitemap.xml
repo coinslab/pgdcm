@@ -7,6 +7,7 @@
 <url><loc>/articles/DCM_workflow.html</loc></url>
 <url><loc>/articles/Model_Specification_Tutorial.html</loc></url>
 <url><loc>/articles/SEM_workflow.html</loc></url>
+<url><loc>/articles/Scoring_Cookbook.html</loc></url>
 <url><loc>/articles/Understanding_loglinearBN.html</loc></url>
 <url><loc>/articles/index.html</loc></url>
 <url><loc>/articles/renv/library/macos/R-4.5/aarch64-apple-darwin20/renv/doc/ci.html</loc></url>
@@ -32,6 +33,7 @@
 <url><loc>/reference/build_from_q_matrix.html</loc></url>
 <url><loc>/reference/build_irt_graph.html</loc></url>
 <url><loc>/reference/build_model_config.html</loc></url>
+<url><loc>/reference/build_scoring_config.html</loc></url>
 <url><loc>/reference/check_mcmc_convergence.html</loc></url>
 <url><loc>/reference/checklegaledges.html</loc></url>
 <url><loc>/reference/compute_M2.html</loc></url>

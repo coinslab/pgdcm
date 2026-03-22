@@ -1,5 +1,5 @@
 # generate_cookbook_data.R
-# This script executes the exact commands from Cookbook.qmd to generate 
+# This script executes the exact commands from Cookbook.qmd to generate
 # the underlying full MCMC results for the four core psychometric models.
 # Warning: Running this script may take a significant amount of time and memory.
 
@@ -12,8 +12,8 @@ if (!requireNamespace("dcmdata", quietly = TRUE)) {
 
 library(dcmdata, lib.loc = "locallib")
 library(nimble)
-library(pgdcm) # Ensure package is loaded or use devtools::load_all()
-# devtools::load_all()
+# library(pgdcm)
+devtools::load_all() # Load the package locally for development/vignette usage
 
 # ----------------------------------------------------------------------------
 # Setup Data

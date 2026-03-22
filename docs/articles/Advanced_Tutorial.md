@@ -7,7 +7,8 @@
 > To keep the example simpler for this tutorial, we assume an
 > independent skills model (i.e., there does not exist any dependencies
 > between the different skills). For tutorials involving dependency
-> structures, see the [Model CookBook](Cookbook.md).
+> structures, see the [Model
+> CookBook](https://coinslab.github.io/pgdcm/articles/Cookbook.html).
 
 If you are new to the package, we highly recommend starting with the
 [Beginner
@@ -365,8 +366,13 @@ If the posterior predictive plots show significant deviations (for
 instance, the distributions don’t align, or scatter nodes sit far off
 the red line), this is diagnostic proof that your chosen psychological
 framework (like DINA) is structurally misspecified for this dataset, and
-you should likely attempt a different network framework like DINO or
-DINM.
+you should likely attempt a different compute type. Since the compute
+type is defined at graph construction time, you would rebuild the graph
+with a different `compute` argument—for example,
+`g <- QMatrix2iGraph(Q, compute = "dino")` or
+`g <- QMatrix2iGraph(Q, compute = "dinm")`—and then re-run the pipeline
+from [`build_model_config()`](../reference/build_model_config.md)
+onward.
 
 ## 7. Generating Summary Tables and Assessing Accuracy
 
@@ -462,36 +468,14 @@ supply our calibrated posterior means, and lock them in place using an
 extremely small standard deviation (e.g., `1e-4`).
 
 ``` r
-# 1. Extract calibrated parameters from your previous estimation (Section 7)
-#    Filter mapped_results for theta (structural) and lambda (item) parameters
-theta_rows <- grepl("^theta", mapped_results$Parameter)
-lambda_rows <- grepl("^lambda", mapped_results$Parameter)
+# 1. Build scoring configuration from the previous calibrated model
+# This helper automatically extracts structural dependencies, fixes item constraints,
+# sizes root matrices appropriately, and binds tightly constrained priors.
+config_scoring <- build_scoring_config(calib_results = results, 
+                                       calib_config = config, 
+                                       new_dataframe = X_new_students)
 
-# Reshape posterior means into the required K x 2 and J x 2 matrices
-K <- config$constants$nrattributenodes  # number of skills
-J <- config$constants$nrtasknodes       # number of items
-calibrated_theta_means <- matrix(mapped_results$mean[theta_rows], nrow = K, ncol = 2)
-calibrated_lambda_means <- matrix(mapped_results$mean[lambda_rows], nrow = J, ncol = 2)
-
-# 2. Build your highly informative scoring priors
-scoring_priors <- list(
-    # Keep the root attribute priors somewhat diffuse to allow new students to be scored
-    beta_mean = c(0),
-    beta_std = c(2),
-
-    # "Lock in" your previously calibrated structural parameters (K x 2 matrix)
-    theta_mean = calibrated_theta_means,
-    theta_std = matrix(0.0001, nrow = nrow(calibrated_theta_means), ncol = 2),
-
-    # "Lock in" your previously calibrated item parameters (J x 2 matrix)
-    lambda_mean = calibrated_lambda_means,
-    lambda_std = matrix(0.0001, nrow = nrow(calibrated_lambda_means), ncol = 2)
-)
-
-# 3. Compile the new config for the new dataset
-config_scoring <- build_model_config(g, X_new_students, priors = scoring_priors)
-
-# 4. Execute the automated workflow (it will sample with fixed items)
+# 2. Execute the automated workflow (it will sample with fixed items)
 scoring_results <- run_pgdcm_auto(config_scoring)
 
 # Profile the new students!
@@ -501,3 +485,9 @@ print(scoring_results$skill_profiles)
 The MCMC sampler will essentially hold those parameters constant at your
 specified means while freely updating the posterior distributions of the
 new participants’ latent skills!
+
+> **Full Operational Workflow**
+>
+> For a complete end-to-end example of calibration, scoring, and
+> cross-validation to detect overfitting, see the [Scoring
+> Cookbook](https://coinslab.github.io/pgdcm/articles/Scoring_Cookbook.html).

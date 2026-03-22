@@ -33,7 +33,7 @@ library(igraph)
 # --- Data ---
 X <- dtmr_data
 Q <- dtmr_qmatrix
-item_names <- colnames(X)[-1]  # drop the student-ID column
+item_names <- colnames(X)[-1] # drop the student-ID column
 ```
 
 ```{r load_results, include=FALSE}
@@ -105,8 +105,10 @@ config <- build_model_config(g, X)
 results <- run_pgdcm_auto(
     config = config,
     prefix = "IRT",
-    estimation_config = list(niter = 10000, nburnin = 1000, chains = 2,
-                             prior_sims = 25, post_sims = 25)
+    estimation_config = list(
+        niter = 10000, nburnin = 1000, chains = 2,
+        prior_sims = 25, post_sims = 25
+    )
 )
 results$WAIC
 ```
@@ -134,8 +136,10 @@ config <- build_model_config(g, X)
 results <- run_pgdcm_auto(
     config = config,
     prefix = "DCM",
-    estimation_config = list(niter = 10000, nburnin = 1000, chains = 2,
-                             prior_sims = 25, post_sims = 25)
+    estimation_config = list(
+        niter = 10000, nburnin = 1000, chains = 2,
+        prior_sims = 25, post_sims = 25
+    )
 )
 results$WAIC
 ```
@@ -176,8 +180,10 @@ config <- build_model_config(g, X)
 results <- run_pgdcm_auto(
     config = config,
     prefix = "AH-DCM",
-    estimation_config = list(niter = 10000, nburnin = 1000, chains = 2,
-                             prior_sims = 25, post_sims = 25)
+    estimation_config = list(
+        niter = 10000, nburnin = 1000, chains = 2,
+        prior_sims = 25, post_sims = 25
+    )
 )
 results$WAIC
 ```
@@ -216,8 +222,10 @@ config <- build_model_config(g, X)
 results <- run_pgdcm_auto(
     config = config,
     prefix = "HO-DCM",
-    estimation_config = list(niter = 10000, nburnin = 1000, chains = 2,
-                             prior_sims = 25, post_sims = 25)
+    estimation_config = list(
+        niter = 10000, nburnin = 1000, chains = 2,
+        prior_sims = 25, post_sims = 25
+    )
 )
 results$WAIC
 ```
@@ -246,11 +254,11 @@ knitr::kable(waic_tbl, digits = 2, format = "markdown")
 
 On this dataset, the **HO-DCM** achieves the lowest WAIC, suggesting that a general-ability-driven skill structure provides the best balance of fit and complexity for this assessment.
 
-### Item Difficulty (`lambda[, 1]`)
+### Item Difficulty (`lambda[, 2]`)
 
 **Access from your results:** `results$item_parameters` - the `difficulty_mean` column contains these values.
 
-The first lambda index (`lambda[j, 1]`) captures the item difficulty. Higher values mean an item is harder overall. Comparing these across models reveals how structural assumptions shift the difficulty calibration.
+The second lambda index (`lambda[j, 2]`) captures the item difficulty. Higher values mean an item is harder overall. Comparing these across models reveals how structural assumptions shift the difficulty calibration.
 
 ```{r table_difficulty, echo=FALSE}
 get_lambda <- function(res, index) {
@@ -265,10 +273,10 @@ get_lambda <- function(res, index) {
 
 diff_tbl <- data.frame(
     Item = item_names,
-    `IRT` = get_lambda(res_IRT, 1),
-    `DCM` = get_lambda(res_DCM, 1),
-    `AH-DCM` = get_lambda(res_AH, 1),
-    `HO-DCM` = get_lambda(res_HO, 1),
+    `IRT` = get_lambda(res_IRT, 2),
+    `DCM` = get_lambda(res_DCM, 2),
+    `AH-DCM` = get_lambda(res_AH, 2),
+    `HO-DCM` = get_lambda(res_HO, 2),
     check.names = FALSE
 )
 knitr::kable(diff_tbl, digits = 3, format = "markdown")
@@ -276,19 +284,19 @@ knitr::kable(diff_tbl, digits = 3, format = "markdown")
 
 
 
-### Item Discrimination (`lambda[, 2]`)
+### Item Discrimination (`lambda[, 1]`)
 
 **Access from your results:** `results$item_parameters` - the `discrimination_mean` column contains these values.
 
-The second lambda index (`lambda[j, 2]`) estimates the main-effect discrimination (slope) - how well an item differentiates between students who possess the relevant skills and those who do not. In multidimensional models (DCM, AH-DCM, HO-DCM), this effect is split across the skills specified in the Q-matrix, so cross-model comparisons should be interpreted cautiously.
+The first lambda index (`lambda[j, 1]`) estimates the main-effect discrimination (slope) - how well an item differentiates between students who possess the relevant skills and those who do not. In multidimensional models (DCM, AH-DCM, HO-DCM), this effect is split across the skills specified in the Q-matrix, so cross-model comparisons should be interpreted cautiously.
 
 ```{r table_discrim, echo=FALSE}
 disc_tbl <- data.frame(
     Item = item_names,
-    `IRT` = get_lambda(res_IRT, 2),
-    `DCM` = get_lambda(res_DCM, 2),
-    `AH-DCM` = get_lambda(res_AH, 2),
-    `HO-DCM` = get_lambda(res_HO, 2),
+    `IRT` = get_lambda(res_IRT, 1),
+    `DCM` = get_lambda(res_DCM, 1),
+    `AH-DCM` = get_lambda(res_AH, 1),
+    `HO-DCM` = get_lambda(res_HO, 1),
     check.names = FALSE
 )
 knitr::kable(disc_tbl, digits = 3, format = "markdown")
@@ -389,3 +397,9 @@ accuracy$profile_accuracy
 | HO-DCM | Edit in Cytoscape | K discrete + 1 continuous | General ability → skills |
 
 : The only thing that changes across models is how you build the graph. Everything else - `build_model_config()`, `run_pgdcm_auto()`, and the results structure - stays identical.
+
+::: {.callout-note}
+## Ready to Deploy?
+
+Once you have selected a model, the [Scoring Cookbook](Scoring_Cookbook.html) shows how to lock your calibrated parameters and score new examinees using `build_scoring_config()`.
+:::

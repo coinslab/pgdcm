@@ -9,26 +9,36 @@ navbar:
     articles:
       text: Articles
       menu:
-        - text: Workflows
-        - text: Model Specification Tutorial
-          href: articles/Model_Specification_Tutorial.html
+        - text: Tutorials
         - text: Beginner Tutorial
           href: articles/Beginner_Tutorial.html
+        - text: Model Specification Tutorial
+          href: articles/Model_Specification_Tutorial.html
         - text: Advanced Tutorial
           href: articles/Advanced_Tutorial.html
+        - text: "---"
+        - text: Cookbooks
         - text: Model Cookbook
           href: articles/Cookbook.html
+        - text: Scoring Cookbook
+          href: articles/Scoring_Cookbook.html
         - text: "---"
         - text: Theory
         - text: "Mathematical Foundations of the PGDCM Model"
           href: articles/Understanding_loglinearBN.html
 articles:
-  - title: "Workflows"
+  - title: "Tutorials"
+    desc: "Step-by-step guides for learning pgdcm."
     contents:
-      - Model_Specification_Tutorial
       - Beginner_Tutorial
+      - Model_Specification_Tutorial
       - Advanced_Tutorial
+  - title: "Cookbooks"
+    desc: "Targeted examples and model recipes."
+    contents:
       - Cookbook
+      - Scoring_Cookbook
   - title: "Theory"
+    desc: "Mathematical details underlying the models."
     contents:
       - Understanding_loglinearBN

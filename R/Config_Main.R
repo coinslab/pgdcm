@@ -178,3 +178,59 @@ build_model_config <- function(graph, dataframe, priors = NULL) {
 
     return(cfg)
 }
+
+# ── Extension Entry ──────────────────────────────────────────────────────────
+#' Build Model Configuration for Scoring
+#'
+#' Automatically isolates and structures the compiled structural and item constraints 
+#' from a calibrated model into a tightly locked scoring model configuration.
+#'
+#' @param calib_results The list returned from \code{run_pgdcm_auto} containing \code{mapped_parameters}.
+#' @param calib_config The model configuration object used to generate the calibrated model.
+#' @param new_dataframe A \code{data.frame} of raw responses matching the new participants to score.
+#'
+#' @return A configuration list prepared for \code{run_pgdcm_auto} execution.
+#' @export
+build_scoring_config <- function(calib_results, calib_config, new_dataframe) {
+    mapped <- calib_results$mapped_parameters
+    if (is.null(mapped) || !("Raw_Param" %in% names(mapped))) {
+        stop("Invalid 'calib_results'. Ensure it is a complete object returned from run_pgdcm_auto().")
+    }
+
+    # Extract raw parameters structurally
+    theta_rows <- grepl("^theta\\[", mapped$Raw_Param)
+    lambda_rows <- grepl("^lambda\\[", mapped$Raw_Param)
+
+    K <- calib_config$constants$nrattributenodes
+    J <- calib_config$constants$nrtasknodes
+
+    calibrated_theta_means <- matrix(mapped$mean[theta_rows], nrow = K, ncol = 2)
+    calibrated_lambda_means <- matrix(mapped$mean[lambda_rows], nrow = J, ncol = 2)
+
+    num_beta_roots <- calib_config$constants$nrbetaroot
+    if (!is.null(num_beta_roots) && num_beta_roots > 0) {
+        b_mean <- rep(0, num_beta_roots)
+        b_std <- rep(2, num_beta_roots)
+    } else {
+        b_mean <- c(0)
+        b_std <- c(2)
+    }
+
+    scoring_priors <- list(
+        beta_mean = b_mean,
+        beta_std = b_std,
+        theta_mean = calibrated_theta_means,
+        theta_std = matrix(0.0001, nrow = K, ncol = 2),
+        lambda_mean = calibrated_lambda_means,
+        lambda_std = matrix(0.0001, nrow = J, ncol = 2)
+    )
+
+    # Compile the new base config targeting the new dataset
+    config_score <- build_model_config(graph = calib_config$graph, dataframe = new_dataframe, priors = scoring_priors)
+
+    # Overwrite random initial values to safely bypass MCMC compilation constraint errors
+    config_score$inits$theta <- calibrated_theta_means
+    config_score$inits$lambda <- calibrated_lambda_means
+
+    return(config_score)
+}

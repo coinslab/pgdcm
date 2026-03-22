@@ -35,7 +35,7 @@ library(igraph)
 # --- Data ---
 X <- dtmr_data
 Q <- dtmr_qmatrix
-item_names <- colnames(X)[-1]  # drop the student-ID column
+item_names <- colnames(X)[-1] # drop the student-ID column
 ```
 
 ------------------------------------------------------------------------
@@ -66,8 +66,10 @@ config <- build_model_config(g, X)
 results <- run_pgdcm_auto(
     config = config,
     prefix = "IRT",
-    estimation_config = list(niter = 10000, nburnin = 1000, chains = 2,
-                             prior_sims = 25, post_sims = 25)
+    estimation_config = list(
+        niter = 10000, nburnin = 1000, chains = 2,
+        prior_sims = 25, post_sims = 25
+    )
 )
 results$WAIC
 ```
@@ -97,8 +99,10 @@ config <- build_model_config(g, X)
 results <- run_pgdcm_auto(
     config = config,
     prefix = "DCM",
-    estimation_config = list(niter = 10000, nburnin = 1000, chains = 2,
-                             prior_sims = 25, post_sims = 25)
+    estimation_config = list(
+        niter = 10000, nburnin = 1000, chains = 2,
+        prior_sims = 25, post_sims = 25
+    )
 )
 results$WAIC
 ```
@@ -145,8 +149,10 @@ config <- build_model_config(g, X)
 results <- run_pgdcm_auto(
     config = config,
     prefix = "AH-DCM",
-    estimation_config = list(niter = 10000, nburnin = 1000, chains = 2,
-                             prior_sims = 25, post_sims = 25)
+    estimation_config = list(
+        niter = 10000, nburnin = 1000, chains = 2,
+        prior_sims = 25, post_sims = 25
+    )
 )
 results$WAIC
 ```
@@ -189,8 +195,10 @@ config <- build_model_config(g, X)
 results <- run_pgdcm_auto(
     config = config,
     prefix = "HO-DCM",
-    estimation_config = list(niter = 10000, nburnin = 1000, chains = 2,
-                             prior_sims = 25, post_sims = 25)
+    estimation_config = list(
+        niter = 10000, nburnin = 1000, chains = 2,
+        prior_sims = 25, post_sims = 25
+    )
 )
 results$WAIC
 ```
@@ -199,7 +207,8 @@ results$WAIC
 
 ## Comparing Results
 
-The recipes above were run on the DTMR dataset (`dcmdata::dtmr_data`).
+The recipes above were run on the DTMR dataset
+([`dcmdata::dtmr_data`](https://dcmdata.r-dcm.org/reference/dtmr.html)).
 The tables below summarize the results so you can see how different
 structural assumptions affect model fit, item parameter estimates, and
 classification accuracy.
@@ -224,57 +233,15 @@ On this dataset, the **HO-DCM** achieves the lowest WAIC, suggesting
 that a general-ability-driven skill structure provides the best balance
 of fit and complexity for this assessment.
 
-### Item Difficulty (`lambda[, 1]`)
+### Item Difficulty (`lambda[, 2]`)
 
 **Access from your results:** `results$item_parameters` - the
 `difficulty_mean` column contains these values.
 
-The first lambda index (`lambda[j, 1]`) captures the item difficulty.
+The second lambda index (`lambda[j, 2]`) captures the item difficulty.
 Higher values mean an item is harder overall. Comparing these across
 models reveals how structural assumptions shift the difficulty
 calibration.
-
-| Item    |   IRT |   DCM | AH-DCM | HO-DCM |
-|:--------|------:|------:|-------:|-------:|
-| Item_1  | 0.915 | 1.720 |  1.697 |  0.895 |
-| Item_2  | 0.363 | 1.327 |  1.252 |  1.167 |
-| Item_3  | 0.684 | 2.430 |  2.370 |  2.681 |
-| Item_4  | 0.429 | 0.919 |  0.932 |  3.100 |
-| Item_5  | 0.812 | 1.743 |  1.757 |  2.809 |
-| Item_6  | 0.618 | 2.000 |  1.966 |  1.381 |
-| Item_7  | 0.516 | 0.987 |  1.039 |  2.274 |
-| Item_8  | 1.363 | 4.178 |  3.917 |  2.025 |
-| Item_9  | 0.891 | 2.238 |  2.312 |  1.572 |
-| Item_10 | 0.185 | 0.941 |  0.737 |  2.135 |
-| Item_11 | 0.665 | 1.647 |  1.667 |  1.717 |
-| Item_12 | 0.240 | 0.590 |  0.580 |  1.304 |
-| Item_13 | 1.809 | 5.289 |  5.071 |  2.370 |
-| Item_14 | 1.896 | 3.290 |  3.235 |  0.912 |
-| Item_15 | 1.638 | 2.988 |  2.931 |  1.621 |
-| Item_16 | 0.528 | 1.272 |  1.283 |  1.973 |
-| Item_17 | 0.739 | 1.342 |  1.340 |  1.043 |
-| Item_18 | 0.465 | 0.885 |  0.896 |  3.966 |
-| Item_19 | 0.482 | 1.186 |  1.162 |  2.329 |
-| Item_20 | 1.223 | 2.631 |  2.631 |  0.730 |
-| Item_21 | 0.983 | 3.090 |  3.077 |  1.703 |
-| Item_22 | 0.945 | 2.786 |  2.796 |  0.539 |
-| Item_23 | 0.692 | 1.540 |  1.449 |  4.893 |
-| Item_24 | 1.119 | 2.345 |  2.268 |  3.269 |
-| Item_25 | 0.899 | 2.132 |  2.022 |  3.084 |
-| Item_26 | 0.797 | 1.555 |  1.589 |  1.236 |
-| Item_27 | 1.109 | 2.157 |  2.147 |  1.302 |
-
-### Item Discrimination (`lambda[, 2]`)
-
-**Access from your results:** `results$item_parameters` - the
-`discrimination_mean` column contains these values.
-
-The second lambda index (`lambda[j, 2]`) estimates the main-effect
-discrimination (slope) - how well an item differentiates between
-students who possess the relevant skills and those who do not. In
-multidimensional models (DCM, AH-DCM, HO-DCM), this effect is split
-across the skills specified in the Q-matrix, so cross-model comparisons
-should be interpreted cautiously.
 
 | Item    |    IRT |    DCM | AH-DCM | HO-DCM |
 |:--------|-------:|-------:|-------:|-------:|
@@ -305,6 +272,48 @@ should be interpreted cautiously.
 | Item_25 | -0.057 |  0.616 |  0.629 |  2.416 |
 | Item_26 |  0.965 |  1.842 |  1.797 |  1.229 |
 | Item_27 |  0.085 |  0.770 |  0.813 |  1.330 |
+
+### Item Discrimination (`lambda[, 1]`)
+
+**Access from your results:** `results$item_parameters` - the
+`discrimination_mean` column contains these values.
+
+The first lambda index (`lambda[j, 1]`) estimates the main-effect
+discrimination (slope) - how well an item differentiates between
+students who possess the relevant skills and those who do not. In
+multidimensional models (DCM, AH-DCM, HO-DCM), this effect is split
+across the skills specified in the Q-matrix, so cross-model comparisons
+should be interpreted cautiously.
+
+| Item    |   IRT |   DCM | AH-DCM | HO-DCM |
+|:--------|------:|------:|-------:|-------:|
+| Item_1  | 0.915 | 1.720 |  1.697 |  0.895 |
+| Item_2  | 0.363 | 1.327 |  1.252 |  1.167 |
+| Item_3  | 0.684 | 2.430 |  2.370 |  2.681 |
+| Item_4  | 0.429 | 0.919 |  0.932 |  3.100 |
+| Item_5  | 0.812 | 1.743 |  1.757 |  2.809 |
+| Item_6  | 0.618 | 2.000 |  1.966 |  1.381 |
+| Item_7  | 0.516 | 0.987 |  1.039 |  2.274 |
+| Item_8  | 1.363 | 4.178 |  3.917 |  2.025 |
+| Item_9  | 0.891 | 2.238 |  2.312 |  1.572 |
+| Item_10 | 0.185 | 0.941 |  0.737 |  2.135 |
+| Item_11 | 0.665 | 1.647 |  1.667 |  1.717 |
+| Item_12 | 0.240 | 0.590 |  0.580 |  1.304 |
+| Item_13 | 1.809 | 5.289 |  5.071 |  2.370 |
+| Item_14 | 1.896 | 3.290 |  3.235 |  0.912 |
+| Item_15 | 1.638 | 2.988 |  2.931 |  1.621 |
+| Item_16 | 0.528 | 1.272 |  1.283 |  1.973 |
+| Item_17 | 0.739 | 1.342 |  1.340 |  1.043 |
+| Item_18 | 0.465 | 0.885 |  0.896 |  3.966 |
+| Item_19 | 0.482 | 1.186 |  1.162 |  2.329 |
+| Item_20 | 1.223 | 2.631 |  2.631 |  0.730 |
+| Item_21 | 0.983 | 3.090 |  3.077 |  1.703 |
+| Item_22 | 0.945 | 2.786 |  2.796 |  0.539 |
+| Item_23 | 0.692 | 1.540 |  1.449 |  4.893 |
+| Item_24 | 1.119 | 2.345 |  2.268 |  3.269 |
+| Item_25 | 0.899 | 2.132 |  2.022 |  3.084 |
+| Item_26 | 0.797 | 1.555 |  1.589 |  1.236 |
+| Item_27 | 1.109 | 2.157 |  2.147 |  1.302 |
 
 ### Classification Accuracy
 
@@ -373,3 +382,10 @@ Everything else -
 [`build_model_config()`](../reference/build_model_config.md),
 [`run_pgdcm_auto()`](../reference/run_pgdcm_auto.md), and the results
 structure - stays identical.
+
+> **Ready to Deploy?**
+>
+> Once you have selected a model, the [Scoring
+> Cookbook](Scoring_Cookbook.md) shows how to lock your calibrated
+> parameters and score new examinees using
+> [`build_scoring_config()`](../reference/build_scoring_config.md).

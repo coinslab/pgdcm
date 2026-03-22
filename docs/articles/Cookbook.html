@@ -41,11 +41,14 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
-    <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
+<li><h6 class="dropdown-header" data-toc-skip>Tutorials</h6></li>
     <li><a class="dropdown-item" href="../articles/Beginner_Tutorial.html">Beginner Tutorial</a></li>
+    <li><a class="dropdown-item" href="../articles/Model_Specification_Tutorial.html">Model Specification Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/Advanced_Tutorial.html">Advanced Tutorial</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Cookbooks</h6></li>
     <li><a class="dropdown-item" href="../articles/Cookbook.html">Model Cookbook</a></li>
+    <li><a class="dropdown-item" href="../articles/Scoring_Cookbook.html">Scoring Cookbook</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
     <li><a class="dropdown-item" href="../articles/Understanding_loglinearBN.html">Mathematical Foundations of the PGDCM Model</a></li>
@@ -108,7 +111,7 @@
 <span><span class="co"># --- Data ---</span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">dtmr_data</span></span>
 <span><span class="va">Q</span> <span class="op">&lt;-</span> <span class="va">dtmr_qmatrix</span></span>
-<span><span class="va">item_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span>  <span class="co"># drop the student-ID column</span></span></code></pre></div>
+<span><span class="va">item_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="co"># drop the student-ID column</span></span></code></pre></div>
 </div>
 <hr></section><section class="level2"><h2 id="recipes">Recipes<a class="anchor" aria-label="anchor" href="#recipes"></a>
 </h2>
@@ -131,8 +134,10 @@
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto</a></span><span class="op">(</span></span>
 <span>    config <span class="op">=</span> <span class="va">config</span>,</span>
 <span>    prefix <span class="op">=</span> <span class="st">"IRT"</span>,</span>
-<span>    estimation_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">10000</span>, nburnin <span class="op">=</span> <span class="fl">1000</span>, chains <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>                             prior_sims <span class="op">=</span> <span class="fl">25</span>, post_sims <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
+<span>    estimation_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        niter <span class="op">=</span> <span class="fl">10000</span>, nburnin <span class="op">=</span> <span class="fl">1000</span>, chains <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>        prior_sims <span class="op">=</span> <span class="fl">25</span>, post_sims <span class="op">=</span> <span class="fl">25</span></span>
+<span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">results</span><span class="op">$</span><span class="va">WAIC</span></span></code></pre></div>
 </div>
@@ -155,8 +160,10 @@
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto</a></span><span class="op">(</span></span>
 <span>    config <span class="op">=</span> <span class="va">config</span>,</span>
 <span>    prefix <span class="op">=</span> <span class="st">"DCM"</span>,</span>
-<span>    estimation_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">10000</span>, nburnin <span class="op">=</span> <span class="fl">1000</span>, chains <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>                             prior_sims <span class="op">=</span> <span class="fl">25</span>, post_sims <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
+<span>    estimation_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        niter <span class="op">=</span> <span class="fl">10000</span>, nburnin <span class="op">=</span> <span class="fl">1000</span>, chains <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>        prior_sims <span class="op">=</span> <span class="fl">25</span>, post_sims <span class="op">=</span> <span class="fl">25</span></span>
+<span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">results</span><span class="op">$</span><span class="va">WAIC</span></span></code></pre></div>
 </div>
@@ -193,8 +200,10 @@
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto</a></span><span class="op">(</span></span>
 <span>    config <span class="op">=</span> <span class="va">config</span>,</span>
 <span>    prefix <span class="op">=</span> <span class="st">"AH-DCM"</span>,</span>
-<span>    estimation_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">10000</span>, nburnin <span class="op">=</span> <span class="fl">1000</span>, chains <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>                             prior_sims <span class="op">=</span> <span class="fl">25</span>, post_sims <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
+<span>    estimation_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        niter <span class="op">=</span> <span class="fl">10000</span>, nburnin <span class="op">=</span> <span class="fl">1000</span>, chains <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>        prior_sims <span class="op">=</span> <span class="fl">25</span>, post_sims <span class="op">=</span> <span class="fl">25</span></span>
+<span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">results</span><span class="op">$</span><span class="va">WAIC</span></span></code></pre></div>
 </div>
@@ -228,14 +237,16 @@
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto</a></span><span class="op">(</span></span>
 <span>    config <span class="op">=</span> <span class="va">config</span>,</span>
 <span>    prefix <span class="op">=</span> <span class="st">"HO-DCM"</span>,</span>
-<span>    estimation_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">10000</span>, nburnin <span class="op">=</span> <span class="fl">1000</span>, chains <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>                             prior_sims <span class="op">=</span> <span class="fl">25</span>, post_sims <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
+<span>    estimation_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        niter <span class="op">=</span> <span class="fl">10000</span>, nburnin <span class="op">=</span> <span class="fl">1000</span>, chains <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>        prior_sims <span class="op">=</span> <span class="fl">25</span>, post_sims <span class="op">=</span> <span class="fl">25</span></span>
+<span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">results</span><span class="op">$</span><span class="va">WAIC</span></span></code></pre></div>
 </div>
 <hr></section></section><section class="level2"><h2 id="comparing-results">Comparing Results<a class="anchor" aria-label="anchor" href="#comparing-results"></a>
 </h2>
-<p>The recipes above were run on the DTMR dataset (<code>dcmdata::dtmr_data</code>). The tables below summarize the results so you can see how different structural assumptions affect model fit, item parameter estimates, and classification accuracy.</p>
+<p>The recipes above were run on the DTMR dataset (<code><a href="https://dcmdata.r-dcm.org/reference/dtmr.html" class="external-link">dcmdata::dtmr_data</a></code>). The tables below summarize the results so you can see how different structural assumptions affect model fit, item parameter estimates, and classification accuracy.</p>
 <section class="level3"><h3 id="model-fit-waic">Model Fit (WAIC)<a class="anchor" aria-label="anchor" href="#model-fit-waic"></a>
 </h3>
 <p><strong>Access from your results:</strong> <code>results$WAIC</code></p>
@@ -279,218 +290,10 @@
 </div>
 </div>
 <p>On this dataset, the <strong>HO-DCM</strong> achieves the lowest WAIC, suggesting that a general-ability-driven skill structure provides the best balance of fit and complexity for this assessment.</p>
-</section><section class="level3"><h3 id="item-difficulty-lambda-1">Item Difficulty (<code>lambda[, 1]</code>)<a class="anchor" aria-label="anchor" href="#item-difficulty-lambda-1"></a>
+</section><section class="level3"><h3 id="item-difficulty-lambda-2">Item Difficulty (<code>lambda[, 2]</code>)<a class="anchor" aria-label="anchor" href="#item-difficulty-lambda-2"></a>
 </h3>
 <p><strong>Access from your results:</strong> <code>results$item_parameters</code> - the <code>difficulty_mean</code> column contains these values.</p>
-<p>The first lambda index (<code>lambda[j, 1]</code>) captures the item difficulty. Higher values mean an item is harder overall. Comparing these across models reveals how structural assumptions shift the difficulty calibration.</p>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table caption-top">
-<thead><tr class="header">
-<th style="text-align: left;">Item</th>
-<th style="text-align: right;">IRT</th>
-<th style="text-align: right;">DCM</th>
-<th style="text-align: right;">AH-DCM</th>
-<th style="text-align: right;">HO-DCM</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Item_1</td>
-<td style="text-align: right;">0.915</td>
-<td style="text-align: right;">1.720</td>
-<td style="text-align: right;">1.697</td>
-<td style="text-align: right;">0.895</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_2</td>
-<td style="text-align: right;">0.363</td>
-<td style="text-align: right;">1.327</td>
-<td style="text-align: right;">1.252</td>
-<td style="text-align: right;">1.167</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_3</td>
-<td style="text-align: right;">0.684</td>
-<td style="text-align: right;">2.430</td>
-<td style="text-align: right;">2.370</td>
-<td style="text-align: right;">2.681</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_4</td>
-<td style="text-align: right;">0.429</td>
-<td style="text-align: right;">0.919</td>
-<td style="text-align: right;">0.932</td>
-<td style="text-align: right;">3.100</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_5</td>
-<td style="text-align: right;">0.812</td>
-<td style="text-align: right;">1.743</td>
-<td style="text-align: right;">1.757</td>
-<td style="text-align: right;">2.809</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_6</td>
-<td style="text-align: right;">0.618</td>
-<td style="text-align: right;">2.000</td>
-<td style="text-align: right;">1.966</td>
-<td style="text-align: right;">1.381</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_7</td>
-<td style="text-align: right;">0.516</td>
-<td style="text-align: right;">0.987</td>
-<td style="text-align: right;">1.039</td>
-<td style="text-align: right;">2.274</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_8</td>
-<td style="text-align: right;">1.363</td>
-<td style="text-align: right;">4.178</td>
-<td style="text-align: right;">3.917</td>
-<td style="text-align: right;">2.025</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_9</td>
-<td style="text-align: right;">0.891</td>
-<td style="text-align: right;">2.238</td>
-<td style="text-align: right;">2.312</td>
-<td style="text-align: right;">1.572</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_10</td>
-<td style="text-align: right;">0.185</td>
-<td style="text-align: right;">0.941</td>
-<td style="text-align: right;">0.737</td>
-<td style="text-align: right;">2.135</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_11</td>
-<td style="text-align: right;">0.665</td>
-<td style="text-align: right;">1.647</td>
-<td style="text-align: right;">1.667</td>
-<td style="text-align: right;">1.717</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_12</td>
-<td style="text-align: right;">0.240</td>
-<td style="text-align: right;">0.590</td>
-<td style="text-align: right;">0.580</td>
-<td style="text-align: right;">1.304</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_13</td>
-<td style="text-align: right;">1.809</td>
-<td style="text-align: right;">5.289</td>
-<td style="text-align: right;">5.071</td>
-<td style="text-align: right;">2.370</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_14</td>
-<td style="text-align: right;">1.896</td>
-<td style="text-align: right;">3.290</td>
-<td style="text-align: right;">3.235</td>
-<td style="text-align: right;">0.912</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_15</td>
-<td style="text-align: right;">1.638</td>
-<td style="text-align: right;">2.988</td>
-<td style="text-align: right;">2.931</td>
-<td style="text-align: right;">1.621</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_16</td>
-<td style="text-align: right;">0.528</td>
-<td style="text-align: right;">1.272</td>
-<td style="text-align: right;">1.283</td>
-<td style="text-align: right;">1.973</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_17</td>
-<td style="text-align: right;">0.739</td>
-<td style="text-align: right;">1.342</td>
-<td style="text-align: right;">1.340</td>
-<td style="text-align: right;">1.043</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_18</td>
-<td style="text-align: right;">0.465</td>
-<td style="text-align: right;">0.885</td>
-<td style="text-align: right;">0.896</td>
-<td style="text-align: right;">3.966</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_19</td>
-<td style="text-align: right;">0.482</td>
-<td style="text-align: right;">1.186</td>
-<td style="text-align: right;">1.162</td>
-<td style="text-align: right;">2.329</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_20</td>
-<td style="text-align: right;">1.223</td>
-<td style="text-align: right;">2.631</td>
-<td style="text-align: right;">2.631</td>
-<td style="text-align: right;">0.730</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_21</td>
-<td style="text-align: right;">0.983</td>
-<td style="text-align: right;">3.090</td>
-<td style="text-align: right;">3.077</td>
-<td style="text-align: right;">1.703</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_22</td>
-<td style="text-align: right;">0.945</td>
-<td style="text-align: right;">2.786</td>
-<td style="text-align: right;">2.796</td>
-<td style="text-align: right;">0.539</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_23</td>
-<td style="text-align: right;">0.692</td>
-<td style="text-align: right;">1.540</td>
-<td style="text-align: right;">1.449</td>
-<td style="text-align: right;">4.893</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_24</td>
-<td style="text-align: right;">1.119</td>
-<td style="text-align: right;">2.345</td>
-<td style="text-align: right;">2.268</td>
-<td style="text-align: right;">3.269</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_25</td>
-<td style="text-align: right;">0.899</td>
-<td style="text-align: right;">2.132</td>
-<td style="text-align: right;">2.022</td>
-<td style="text-align: right;">3.084</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Item_26</td>
-<td style="text-align: right;">0.797</td>
-<td style="text-align: right;">1.555</td>
-<td style="text-align: right;">1.589</td>
-<td style="text-align: right;">1.236</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Item_27</td>
-<td style="text-align: right;">1.109</td>
-<td style="text-align: right;">2.157</td>
-<td style="text-align: right;">2.147</td>
-<td style="text-align: right;">1.302</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</section><section class="level3"><h3 id="item-discrimination-lambda-2">Item Discrimination (<code>lambda[, 2]</code>)<a class="anchor" aria-label="anchor" href="#item-discrimination-lambda-2"></a>
-</h3>
-<p><strong>Access from your results:</strong> <code>results$item_parameters</code> - the <code>discrimination_mean</code> column contains these values.</p>
-<p>The second lambda index (<code>lambda[j, 2]</code>) estimates the main-effect discrimination (slope) - how well an item differentiates between students who possess the relevant skills and those who do not. In multidimensional models (DCM, AH-DCM, HO-DCM), this effect is split across the skills specified in the Q-matrix, so cross-model comparisons should be interpreted cautiously.</p>
+<p>The second lambda index (<code>lambda[j, 2]</code>) captures the item difficulty. Higher values mean an item is harder overall. Comparing these across models reveals how structural assumptions shift the difficulty calibration.</p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table caption-top">
@@ -695,6 +498,214 @@
 </table>
 </div>
 </div>
+</section><section class="level3"><h3 id="item-discrimination-lambda-1">Item Discrimination (<code>lambda[, 1]</code>)<a class="anchor" aria-label="anchor" href="#item-discrimination-lambda-1"></a>
+</h3>
+<p><strong>Access from your results:</strong> <code>results$item_parameters</code> - the <code>discrimination_mean</code> column contains these values.</p>
+<p>The first lambda index (<code>lambda[j, 1]</code>) estimates the main-effect discrimination (slope) - how well an item differentiates between students who possess the relevant skills and those who do not. In multidimensional models (DCM, AH-DCM, HO-DCM), this effect is split across the skills specified in the Q-matrix, so cross-model comparisons should be interpreted cautiously.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table caption-top">
+<thead><tr class="header">
+<th style="text-align: left;">Item</th>
+<th style="text-align: right;">IRT</th>
+<th style="text-align: right;">DCM</th>
+<th style="text-align: right;">AH-DCM</th>
+<th style="text-align: right;">HO-DCM</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Item_1</td>
+<td style="text-align: right;">0.915</td>
+<td style="text-align: right;">1.720</td>
+<td style="text-align: right;">1.697</td>
+<td style="text-align: right;">0.895</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_2</td>
+<td style="text-align: right;">0.363</td>
+<td style="text-align: right;">1.327</td>
+<td style="text-align: right;">1.252</td>
+<td style="text-align: right;">1.167</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_3</td>
+<td style="text-align: right;">0.684</td>
+<td style="text-align: right;">2.430</td>
+<td style="text-align: right;">2.370</td>
+<td style="text-align: right;">2.681</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_4</td>
+<td style="text-align: right;">0.429</td>
+<td style="text-align: right;">0.919</td>
+<td style="text-align: right;">0.932</td>
+<td style="text-align: right;">3.100</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_5</td>
+<td style="text-align: right;">0.812</td>
+<td style="text-align: right;">1.743</td>
+<td style="text-align: right;">1.757</td>
+<td style="text-align: right;">2.809</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_6</td>
+<td style="text-align: right;">0.618</td>
+<td style="text-align: right;">2.000</td>
+<td style="text-align: right;">1.966</td>
+<td style="text-align: right;">1.381</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_7</td>
+<td style="text-align: right;">0.516</td>
+<td style="text-align: right;">0.987</td>
+<td style="text-align: right;">1.039</td>
+<td style="text-align: right;">2.274</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_8</td>
+<td style="text-align: right;">1.363</td>
+<td style="text-align: right;">4.178</td>
+<td style="text-align: right;">3.917</td>
+<td style="text-align: right;">2.025</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_9</td>
+<td style="text-align: right;">0.891</td>
+<td style="text-align: right;">2.238</td>
+<td style="text-align: right;">2.312</td>
+<td style="text-align: right;">1.572</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_10</td>
+<td style="text-align: right;">0.185</td>
+<td style="text-align: right;">0.941</td>
+<td style="text-align: right;">0.737</td>
+<td style="text-align: right;">2.135</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_11</td>
+<td style="text-align: right;">0.665</td>
+<td style="text-align: right;">1.647</td>
+<td style="text-align: right;">1.667</td>
+<td style="text-align: right;">1.717</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_12</td>
+<td style="text-align: right;">0.240</td>
+<td style="text-align: right;">0.590</td>
+<td style="text-align: right;">0.580</td>
+<td style="text-align: right;">1.304</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_13</td>
+<td style="text-align: right;">1.809</td>
+<td style="text-align: right;">5.289</td>
+<td style="text-align: right;">5.071</td>
+<td style="text-align: right;">2.370</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_14</td>
+<td style="text-align: right;">1.896</td>
+<td style="text-align: right;">3.290</td>
+<td style="text-align: right;">3.235</td>
+<td style="text-align: right;">0.912</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_15</td>
+<td style="text-align: right;">1.638</td>
+<td style="text-align: right;">2.988</td>
+<td style="text-align: right;">2.931</td>
+<td style="text-align: right;">1.621</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_16</td>
+<td style="text-align: right;">0.528</td>
+<td style="text-align: right;">1.272</td>
+<td style="text-align: right;">1.283</td>
+<td style="text-align: right;">1.973</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_17</td>
+<td style="text-align: right;">0.739</td>
+<td style="text-align: right;">1.342</td>
+<td style="text-align: right;">1.340</td>
+<td style="text-align: right;">1.043</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_18</td>
+<td style="text-align: right;">0.465</td>
+<td style="text-align: right;">0.885</td>
+<td style="text-align: right;">0.896</td>
+<td style="text-align: right;">3.966</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_19</td>
+<td style="text-align: right;">0.482</td>
+<td style="text-align: right;">1.186</td>
+<td style="text-align: right;">1.162</td>
+<td style="text-align: right;">2.329</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_20</td>
+<td style="text-align: right;">1.223</td>
+<td style="text-align: right;">2.631</td>
+<td style="text-align: right;">2.631</td>
+<td style="text-align: right;">0.730</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_21</td>
+<td style="text-align: right;">0.983</td>
+<td style="text-align: right;">3.090</td>
+<td style="text-align: right;">3.077</td>
+<td style="text-align: right;">1.703</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_22</td>
+<td style="text-align: right;">0.945</td>
+<td style="text-align: right;">2.786</td>
+<td style="text-align: right;">2.796</td>
+<td style="text-align: right;">0.539</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_23</td>
+<td style="text-align: right;">0.692</td>
+<td style="text-align: right;">1.540</td>
+<td style="text-align: right;">1.449</td>
+<td style="text-align: right;">4.893</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_24</td>
+<td style="text-align: right;">1.119</td>
+<td style="text-align: right;">2.345</td>
+<td style="text-align: right;">2.268</td>
+<td style="text-align: right;">3.269</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_25</td>
+<td style="text-align: right;">0.899</td>
+<td style="text-align: right;">2.132</td>
+<td style="text-align: right;">2.022</td>
+<td style="text-align: right;">3.084</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Item_26</td>
+<td style="text-align: right;">0.797</td>
+<td style="text-align: right;">1.555</td>
+<td style="text-align: right;">1.589</td>
+<td style="text-align: right;">1.236</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Item_27</td>
+<td style="text-align: right;">1.109</td>
+<td style="text-align: right;">2.157</td>
+<td style="text-align: right;">2.147</td>
+<td style="text-align: right;">1.302</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </section><section class="level3"><h3 id="classification-accuracy">Classification Accuracy<a class="anchor" aria-label="anchor" href="#classification-accuracy"></a>
 </h3>
 <p><strong>Access from your results:</strong> <code>results$skill_profiles</code> contains the posterior mastery probabilities for each student.</p>
@@ -812,7 +823,14 @@
 <td>General ability → skills</td>
 </tr>
 </tbody>
-</table></section><script id="quarto-html-after-body" type="application/javascript">
+</table>
+<div>
+<blockquote>
+<p><strong>Ready to Deploy?</strong></p>
+<p>Once you have selected a model, the <a href="Scoring_Cookbook.html">Scoring Cookbook</a> shows how to lock your calibrated parameters and score new examinees using <code><a href="../reference/build_scoring_config.html">build_scoring_config()</a></code>.</p>
+</blockquote>
+</div>
+</section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);

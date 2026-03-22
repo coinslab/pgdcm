@@ -1,0 +1,252 @@
+# Scoring Cookbook: Operational Scoring & Cross-Validation
+
+## 1 Introduction: Operational Scoring
+
+> **Learning Objectives**
+>
+> By the end of this cookbook, you will learn how to:
+>
+> 1.  Split a dataset into Calibration and Scoring samples to simulate a
+>     multi-year assessment cycle.
+> 2.  Run a full Calibration phase using
+>     [`build_model_config()`](../reference/build_model_config.md) and
+>     [`run_pgdcm_auto()`](../reference/run_pgdcm_auto.md).
+> 3.  Lock item parameters and transfer them to new examinees using
+>     [`build_scoring_config()`](../reference/build_scoring_config.md).
+> 4.  Evaluate model generalization via cross-validated accuracy and
+>     detect overfitting.
+
+> **Prerequisites**
+>
+> This cookbook assumes familiarity with the core `pgdcm` workflow. If
+> you are new to the package, start with the [Beginner
+> Tutorial](https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html).
+> For details on constructing attribute hierarchies and higher-order
+> models, see the [Model
+> Cookbook](https://coinslab.github.io/pgdcm/articles/Cookbook.html).
+
+In operational psychometrics, assessment programs rarely estimate
+everything from scratch each time they administer a test. Doing so is
+computationally expensive and requires massive sample sizes to guarantee
+stability.
+
+Instead, testing programs rely on a **Calibration and Scoring**
+workflow:
+
+1.  **Calibration (Year 1):** Administer the test to a large,
+    representative sample. Run full estimation to establish item
+    parameters (difficulties and discriminations) and validate the
+    underlying cognitive structure.
+2.  **Scoring (Year 2+):** Lock those item parameters in place. When new
+    examinees take the test, the model bypasses re-estimation of the
+    test blueprint and focuses exclusively on classifying each
+    examinee’s latent masteries against the fixed framework.
+
+This cookbook demonstrates how `pgdcm` abstracts this operational
+pipeline into a reproducible, automated process.
+
+## 2 Preparing the Data
+
+To simulate a Year 1 vs. Year 2 operational scenario, we split the full
+990-examinee `dtmr_data` matrix into two halves: a **Calibration**
+sample and a **Scoring** sample.
+
+Because we are running a cross-validation experiment later in this
+document, we also match each examinee’s ID to the ground-truth profiles
+in `dtmr_true_profiles` so we can evaluate classification accuracy at
+the end.
+
+``` r
+library(dcmdata)
+library(nimble)
+library(pgdcm)
+
+set.seed(2026)
+N <- nrow(dtmr_data)
+shuffled_idx <- sample(1:N)
+
+# Shuffle data
+X_shuffled <- dtmr_data[shuffled_idx, ]
+
+# Match the true profiles to the shuffled IDs
+matched_idx <- match(
+    as.character(X_shuffled[[1]]),
+    as.character(dtmr_true_profiles[[1]])
+)
+true_profiles_shuffled <- dtmr_true_profiles[matched_idx, ]
+
+# Use string IDs as row names so MCMC output is labeled correctly
+rownames(X_shuffled) <- as.character(X_shuffled[[1]])
+rownames(true_profiles_shuffled) <- as.character(true_profiles_shuffled[[1]])
+
+# Split into Calibration (Year 1) and Scoring (Year 2) samples
+half <- floor(N / 2)
+X_calib <- X_shuffled[1:half, ]
+X_score <- X_shuffled[(half + 1):N, ]
+
+true_calib <- true_profiles_shuffled[1:half, ]
+true_score <- true_profiles_shuffled[(half + 1):N, ]
+```
+
+## 3 The Calibration Phase (Year 1)
+
+With the isolated `X_calib` sample, we construct the Q-Matrix graph and
+run full estimation exactly as in the standard tutorials. For this
+example we use the **Attribute Hierarchy model (AH-DCM)**:
+
+``` r
+# Read the pre-specified graphical network
+g_ah <- read_graph("AH_DCM.graphml", format = "graphml")
+
+# Compile the model configuration
+config_calib <- build_model_config(g_ah, X_calib)
+
+# Estimation settings
+estimation_cfg <- list(niter = 10000, nburnin = 1000, chains = 2)
+
+# Run full estimation on the Year 1 sample
+res_calib <- run_pgdcm_auto(
+    config = config_calib,
+    prefix = "scoring_results/AH-DCM_Calib",
+    estimation_config = estimation_cfg
+)
+```
+
+The returned `res_calib` object now contains the posterior distributions
+for:
+
+- **`lambda`** — item intercepts and main-effect discriminations.
+- **`theta`** — structural dependency parameters governing attribute
+  relationships.
+
+These posteriors represent the calibrated “blueprint” of the assessment.
+
+## 4 The Scoring Phase (Year 2)
+
+When Year 2 arrives, we need to transfer the calibrated item parameters
+to score new examinees. Doing this manually in NIMBLE would require
+subsetting posterior arrays, tracking `beta_root` structural matrices
+across model types, and injecting tightly constrained priors
+(`sd = 0.0001`) into initial values.
+
+[`build_scoring_config()`](../reference/build_scoring_config.md) handles
+all of that automatically:
+
+``` r
+# Extract posteriors from calibration, freeze item parameters,
+# and create a scoring configuration targeting the new dataset
+config_score <- build_scoring_config(
+    calib_results = res_calib,
+    calib_config  = config_calib,
+    new_dataframe = X_score
+)
+
+# Run scoring — the sampler now estimates only the latent profiles
+res_score <- run_pgdcm_auto(
+    config = config_score,
+    prefix = "scoring_results/AH-DCM_Score",
+    estimation_config = estimation_cfg
+)
+
+# Year 2 diagnostics are ready
+head(res_score$skill_profiles)
+```
+
+> **What
+> [`build_scoring_config()`](../reference/build_scoring_config.md) Does
+> Under the Hood**
+>
+> 1.  Extracts the posterior means for `lambda` and `theta` from
+>     `res_calib$mapped_parameters`.
+> 2.  Constructs priors with near-zero variance (`sd = 0.0001`) around
+>     those means, effectively locking the item parameters.
+> 3.  Rebuilds the full model configuration targeting `X_score`, so the
+>     MCMC sampler estimates **only** the latent mastery profiles for
+>     the new examinees.
+
+## 5 Cross-Validation Experiment: Detecting Overfitting
+
+In a real operational setting, you cannot compute true classification
+accuracy because the examinees’ actual cognitive states are unknown. You
+must trust that the locked parameters from Year 1 generalize.
+
+Because `dtmr_data` is a simulated dataset, we have the luxury of
+ground-truth profiles. We can measure exactly how well each model holds
+up when transferred from Calibration to Scoring. This split-half design
+exposes the hidden danger of **overfitting**.
+
+### 5.1 Evaluating Accuracy with `assess_classification_accuracy()`
+
+After each phase, we compare the estimated skill profiles against the
+known truth:
+
+``` r
+# Define the mapping between model skill names and ground-truth columns
+skills_map <- list(
+    "referent_units"           = "referent_units",
+    "partitioning_iterating"   = "partitioning_iterating",
+    "appropriateness"          = "appropriateness",
+    "multiplicative_comparison" = "multiplicative_comparison"
+)
+
+# Evaluate the scoring phase accuracy
+acc_score <- assess_classification_accuracy(
+    skill_profiles = res_score$skill_profiles,
+    true_data      = true_score,
+    mapping_list   = skills_map
+)
+
+acc_score$profile_accuracy
+```
+
+### 5.2 Model Comparison Results
+
+Running this workflow uniformly across DCM, AH-DCM, and HO-DCM produces
+the following diagnostic table:
+
+| Model      | Phase       |         WAIC | Profile Accuracy |
+|:-----------|:------------|-------------:|-----------------:|
+| DCM        | Calibration |     14730.62 |            52.5% |
+| DCM        | Scoring     |     14857.72 |            50.9% |
+| AH-DCM     | Calibration |     14564.05 |            58.9% |
+| **AH-DCM** | **Scoring** | **15079.14** |        **57.9%** |
+| HO-DCM     | Calibration |     14560.84 |            62.0% |
+| HO-DCM     | Scoring     |     15206.87 |            44.6% |
+
+### 5.3 Interpreting the Results
+
+> **The Overfitting Trap**
+>
+> Looking only at **Calibration** accuracy, one might conclude that the
+> **HO-DCM** is the best model — it achieves the highest accuracy (62%)
+> and the lowest WAIC (14561). However, its **Scoring** accuracy
+> collapses to 44.6%, the worst of all three models.
+
+This degradation is a textbook example of overfitting. With only
+$N = 495$ examinees, the HO-DCM’s heavily nested hierarchy does not have
+enough data to reliably estimate 27 items alongside the structural
+parameters. The model “memorizes” noise in the calibration sample and
+fails to generalize.
+
+In contrast, the **AH-DCM** loses only ~1 percentage point when moving
+from Calibration (58.9%) to Scoring (57.9%). Its simpler dependency
+structure is well-supported by the available sample size, making it the
+most robust choice for operational deployment.
+
+## 6 Summary
+
+| Step | Function                                                                             | Purpose                                                     |
+|:-----|:-------------------------------------------------------------------------------------|:------------------------------------------------------------|
+| 1    | [`build_model_config()`](../reference/build_model_config.md)                         | Compile the calibration configuration from graph + data     |
+| 2    | [`run_pgdcm_auto()`](../reference/run_pgdcm_auto.md)                                 | Run full MCMC estimation on the calibration sample          |
+| 3    | [`build_scoring_config()`](../reference/build_scoring_config.md)                     | Lock item parameters and target a new dataset               |
+| 4    | [`run_pgdcm_auto()`](../reference/run_pgdcm_auto.md)                                 | Score new examinees against the frozen framework            |
+| 5    | [`assess_classification_accuracy()`](../reference/assess_classification_accuracy.md) | Evaluate classification against ground truth (if available) |
+
+**Key takeaway:** The
+[`build_scoring_config()`](../reference/build_scoring_config.md)
+pipeline not only automates operational scoring — it also provides a
+principled framework for cross-validating model selection. Models that
+overfit during calibration will reveal themselves through accuracy
+degradation at scoring time. For the DTMR dataset with $N < 500$, the
+AH-DCM is the safest operational foundation.
