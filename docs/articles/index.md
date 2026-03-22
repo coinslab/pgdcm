@@ -24,4 +24,4 @@ Targeted examples and model recipes.
 Mathematical details underlying the models.
 
 - [Mathematical Foundations of the PGDCM Bayesian Network
-  Model](Understanding_loglinearBN.md):
+  Model](Understanding_DiBelloBN.md):

@@ -1,0 +1,30 @@
+---
+title: "Module 0: Setup and Environment Check"
+author: "NCME 2026 PGDCM Workshop"
+output: html_document
+---
+
+# Setup and Environment Check
+
+Run this script to ensure your R environment is correctly configured prior to the workshop modules.
+
+```{r setup, message=FALSE, warning=FALSE}
+# 1. Load the core statistical and psychometric libraries
+library(nimble)
+library(pgdcm)
+
+# 2. Load the sample data library
+# If you don't have dcmdata installed, uncomment the line below:
+# install.packages("dcmdata", repos = "https://cloud.r-project.org")
+library(dcmdata)
+
+# 3. Load the graphical visualization libraries
+library(igraph)
+
+# Note: You must have the Cytoscape application OPEN on your computer
+# before running the next lines.
+library(RCy3) 
+cytoscapePing() # This should return "You are connected to Cytoscape!"
+
+cat("🚀 All libraries loaded successfully! You are ready for the workshop.\n")
+```

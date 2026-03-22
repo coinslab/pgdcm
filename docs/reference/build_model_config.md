@@ -46,7 +46,7 @@ contains:
   generator script.
 
 - `model_object`: A character string denoting the name of the function
-  to invoke (e.g., `"loglinearBN"`).
+  to invoke (e.g., `"DiBelloBN"`).
 
 - `graph`: The fully verified and topologically sorted `igraph` object.
 

@@ -121,7 +121,7 @@ calc_mixed_kernel <- nimbleFunction(
     }
 )
 
-loglinearBN <- nimbleCode({
+DiBelloBN <- nimbleCode({
     # --- Priors ---
 
     # 1. Priors for Root Attributes (Intercepts only / OR Latent Ability)
@@ -168,7 +168,7 @@ loglinearBN <- nimbleCode({
         if (nrattributenodes > nrbetaroot) {
             for (k in (nrbetaroot + 1):nrattributenodes) {
                 # Calculate Kernel using Custom Function to handle Mixed Inputs
-                # Using 1:(k-1) properly ensures Nimble does not see a bidirectional DAG cycle. 
+                # Using 1:(k-1) properly ensures Nimble does not see a bidirectional DAG cycle.
                 # Because k is dynamic in the loop, Nimble handles 1:1 boundaries correctly here without the C++ bug.
                 psival[i, k] <- calc_mixed_kernel(
                     weights = CDMmatrix[k, 1:(k - 1)],

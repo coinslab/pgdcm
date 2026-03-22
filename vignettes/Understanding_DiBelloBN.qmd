@@ -8,7 +8,7 @@ vignette: >
 
 ## Introduction
 
-At the heart of the `pgdcm` package lies a single, unified Bayesian network model defined in the file `loglinearBN.R`. This one piece of NIMBLE code is highly flexible: depending on how you configure your graph (i.e., which node types and compute rules you assign), it can express a standard **Diagnostic Classification Model (DCM)**, an **Item Response Theory (IRT)** model, a **Multidimensional IRT (MIRT)** model, or a **Higher-Order DCM (HO-DCM)**.
+At the heart of the `pgdcm` package lies a single, unified Bayesian network model defined in the file `DiBelloBN.R`. This one piece of NIMBLE code is highly flexible: depending on how you configure your graph (i.e., which node types and compute rules you assign), it can express a standard **Diagnostic Classification Model (DCM)**, an **Item Response Theory (IRT)** model, a **Multidimensional IRT (MIRT)** model, or a **Higher-Order DCM (HO-DCM)**.
 
 This vignette is written for readers who want to understand *exactly* what the model is doing mathematically. We will walk through:
 
@@ -403,7 +403,7 @@ A single continuous general ability $\eta$ feeds into discrete binary skills, wh
 
 **What happens mathematically:**
 
-This model type demonstrates the full mixed continuous-discrete capability of `loglinearBN`. The network has **three layers**:
+This model type demonstrates the full mixed continuous-discrete capability of `DiBelloBN`. The network has **three layers**:
 
 **Layer 1 - General Ability (Root):** $$\eta_i \sim \mathcal{N}(0, 1)$$
 
@@ -502,7 +502,7 @@ The value $-10$ is not arbitrary - it is chosen so that $\text{logit}^{-1}(a \cd
 
 ## 7. The Complete Prior Structure
 
-Every unknown parameter in the model is given a **prior distribution** - a mathematical statement of our beliefs before seeing any data. The priors in `loglinearBN` are:
+Every unknown parameter in the model is given a **prior distribution** - a mathematical statement of our beliefs before seeing any data. The priors in `DiBelloBN` are:
 
 ### Root Attribute Intercepts (Discrete Mode)
 
@@ -560,7 +560,7 @@ config <- build_model_config(g, X, priors = list(
 
 ## 8. Summary: How One Model Becomes Many
 
-The following table summarizes how the same `loglinearBN` code adapts to different psychometric models purely through graph configuration:
+The following table summarizes how the same `DiBelloBN` code adapts to different psychometric models purely through graph configuration:
 
 | Model | Root Attributes | Root Compute | Dependent Attributes | Item Compute | Key Parameters |
 |:-----------|:----------:|:----------:|:----------:|:----------:|:-----------|

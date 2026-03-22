@@ -1,0 +1,65 @@
+---
+title: "Module 4: Operational Scoring Engine"
+author: "NCME 2026 PGDCM Workshop"
+output: html_document
+---
+
+# Operational Scoring Engine
+
+**Objective:** Transition from exploratory calibration to high-speed operational scoring of new students using locked priors.
+
+## 1. Defining the Gold Standard
+
+Calibration is heavy. Operational student scoring should be fast. We will take the item parameters estimated in Hour 1 and lock them in as "Gold Standard" assumptions.
+
+```{r load-priors, message=FALSE, warning=FALSE}
+library(pgdcm)
+library(dcmdata)
+
+# Identify the 'winning' parameters from earlier calibration
+gold_standard_params <- read.csv("NCME_DCM_item_parameters.csv")
+head(gold_standard_params)
+```
+
+## 2. Acquiring Operational Data
+
+We simulate acquiring a brand NEW, unseen dataset of operational student responses. For this exercise, we'll pretend the second half of our dataset is brand new.
+
+```{r config-operational}
+# For this exercise, we'll pretend the second half of `dtmr_data` is brand new.
+X_new <- dtmr_data[501:1000, ] 
+Q <- dtmr_qmatrix
+
+g_dcm <- QMatrix2iGraph(Q)
+
+# Build the scoring configuration
+# FILL IN THE BLANK: Map the graph to the NEW operational data
+config_scoring <- build_model_config(graph = g_dcm, data = ___)
+```
+
+## 3. The Scoring Engine
+
+By feeding `pgdcm` our prior parameter expectations with near-zero variance, the engine skips recalibrating items entirely and converges rapidly on predicting latent skills for the new students.
+
+```{r run-scoring, eval=FALSE}
+# Run `pgdcm` in purely operational scoring mode!
+# FILL IN THE BLANK: You might need to adjust the structure based on pgdcm's `priors` argument layout.
+results_scoring <- run_pgdcm_auto(
+  config = config_scoring,
+  prefix = "NCME_Scoring",
+  # Note: Replace `priors_list` with the properly formatted list of locked parameter means and tiny standard deviations. 
+  # priors = priors_list, 
+  estimation_config = list(niter = 2000, nburnin = 500, chains = 2)
+)
+```
+
+## 4. Diagnostics Delivered
+
+Just like that, we successfully scored hundreds of new students using our validated engine natively!
+
+```{r final-results, eval=FALSE}
+# Output the profiles for the NEW students
+head(results_scoring$skill_profiles)
+
+cat("\nModule 4 Complete: Operational Scoring achieved!\n")
+```

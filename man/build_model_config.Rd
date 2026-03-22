@@ -21,7 +21,7 @@ A configuration list encompassing Nimble requirements. The list contains:
   \item \code{monitors}: A character vector of node names to monitor during MCMC.
   \item \code{data}: A list containing the aligned observational response matrix \code{X}.
   \item \code{code_file}: The resolved absolute path to the underlying Nimble model generator script.
-  \item \code{model_object}: A character string denoting the name of the function to invoke (e.g., \code{"loglinearBN"}).
+  \item \code{model_object}: A character string denoting the name of the function to invoke (e.g., \code{"DiBelloBN"}).
   \item \code{graph}: The fully verified and topologically sorted \code{igraph} object.
   \item \code{type}: A character string denoting the detected architecture (e.g., \code{"DCM"}, \code{"SEM"}).
 }

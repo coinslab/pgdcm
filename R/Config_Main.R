@@ -107,7 +107,7 @@ validate_graph_compute_nodes <- function(graph) {
 #'   \item \code{monitors}: A character vector of node names to monitor during MCMC.
 #'   \item \code{data}: A list containing the aligned observational response matrix \code{X}.
 #'   \item \code{code_file}: The resolved absolute path to the underlying Nimble model generator script.
-#'   \item \code{model_object}: A character string denoting the name of the function to invoke (e.g., \code{"loglinearBN"}).
+#'   \item \code{model_object}: A character string denoting the name of the function to invoke (e.g., \code{"DiBelloBN"}).
 #'   \item \code{graph}: The fully verified and topologically sorted \code{igraph} object.
 #'   \item \code{type}: A character string denoting the detected architecture (e.g., \code{"DCM"}, \code{"SEM"}).
 #' }
@@ -168,8 +168,8 @@ build_model_config <- function(graph, dataframe, priors = NULL) {
         cfg$model_object <- "loglinearSEM"
     } else {
         cfg <- configure_dcm(info, X, priors = priors)
-        cfg$code_file <- get_model_path("loglinearBN.R")
-        cfg$model_object <- "loglinearBN"
+        cfg$code_file <- get_model_path("DiBelloBN.R")
+        cfg$model_object <- "DiBelloBN"
     }
 
     cfg$graph <- graph
@@ -182,7 +182,7 @@ build_model_config <- function(graph, dataframe, priors = NULL) {
 # ── Extension Entry ──────────────────────────────────────────────────────────
 #' Build Model Configuration for Scoring
 #'
-#' Automatically isolates and structures the compiled structural and item constraints 
+#' Automatically isolates and structures the compiled structural and item constraints
 #' from a calibrated model into a tightly locked scoring model configuration.
 #'
 #' @param calib_results The list returned from \code{run_pgdcm_auto} containing \code{mapped_parameters}.
