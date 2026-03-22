@@ -115,8 +115,8 @@ res_calib <- run_pgdcm_auto(
 The returned `res_calib` object now contains the posterior distributions
 for:
 
-- **`lambda`** — item intercepts and main-effect discriminations.
-- **`theta`** — structural dependency parameters governing attribute
+- **`lambda`** - item intercepts and main-effect discriminations.
+- **`theta`** - structural dependency parameters governing attribute
   relationships.
 
 These posteriors represent the calibrated “blueprint” of the assessment.
@@ -141,7 +141,7 @@ config_score <- build_scoring_config(
     new_dataframe = X_score
 )
 
-# Run scoring — the sampler now estimates only the latent profiles
+# Run scoring - the sampler now estimates only the latent profiles
 res_score <- run_pgdcm_auto(
     config = config_score,
     prefix = "scoring_results/AH-DCM_Score",
@@ -218,7 +218,7 @@ the following diagnostic table:
 > **The Overfitting Trap**
 >
 > Looking only at **Calibration** accuracy, one might conclude that the
-> **HO-DCM** is the best model — it achieves the highest accuracy (62%)
+> **HO-DCM** is the best model - it achieves the highest accuracy (62%)
 > and the lowest WAIC (14561). However, its **Scoring** accuracy
 > collapses to 44.6%, the worst of all three models.
 
@@ -245,7 +245,7 @@ most robust choice for operational deployment.
 
 **Key takeaway:** The
 [`build_scoring_config()`](../reference/build_scoring_config.md)
-pipeline not only automates operational scoring — it also provides a
+pipeline not only automates operational scoring - it also provides a
 principled framework for cross-validating model selection. Models that
 overfit during calibration will reveal themselves through accuracy
 degradation at scoring time. For the DTMR dataset with $N < 500$, the

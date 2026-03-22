@@ -173,9 +173,9 @@
 <p>The returned <code>res_calib</code> object now contains the posterior distributions for:</p>
 <ul>
 <li>
-<strong><code>lambda</code></strong> — item intercepts and main-effect discriminations.</li>
+<strong><code>lambda</code></strong> - item intercepts and main-effect discriminations.</li>
 <li>
-<strong><code>theta</code></strong> — structural dependency parameters governing attribute relationships.</li>
+<strong><code>theta</code></strong> - structural dependency parameters governing attribute relationships.</li>
 </ul>
 <p>These posteriors represent the calibrated “blueprint” of the assessment.</p>
 </section><section class="level2" data-number="4"><h2 data-number="4" id="the-scoring-phase-year-2">
@@ -193,7 +193,7 @@
 <span>    new_dataframe <span class="op">=</span> <span class="va">X_score</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Run scoring — the sampler now estimates only the latent profiles</span></span>
+<span><span class="co"># Run scoring - the sampler now estimates only the latent profiles</span></span>
 <span><span class="va">res_score</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_pgdcm_auto.html">run_pgdcm_auto</a></span><span class="op">(</span></span>
 <span>    config <span class="op">=</span> <span class="va">config_score</span>,</span>
 <span>    prefix <span class="op">=</span> <span class="st">"scoring_results/AH-DCM_Score"</span>,</span>
@@ -297,7 +297,7 @@
 <div>
 <blockquote>
 <p><strong>The Overfitting Trap</strong></p>
-<p>Looking only at <strong>Calibration</strong> accuracy, one might conclude that the <strong>HO-DCM</strong> is the best model — it achieves the highest accuracy (62%) and the lowest WAIC (14561). However, its <strong>Scoring</strong> accuracy collapses to 44.6%, the worst of all three models.</p>
+<p>Looking only at <strong>Calibration</strong> accuracy, one might conclude that the <strong>HO-DCM</strong> is the best model - it achieves the highest accuracy (62%) and the lowest WAIC (14561). However, its <strong>Scoring</strong> accuracy collapses to 44.6%, the worst of all three models.</p>
 </blockquote>
 </div>
 <p>This degradation is a textbook example of overfitting. With only <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>495</mn></mrow><annotation encoding="application/x-tex">N = 495</annotation></semantics></math> examinees, the HO-DCM’s heavily nested hierarchy does not have enough data to reliably estimate 27 items alongside the structural parameters. The model “memorizes” noise in the calibration sample and fails to generalize.</p>
@@ -344,7 +344,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Key takeaway:</strong> The <code><a href="../reference/build_scoring_config.html">build_scoring_config()</a></code> pipeline not only automates operational scoring — it also provides a principled framework for cross-validating model selection. Models that overfit during calibration will reveal themselves through accuracy degradation at scoring time. For the DTMR dataset with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>&lt;</mo><mn>500</mn></mrow><annotation encoding="application/x-tex">N &lt; 500</annotation></semantics></math>, the AH-DCM is the safest operational foundation.</p>
+<p><strong>Key takeaway:</strong> The <code><a href="../reference/build_scoring_config.html">build_scoring_config()</a></code> pipeline not only automates operational scoring - it also provides a principled framework for cross-validating model selection. Models that overfit during calibration will reveal themselves through accuracy degradation at scoring time. For the DTMR dataset with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>&lt;</mo><mn>500</mn></mrow><annotation encoding="application/x-tex">N &lt; 500</annotation></semantics></math>, the AH-DCM is the safest operational foundation.</p>
 </section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
