@@ -1,6 +1,6 @@
 # PGDCM: Probabilistic Graphical Diagnostic Classification Models <img src="man/figures/logo.png" align="right" height="139" alt="pgdcm package logo" />
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19163715.svg)](https://doi.org/10.5281/zenodo.19163715)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19163915.svg)](https://doi.org/10.5281/zenodo.19163915)
 
 PGDCM is a unified framework for building and estimating several psychometric models within the probabilistic graphical modeling framework (i.e., treating these psychometric models as special cases of Bayesian networks, Hidden Markov Models, or Partially Observed Markov Decision Processes).
 
@@ -113,11 +113,11 @@ If you use `pgdcm` in your research, please cite it as:
 
 ```bibtex
 @manual{pgdcm,
-  title = {pgdcm: Probabilistic Graphical Diagnostic Classification Models},
+  title = {pgdcm: An R Package for Probabilistic Graphical Diagnostic Classification Modeling},
   author = {Athul Sudheesh and Richard M. Golden},
   year = {2026},
   note = {R package version 0.1.0},
   url = {https://github.com/coinslab/pgdcm},
-  doi = {10.5281/zenodo.19163715}
+  doi = {10.5281/zenodo.19163915}
 }
 ```
