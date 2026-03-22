@@ -24,8 +24,9 @@ PGDCM is designed to provide maximum flexibility through three core pillars: **M
 ### Estimation & Workflow
 
 * **End-to-End Bayesian Pipeline** - A single function call orchestrates your entire analysis: prior predictive checking, MCMC sampling, convergence diagnostics, posterior predictive checking, and result extraction (skill profiles, item parameters, WAIC).
-* **Operational Scoring** - Lock calibrated item parameters from a calibration sample to score new examinees against the validated framework. 
+* **Operational Scoring** - Lock calibrated item parameters from a calibration sample to score new examinees against the validated framework.
 * **Flexible Prior Specification** - Supply custom priors as simple `(mean, sd)` pairs or full per-parameter arrays. Omit priors for weakly informative defaults, or use near-zero variance to lock values for scoring workflows.
+* **Missing Data Handling** - Built-in Bayesian missing data capabilities. Safely estimate item parameters and student profiles even when your response matrix has missing data.
 
 ### Architecture & Extensibility
 

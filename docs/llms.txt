@@ -54,6 +54,9 @@ pillars: **Modeling Capabilities**, **Estimation & Workflow**, and
   `(mean, sd)` pairs or full per-parameter arrays. Omit priors for
   weakly informative defaults, or use near-zero variance to lock values
   for scoring workflows.
+- **Missing Data Handling** - Built-in Bayesian missing data
+  capabilities. Safely estimate item parameters and student profiles
+  even when your response matrix has missing data.
 
 ### Architecture & Extensibility
 
