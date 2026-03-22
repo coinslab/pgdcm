@@ -17,31 +17,58 @@ Currently supported models include:
 - Linear and Logistic Structural Equation Models (SEM) with continuous
   responses
 
-We currently use [Cytoscape](https://cytoscape.org/) to provide a
-powerful graphical user-interface for directed graph construction and
-viewing, [igraph](https://igraph.org/r/) for graph processing and
-manipulation functions, and [NIMBLE](https://r-nimble.org/) for Markov
-Chain Monte Carlo (MCMC) estimation in R. This extensibility allows
-developers to not only make full use of the wide variety of existing
-estimation and inference algorithms NIMBLE but additionally provides
-mechanisms for custom user-developed estimation and inference
-algorithms.
+## Key Features
 
-To interact with the graph building component, you will need to have
-Cytoscape installed and running on your system, as well as the **RCy3**
-R package. Using the Cytoscape template file that we provide supports
-correct construction of the probabilistic graphical model. Once
-Cytoscape is running, the user may import the probabilistic graphical
-model specifications using a spreadsheet/CSV format, create the
-probabilistic graphical model directly within the Cytoscape environment,
-or edit an existing probabilistic graphical model within Cytoscape. The
-resulting probabilistic graphical model is then exported from Cytoscape
-and can then be processed by `NIMBLE` and `igraph`.
+PGDCM is designed to provide maximum flexibility through three core
+pillars: **Modeling Capabilities**, **Estimation & Workflow**, and
+**Architecture & Extensibility**.
 
-We also provide many `igraph` edit functions in this package that can be
-used for graph building and graph editing. These are especially useful
-if you prefer a code-based workflow instead of Cytoscape, or if you want
-to eliminate the dependency on Cytoscape entirely.
+### Modeling Capabilities
+
+- **Unified Model Framework** - DCM, Higher-Order DCM, IRT, MIRT, and
+  SEM are all treated as special cases of the same probabilistic
+  graphical model. The graph structure alone determines the underlying
+  model - no manual model selection flags are required.
+- **Per-Item Compute Types** - Assign different response rules (e.g.,
+  DINA, DINO, DINM) to individual items within a single model. Unlike
+  traditional software that forces one global rule, `pgdcm` lets each
+  item carry its own compensatory, non-compensatory, or additive logic.
+- **Structural Skill Dependencies** - Easily model prerequisite
+  relationships between skills (attribute hierarchies) or shared latent
+  abilities (higher-order factors). The directed graph automatically
+  encodes these dependencies for the estimator.
+- **Latent Class Enumeration** - Automatically classify examinees into
+  all $2^{K}$ possible mastery profiles and compute class-level
+  prevalence rates for population-level diagnostic reporting.
+
+### Estimation & Workflow
+
+- **End-to-End Bayesian Pipeline** - A single function call orchestrates
+  your entire analysis: prior predictive checking, MCMC sampling,
+  convergence diagnostics, posterior predictive checking, and result
+  extraction (skill profiles, item parameters, WAIC).
+- **Operational Scoring** - Lock calibrated item parameters from a
+  calibration sample to score new examinees against the validated
+  framework.
+- **Flexible Prior Specification** - Supply custom priors as simple
+  `(mean, sd)` pairs or full per-parameter arrays. Omit priors for
+  weakly informative defaults, or use near-zero variance to lock values
+  for scoring workflows.
+
+### Architecture & Extensibility
+
+- **Multiple Graph Input Methods** - Define your models any way you
+  like: from a Q-matrix, adjacency matrix, node/edge CSV files, GraphML
+  files, the Cytoscape GUI, or entirely in R code.
+- **GUI & Code-Based Graph Building** - Build and visualize directed
+  graphs interactively using the [Cytoscape](https://cytoscape.org/) UI,
+  or opt for a completely code-based workflow using provided
+  [igraph](https://igraph.org/r/) functions to eliminate external
+  dependencies entirely.
+- **NIMBLE Extensibility** - Built on the
+  [NIMBLE](https://r-nimble.org/) probabilistic programming engine,
+  advanced users can seamlessly swap in custom model code, samplers, or
+  inference algorithms without leaving the package pipeline.
 
 ## Installation
 

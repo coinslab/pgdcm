@@ -80,9 +80,49 @@
 <li>Item Response Theory (IRT) Models with dichotomous responses</li>
 <li>Linear and Logistic Structural Equation Models (SEM) with continuous responses</li>
 </ul>
-<p>We currently use <a href="https://cytoscape.org/" class="external-link">Cytoscape</a> to provide a powerful graphical user-interface for directed graph construction and viewing, <a href="https://igraph.org/r/" class="external-link">igraph</a> for graph processing and manipulation functions, and <a href="https://r-nimble.org/" class="external-link">NIMBLE</a> for Markov Chain Monte Carlo (MCMC) estimation in R. This extensibility allows developers to not only make full use of the wide variety of existing estimation and inference algorithms NIMBLE but additionally provides mechanisms for custom user-developed estimation and inference algorithms.</p>
-<p>To interact with the graph building component, you will need to have Cytoscape installed and running on your system, as well as the <strong>RCy3</strong> R package. Using the Cytoscape template file that we provide supports correct construction of the probabilistic graphical model. Once Cytoscape is running, the user may import the probabilistic graphical model specifications using a spreadsheet/CSV format, create the probabilistic graphical model directly within the Cytoscape environment, or edit an existing probabilistic graphical model within Cytoscape. The resulting probabilistic graphical model is then exported from Cytoscape and can then be processed by <code>NIMBLE</code> and <code>igraph</code>.</p>
-<p>We also provide many <code>igraph</code> edit functions in this package that can be used for graph building and graph editing. These are especially useful if you prefer a code-based workflow instead of Cytoscape, or if you want to eliminate the dependency on Cytoscape entirely.</p>
+<div class="section level2">
+<h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
+</h2>
+<p>PGDCM is designed to provide maximum flexibility through three core pillars: <strong>Modeling Capabilities</strong>, <strong>Estimation &amp; Workflow</strong>, and <strong>Architecture &amp; Extensibility</strong>.</p>
+<div class="section level3">
+<h3 id="modeling-capabilities">Modeling Capabilities<a class="anchor" aria-label="anchor" href="#modeling-capabilities"></a>
+</h3>
+<ul>
+<li>
+<strong>Unified Model Framework</strong> - DCM, Higher-Order DCM, IRT, MIRT, and SEM are all treated as special cases of the same probabilistic graphical model. The graph structure alone determines the underlying model - no manual model selection flags are required.</li>
+<li>
+<strong>Per-Item Compute Types</strong> - Assign different response rules (e.g., DINA, DINO, DINM) to individual items within a single model. Unlike traditional software that forces one global rule, <code>pgdcm</code> lets each item carry its own compensatory, non-compensatory, or additive logic.</li>
+<li>
+<strong>Structural Skill Dependencies</strong> - Easily model prerequisite relationships between skills (attribute hierarchies) or shared latent abilities (higher-order factors). The directed graph automatically encodes these dependencies for the estimator.</li>
+<li>
+<strong>Latent Class Enumeration</strong> - Automatically classify examinees into all <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>2</mn><mi>K</mi></msup><annotation encoding="application/x-tex">2^K</annotation></semantics></math> possible mastery profiles and compute class-level prevalence rates for population-level diagnostic reporting.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="estimation--workflow">Estimation &amp; Workflow<a class="anchor" aria-label="anchor" href="#estimation--workflow"></a>
+</h3>
+<ul>
+<li>
+<strong>End-to-End Bayesian Pipeline</strong> - A single function call orchestrates your entire analysis: prior predictive checking, MCMC sampling, convergence diagnostics, posterior predictive checking, and result extraction (skill profiles, item parameters, WAIC).</li>
+<li>
+<strong>Operational Scoring</strong> - Lock calibrated item parameters from a calibration sample to score new examinees against the validated framework.</li>
+<li>
+<strong>Flexible Prior Specification</strong> - Supply custom priors as simple <code>(mean, sd)</code> pairs or full per-parameter arrays. Omit priors for weakly informative defaults, or use near-zero variance to lock values for scoring workflows.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="architecture--extensibility">Architecture &amp; Extensibility<a class="anchor" aria-label="anchor" href="#architecture--extensibility"></a>
+</h3>
+<ul>
+<li>
+<strong>Multiple Graph Input Methods</strong> - Define your models any way you like: from a Q-matrix, adjacency matrix, node/edge CSV files, GraphML files, the Cytoscape GUI, or entirely in R code.</li>
+<li>
+<strong>GUI &amp; Code-Based Graph Building</strong> - Build and visualize directed graphs interactively using the <a href="https://cytoscape.org/" class="external-link">Cytoscape</a> UI, or opt for a completely code-based workflow using provided <a href="https://igraph.org/r/" class="external-link">igraph</a> functions to eliminate external dependencies entirely.</li>
+<li>
+<strong>NIMBLE Extensibility</strong> - Built on the <a href="https://r-nimble.org/" class="external-link">NIMBLE</a> probabilistic programming engine, advanced users can seamlessly swap in custom model code, samplers, or inference algorithms without leaving the package pipeline.</li>
+</ul>
+</div>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
