@@ -29,6 +29,21 @@ configure_sem <- function(info, X, priors = NULL) {
     att_computes <- info$attr_computes
     task_computes <- tolower(V(info$graph)[tolower(V(info$graph)$type) == "task"]$compute)
 
+    # Validate: all attributes must share a single compute type, and all tasks must share one
+    att_sem_types <- unique(ifelse(att_computes %in% c("zscore", "continuous"), "zscore", att_computes))
+    task_sem_types <- unique(ifelse(task_computes %in% c("zscore", "continuous"), "zscore", task_computes))
+
+    if (length(att_sem_types) > 1) {
+        stop("SEM Validation Error: All attribute nodes must share a single compute type, but found: ",
+             paste(unique(att_computes), collapse = ", "), ". ",
+             "The SEM model applies the same distribution to every node within a layer.", call. = FALSE)
+    }
+    if (length(task_sem_types) > 1) {
+        stop("SEM Validation Error: All task nodes must share a single compute type, but found: ",
+             paste(unique(task_computes), collapse = ", "), ". ",
+             "The SEM model applies the same distribution to every node within a layer.", call. = FALSE)
+    }
+
     constants <- list(
         nrparticipants = nrparticipants,
         nrtasknodes = info$nrtasknodes,
@@ -45,24 +60,52 @@ configure_sem <- function(info, X, priors = NULL) {
         CDMattnodesmax = max(2, info$nrattributenodes)
     )
 
+    # Extracting sparse edges to send as constants alongside the data
+    edges <- which(info$matrix == 1, arr.ind = TRUE)
+    zeros <- which(info$matrix == 0, arr.ind = TRUE)
+
+    constants$num_edges <- nrow(edges)
+    constants$edge_from <- edges[, 1]
+    constants$edge_to <- edges[, 2]
+
+    constants$num_zeros <- nrow(zeros)
+    constants$zero_from <- zeros[, 1]
+    constants$zero_to <- zeros[, 2]
+
     # Prior generation
     alpha_prior_mean <- rep(0, info$nrnodes)
     alpha_prior_std <- rep(2, info$nrnodes)
-    beta_prior_mean <- matrix(0, nrow = info$nrnodes, ncol = info$nrnodes)
-    beta_prior_std <- matrix(2, nrow = info$nrnodes, ncol = info$nrnodes)
+    
+    if (nrow(edges) > 0) {
+        beta_prior_mean <- rep(0, nrow(edges))
+        beta_prior_std <- rep(2, nrow(edges))
+    } else {
+        beta_prior_mean <- numeric(0)
+        beta_prior_std <- numeric(0)
+    }
 
     if (!is.null(priors)) {
         if (all(c("alpha", "beta") %in% names(priors)) && length(priors$alpha) == 2 && length(priors$beta) == 2 && !is.matrix(priors$beta)) {
             alpha_prior_mean[] <- priors$alpha[1]
             alpha_prior_std[] <- priors$alpha[2]
-            beta_prior_mean[] <- priors$beta[1]
-            beta_prior_std[] <- priors$beta[2]
+            if (nrow(edges) > 0) {
+                 beta_prior_mean[] <- priors$beta[1]
+                 beta_prior_std[] <- priors$beta[2]
+            }
         } else {
             if (!is.null(priors$alpha_mean)) alpha_prior_mean <- priors$alpha_mean
             if (!is.null(priors$alpha_std)) alpha_prior_std <- priors$alpha_std
 
-            if (!is.null(priors$beta_mean)) beta_prior_mean <- priors$beta_mean
-            if (!is.null(priors$beta_std)) beta_prior_std <- priors$beta_std
+            if (!is.null(priors$beta_mean) && nrow(edges) > 0) {
+                for (e in 1:nrow(edges)) {
+                    beta_prior_mean[e] <- priors$beta_mean[edges[e, "row"], edges[e, "col"]]
+                }
+            }
+            if (!is.null(priors$beta_std) && nrow(edges) > 0) {
+                for (e in 1:nrow(edges)) {
+                    beta_prior_std[e] <- priors$beta_std[edges[e, "row"], edges[e, "col"]]
+                }
+            }
         }
     }
 
@@ -71,15 +114,19 @@ configure_sem <- function(info, X, priors = NULL) {
     constants$beta_prior_mean <- beta_prior_mean
     constants$beta_prior_std <- beta_prior_std
 
-    alpha_init <- rep(0, info$nrnodes)
-    beta_init <- matrix(0, nrow = info$nrnodes, ncol = info$nrnodes)
+    # Sigma prior for continuous observed task nodes
+    sigma_task_prior_mean <- 1.0
+    sigma_task_prior_std <- 1.0
+    if (!is.null(priors$sigma_task_mean)) sigma_task_prior_mean <- priors$sigma_task_mean
+    if (!is.null(priors$sigma_task_std)) sigma_task_prior_std <- priors$sigma_task_std
+    constants$sigma_task_prior_mean <- sigma_task_prior_mean
+    constants$sigma_task_prior_std <- sigma_task_prior_std
 
-    for (r in 1:info$nrnodes) {
-        for (c in 1:info$nrnodes) {
-            if (info$matrix[r, c] == 1) {
-                beta_init[r, c] <- rnorm(1, 0.5, 0.5)
-            }
-        }
+    alpha_init <- rep(0, info$nrnodes)
+    if (nrow(edges) > 0) {
+        beta_edge_init <- rnorm(nrow(edges), 0.5, 0.5)
+    } else {
+        beta_edge_init <- numeric(0)
     }
 
     if (constants$SEMdoBinaryAttribute || constants$SEMdoPercentileAttribute) {
@@ -90,11 +137,12 @@ configure_sem <- function(info, X, priors = NULL) {
 
     inits <- list(
         alpha = alpha_init,
-        beta = beta_init,
-        attributenodes = attributenodes_init
+        beta_edge = beta_edge_init,
+        attributenodes = attributenodes_init,
+        sigma_task = 1.0
     )
 
-    monitors <- c("alpha", "beta", "attributenodes")
+    monitors <- c("alpha", "beta", "attributenodes", "sigma_task")
 
     list(constants = constants, inits = inits, monitors = monitors, data = list(X = X))
 }

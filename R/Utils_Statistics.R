@@ -241,6 +241,76 @@ map_pgdcm_parameters <- function(summary_mx, config_obj, student_names = NULL) {
     return(out_df)
 }
 
+# ── map_sem_parameters ───────────────────────────────────────────────────────
+#' Map SEM Parameters to Readable Names
+#'
+#' @export
+map_sem_parameters <- function(summary_mx, config_obj, student_names = NULL) {
+    if (is.null(student_names)) student_names <- 1:config_obj$constants$nrparticipants
+
+    raw_names <- rownames(summary_mx)
+    clean_names <- character(length(raw_names))
+    types <- character(length(raw_names))
+
+    g <- config_obj$graph
+    all_nodes <- igraph::V(g)$name
+    attr_nodes <- igraph::V(g)[tolower(igraph::V(g)$type) == "attribute"]$name
+
+    for (i in seq_along(raw_names)) {
+        rn <- raw_names[i]
+
+        if (grepl("^alpha\\[", rn)) {
+            matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
+            k <- as.numeric(matches[1])
+            if (k <= length(all_nodes)) {
+                clean_names[i] <- paste0(all_nodes[k], " - Intercept")
+                types[i] <- "Intercept"
+            } else {
+                clean_names[i] <- rn
+                types[i] <- "Index Error"
+            }
+        } else if (grepl("^beta\\[", rn)) {
+            matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
+            j <- as.numeric(matches[1]) 
+            k <- as.numeric(matches[2]) 
+            if (j <= length(all_nodes) && k <= length(all_nodes)) {
+                clean_names[i] <- paste0(all_nodes[j], " -> ", all_nodes[k], " - Slope")
+                types[i] <- "Slope/Edge"
+            } else {
+                clean_names[i] <- rn
+                types[i] <- "Index Error"
+            }
+        } else if (grepl("^attributenodes\\[", rn)) {
+            matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
+            s_idx <- as.numeric(matches[1])
+            k <- as.numeric(matches[2])
+            
+            s_id <- "Unknown"
+            if (s_idx <= length(student_names)) s_id <- student_names[s_idx]
+            
+            attr_name <- "Unknown"
+            if (k <= length(attr_nodes)) attr_name <- attr_nodes[k]
+            
+            clean_names[i] <- paste0(s_id, " - ", attr_name)
+            types[i] <- "Student Mastery"
+        } else if (grepl("^sigma_task", rn)) {
+            clean_names[i] <- "Tasks Residual Variance"
+            types[i] <- "Residuals"
+        } else {
+            clean_names[i] <- rn
+            types[i] <- "Other"
+        }
+    }
+
+    out_df <- data.frame(
+        Raw_Param = raw_names,
+        Readable_Name = clean_names,
+        Type = types
+    )
+    out_df <- cbind(out_df, as.data.frame(summary_mx))
+    return(out_df)
+}
+
 # ── generate_summary_tables ──────────────────────────────────────────────────
 #' Generate Specific Summary Tables
 #'
@@ -369,9 +439,11 @@ groupattributepatterns <- function(attributenodes, threshold = 0.5) {
             }
         }
 
-        groupval$members <- participantids
-        groupval$label <- possibleattributepatterns[groupid, ]
-        groupmembers[[paste(possibleattributepatterns[groupid, ], collapse = "")]] <- groupval
+        if (length(participantids) > 0) {
+            groupval$members <- participantids
+            groupval$label <- possibleattributepatterns[groupid, ]
+            groupmembers[[paste(possibleattributepatterns[groupid, ], collapse = "")]] <- groupval
+        }
     }
 
     # Prepare grouping output

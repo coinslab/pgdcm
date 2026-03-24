@@ -106,7 +106,11 @@ run_pgdcm_auto <- function(config,
             }
 
             print("Mapping parameters to human-readable names...")
-            mapped_results <- map_pgdcm_parameters(summary_mx = mcmc_summ, config_obj = config, student_names = student_ids)
+            if (!is.null(config$type) && config$type == "SEM") {
+                mapped_results <- map_sem_parameters(summary_mx = mcmc_summ, config_obj = config, student_names = student_ids)
+            } else {
+                mapped_results <- map_pgdcm_parameters(summary_mx = mcmc_summ, config_obj = config, student_names = student_ids)
+            }
             mapped_csv_file <- paste0(prefix, "_mapped_parameters.csv")
             write.csv(mapped_results, file = mapped_csv_file, row.names = FALSE)
             print(paste("Mapped parameters saved to:", mapped_csv_file))

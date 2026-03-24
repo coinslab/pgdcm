@@ -1,15 +1,3 @@
-calc_sem_input <- nimbleFunction(
-    run = function(beta_vec = double(1), cdm_vec = double(1), attr_vec = double(1), num_elements = double(0)) {
-        out <- 0.0
-        n <- num_elements
-        for(p in 1:n) {
-            out <- out + beta_vec[p] * cdm_vec[p] * attr_vec[p]
-        }
-        returnType(double(0))
-        return(out)
-    }
-)
-
 loglinearSEM <- nimbleCode({
     # --- Priors ---
 
@@ -18,12 +6,20 @@ loglinearSEM <- nimbleCode({
         alpha[k] ~ dnorm(mean = alpha_prior_mean[k], sd = alpha_prior_std[k])
     }
 
-    # 2. Weights (beta) for all potential edges
-    for (k in 1:nrnodes) {
-        for (j in 1:nrnodes) {
-            beta[k, j] ~ dnorm(mean = beta_prior_mean[k, j], sd = beta_prior_std[k, j])
-        }
+    # 2. Weights (beta) ONLY for existent edges (Sparse Parameterization)
+    for (e in 1:num_edges) {
+        beta_edge[e] ~ dnorm(mean = beta_prior_mean[e], sd = beta_prior_std[e])
+        # Map the sparse edge back to the dense matrix for equation simplicity
+        beta[edge_from[e], edge_to[e]] <- beta_edge[e]
     }
+    
+    # 3. Structural zeros for non-existent edges are fixed to 0
+    for (z in 1:num_zeros) {
+        beta[zero_from[z], zero_to[z]] <- 0.0
+    }
+
+    # 4. Residual standard deviation for continuous observed task nodes
+    sigma_task ~ T(dnorm(mean = sigma_task_prior_mean, sd = sigma_task_prior_std), 0, Inf)
 
     # --- Likelihood ---
 
@@ -34,6 +30,7 @@ loglinearSEM <- nimbleCode({
 
         # k = 1 Case
         linear_pred_att[i, 1] <- alpha[1]
+        
         if (SEMdoZscoreAttribute) {
             attributenodes[i, 1] ~ dnorm(mean = linear_pred_att[i, 1], sd = 1)
         }
@@ -47,8 +44,8 @@ loglinearSEM <- nimbleCode({
         # k = 2...attdim Case
         if (attdim >= 2) {
             for (k in 2:attdim) {
-                # Depends on 1:(k-1)
-                linear_pred_att[i, k] <- alpha[k] + calc_sem_input(beta[k, 1:(k - 1)], CDMmatrix[k, 1:(k - 1)], attributenodes[i, 1:(k - 1)], k - 1)
+                # Depends on 1:(k-1). Replacing calc_sem_input with native vectorized sum()
+                linear_pred_att[i, k] <- alpha[k] + sum(beta[k, 1:(k - 1)] * CDMmatrix[k, 1:(k - 1)] * attributenodes[i, 1:(k - 1)])
 
                 if (SEMdoZscoreAttribute) {
                     attributenodes[i, k] ~ dnorm(mean = linear_pred_att[i, k], sd = 1)
@@ -68,7 +65,8 @@ loglinearSEM <- nimbleCode({
 
         # 1. Calc Input from Attributes (All tasks)
         for (j in 1:nrtasknodes) {
-            input_from_atts[i, j] <- calc_sem_input(beta[attdim + j, 1:CDMattnodesmax], CDMmatrix[attdim + j, 1:CDMattnodesmax], attributenodes[i, 1:CDMattnodesmax], attdim)
+            # Evaluating input from attributes to task j
+            input_from_atts[i, j] <- sum(beta[attdim + j, 1:CDMattnodesmax] * CDMmatrix[attdim + j, 1:CDMattnodesmax] * attributenodes[i, 1:CDMattnodesmax])
         }
 
         # 2. Calc Input from Tasks
@@ -80,7 +78,6 @@ loglinearSEM <- nimbleCode({
         if (nrtasknodes >= 2) {
             for (j in 2:nrtasknodes) {
                 # Depends on tasks 1...(j-1) which are cols 1...(j-1) of X
-                # and nodes attdim+1 ... attdim+j-1
                 input_from_tasks[i, j] <- sum(beta[attdim + j, (attdim + 1):(attdim + j - 1)] * CDMmatrix[attdim + j, (attdim + 1):(attdim + j - 1)] * X[i, 1:(j - 1)])
             }
         }
@@ -90,7 +87,7 @@ loglinearSEM <- nimbleCode({
             linear_pred_task[i, j] <- alpha[attdim + j] + input_from_atts[i, j] + input_from_tasks[i, j]
 
             if (SEMdoZscoreTask) {
-                X[i, j] ~ dnorm(mean = linear_pred_task[i, j], sd = 1)
+                X[i, j] ~ dnorm(mean = linear_pred_task[i, j], sd = sigma_task)
             }
             if (SEMdoPercentileTask) {
                 X[i, j] ~ dbern(ilogit(1.702 * linear_pred_task[i, j]))

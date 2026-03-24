@@ -96,15 +96,21 @@ get_graph_info <- function(g) {
 #' @return A character string denoting the model type ("SEM" or "DCM").
 #' @export
 determine_model_type <- function(info) {
-    # Check if all tasks are discrete (logit/dina style) vs continuous
-    tasks_continuous <- all(tolower(V(info$graph)[tolower(V(info$graph)$type) == "task"]$compute) == "zscore")
-    tasks_all_cdm <- all(tolower(V(info$graph)[tolower(V(info$graph)$type) == "task"]$compute) %in% c("dina", "dino", "dinm"))
+    task_computes <- tolower(V(info$graph)[tolower(V(info$graph)$type) == "task"]$compute)
+
+    # SEM-family compute types (additive linear models)
+    sem_types <- c("zscore", "continuous", "binary", "percentile")
+    # DCM-family compute types (condensation-rule models)
+    cdm_types <- c("dina", "dino", "dinm")
+
+    tasks_all_sem <- all(task_computes %in% sem_types)
+    tasks_all_cdm <- all(task_computes %in% cdm_types)
 
     # Check attributes
-    all_attr_continuous <- all(info$attr_computes %in% c("zscore", "continuous"))
+    all_attr_sem <- all(info$attr_computes %in% sem_types)
     all_attr_pattern <- all(info$attr_computes == "pattern")
 
-    if (tasks_continuous && all_attr_continuous) {
+    if (tasks_all_sem && all_attr_sem) {
         return("SEM")
     }
     if (all_attr_pattern && tasks_all_cdm) {
