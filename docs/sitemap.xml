@@ -5,6 +5,7 @@
 <url><loc>/articles/Beginner_Tutorial.html</loc></url>
 <url><loc>/articles/Cookbook.html</loc></url>
 <url><loc>/articles/DCM_workflow.html</loc></url>
+<url><loc>/articles/Diagnostic_Queries.html</loc></url>
 <url><loc>/articles/Model_Specification_Tutorial.html</loc></url>
 <url><loc>/articles/SEM_workflow.html</loc></url>
 <url><loc>/articles/Scoring_Cookbook.html</loc></url>
@@ -35,6 +36,13 @@
 <url><loc>/reference/build_irt_graph.html</loc></url>
 <url><loc>/reference/build_model_config.html</loc></url>
 <url><loc>/reference/build_scoring_config.html</loc></url>
+<url><loc>/reference/calc_item_discrimination_index.html</loc></url>
+<url><loc>/reference/calc_item_guessing_prob.html</loc></url>
+<url><loc>/reference/calc_item_slip_prob.html</loc></url>
+<url><loc>/reference/calc_item_true_positive_prob.html</loc></url>
+<url><loc>/reference/calc_prob_master_given_no_prereqs.html</loc></url>
+<url><loc>/reference/calc_prob_master_given_prereqs.html</loc></url>
+<url><loc>/reference/calc_risk_difference.html</loc></url>
 <url><loc>/reference/check_mcmc_convergence.html</loc></url>
 <url><loc>/reference/checklegaledges.html</loc></url>
 <url><loc>/reference/compute_M2.html</loc></url>
@@ -47,7 +55,9 @@
 <url><loc>/reference/edgedelete.html</loc></url>
 <url><loc>/reference/enforce_topo_sort.html</loc></url>
 <url><loc>/reference/filter_structural_nas.html</loc></url>
+<url><loc>/reference/generate_item_diagnostics.html</loc></url>
 <url><loc>/reference/generate_ppc_plots.html</loc></url>
+<url><loc>/reference/generate_skill_diagnostics.html</loc></url>
 <url><loc>/reference/generate_summary_tables.html</loc></url>
 <url><loc>/reference/get_Cyto_template.html</loc></url>
 <url><loc>/reference/get_EdgesTable.html</loc></url>
@@ -60,8 +70,11 @@
 <url><loc>/reference/pull_from_cytoscape.html</loc></url>
 <url><loc>/reference/push_to_cytoscape.html</loc></url>
 <url><loc>/reference/readigraph.html</loc></url>
+<url><loc>/reference/resolve_item.html</loc></url>
+<url><loc>/reference/resolve_skill.html</loc></url>
 <url><loc>/reference/run_pgdcm_auto.html</loc></url>
 <url><loc>/reference/run_predictive_check.html</loc></url>
+<url><loc>/reference/validate_discrete_assumption.html</loc></url>
 <url><loc>/reference/validate_graph_and_data.html</loc></url>
 <url><loc>/reference/validate_graph_compute_nodes.html</loc></url>
 <url><loc>/reference/viewparentsandchildren.html</loc></url>

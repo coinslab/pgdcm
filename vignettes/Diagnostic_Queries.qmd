@@ -1,0 +1,196 @@
+---
+title: "Generating Diagnostic Inferences"
+format: html
+vignette: >
+  %\VignetteIndexEntry{Generating Diagnostic Inferences}
+  %\VignetteEngine{quarto::html}
+---
+
+## Introduction
+
+Once you have fitted a Cognitive Diagnostic Model (DCM) using the `pgdcm` package, the raw MCMC output contains log-odds slopes and intercepts (`lambda` and `theta` parameters). While mathematically precise, these values are difficult to interpret directly. A slope of 3.2 on Item 7 does not immediately communicate the item's guessing or slip probabilities.
+
+The `pgdcm` diagnostic query functions solve this by transforming raw posterior draws into interpretable probability metrics (such as **Guessing rates**, **Slip rates**, **True Positive probabilities**, **Prerequisite Gate Strengths**, and more), each with full 95% Credible Intervals computed directly from the MCMC chains.
+
+::: {.callout-note}
+## Prerequisites
+This vignette assumes you have already fitted a model using `run_pgdcm_auto()` and have a `results` object. If you are new to the package, start with the [Beginner Tutorial](https://coinslab.github.io/pgdcm/articles/Beginner_Tutorial.html) first.
+:::
+
+::: {.callout-warning}
+## Discrete Skills Only
+The diagnostic queries in this vignette apply to models with **discrete binary skills** (DCM, HO-DCM). If your model uses continuous latent traits (IRT/MIRT), these functions will raise an error. Use standard IRT posterior summaries for those models instead.
+:::
+
+```{r setup_hidden}
+#| echo: false
+#| message: false
+#| warning: false
+if (!requireNamespace("pgdcm", quietly = TRUE)) {
+    devtools::load_all("..")
+} else {
+    library(pgdcm)
+}
+# Load a pre-computed DCM results object for this vignette
+results <- readRDS("AH_DCM_results.rds")
+```
+
+## The Underlying Math (Brief Recap)
+
+Every node in a `pgdcm` model follows the logistic equation:
+
+$$
+P(v_i = 1) = \text{logit}^{-1}\!\Big(a_v \cdot \psi_v(\text{parents}) - b_v\Big)
+$$
+
+where $a_v$ is the slope (discrimination), $b_v$ is the intercept (difficulty), and $\psi_v$ is a condensation rule over parent nodes. For items, these parameters are stored as `lambda[j, 1]` (slope) and `lambda[j, 2]` (intercept). For skills, they are `theta[k, 1]` and `theta[k, 2]`.
+
+The diagnostic queries below evaluate this equation at specific boundary conditions (e.g., "all prereqs met" or "no prereqs met") across every MCMC draw, yielding full posterior distributions over interpretable probabilities. For more details, see the [Mathematical Foundations](https://coinslab.github.io/pgdcm/articles/Understanding_DiBelloBN.html) vignette.
+
+---
+
+## 1. Item-Level Diagnostics
+
+
+### 1.1 Full Item Diagnostic Table
+
+The `generate_item_diagnostics()` function computes four metrics for every item in a single call:
+
+```{r item_diags}
+item_metrics <- generate_item_diagnostics(results)
+head(item_metrics, 3)
+```
+
+Each row contains the posterior mean and 95% Credible Interval for:
+
+| Metric | What it measures |
+|--------|-----------------|
+| **Guessing** | $P(\text{correct} \mid \text{non-master})$ (false positive rate) |
+| **True Mastery** | $P(\text{correct} \mid \text{master})$ (true positive rate) |
+| **Slip** | $P(\text{incorrect} \mid \text{master})$ (false negative rate, $1 -$ True Mastery) |
+| **Discrimination** | True Mastery $-$ Guessing (the probability gap between masters and non-masters) |
+
+::: {.callout-tip}
+## Interpretation Guide
+An item with **high guessing** (> 0.3) suggests weak distractors (non-masters can easily guess a correct answer). An item with **high slip** (> 0.3) suggests confusing wording or an unmodeled secondary skill that causes true masters to fail. Both are flags for item revision.
+:::
+
+### 1.2 Querying a Single Item
+
+To investigate a specific item, use the individual query functions. Each returns a named list with the posterior mean and 95% CI:
+
+```{r single_item_queries}
+# False positive: can non-masters guess this item correctly?
+calc_item_guessing_prob(results, "1")
+
+# True positive: can masters reliably answer correctly?
+calc_item_true_positive_prob(results, "1")
+
+# False negative: how often do masters slip up?
+calc_item_slip_prob(results, "1")
+
+# Discrimination: how large is the master vs. non-master gap?
+calc_item_discrimination_index(results, "1")
+```
+
+
+
+---
+
+## 2. Skill-Level Structural Diagnostics
+
+
+### 2.1 Full Skill Diagnostic Table
+
+The `generate_skill_diagnostics()` function inspects your graph topology and computes the appropriate metrics for each skill:
+
+```{r skill_diags}
+skill_metrics <- generate_skill_diagnostics(results)
+skill_metrics[, c(
+    "Skill", "Type", "BaseRate_Mean",
+    "Prob_Given_All_Prereqs_Mean",
+    "Prob_Given_No_Prereqs_Mean",
+    "GateStrength_Mean"
+)]
+```
+
+The function automatically classifies each skill:
+
+- **Root** skills have no prerequisites. For these, only the population `BaseRate` (the proportion of students who have mastered this skill) is reported.
+- **Dependent** skills have prerequisite arrows. For these, three structural metrics are computed:
+
+| Metric | What it measures |
+|--------|-----------------|
+| **Prob Given All Prereqs** | $P(\text{master target skill} \mid \text{all prereqs met})$ (success rate when fully prepared) |
+| **Prob Given No Prereqs** | $P(\text{master target skill} \mid \text{no prereqs met})$ (the "leap" probability) |
+| **Gate Strength** | Prob Given All Prereqs $-$ Prob Given No Prereqs (the causal impact of the prerequisite) |
+
+### 2.2 Interpreting Structural Patterns
+
+The three structural metrics tell a pointed story about each prerequisite arrow:
+
+**Strong gate** (Gate Strength > 0.6): The prerequisite genuinely matters. Students who lack the prerequisite have almost no chance of acquiring the target skill, but those who master it progress naturally.
+
+**Weak gate** (Gate Strength < 0.2): The prerequisite arrow may be theoretically unjustified. Students can "leap" to the target skill without the prerequisite, suggesting the skills are more independent than your graph assumes.
+
+**Bottleneck** (Prob Given All Prereqs < 0.5): Even perfectly prepared students struggle to acquire this skill. This signals a missing prerequisite, a poorly scaffolded instructional transition, or a skill that depends on knowledge outside the model.
+
+### 2.3 Querying a Single Skill
+
+To evaluate a specific prerequisite relationship:
+
+```{r single_skill_queries}
+# Bottleneck: if students have all prereqs, what's their mastery probability?
+calc_prob_master_given_prereqs(results, "partitioning_iterating")
+
+# Leap: can students master this skill without any prereqs?
+calc_prob_master_given_no_prereqs(results, "partitioning_iterating")
+
+# Gate Strength: how much do the prerequisites actually help?
+calc_risk_difference(results, "partitioning_iterating")
+```
+
+::: {.callout-tip}
+## Root Nodes
+Root skills have no `theta` parameters; they are governed by `beta_root` intercepts instead. Calling `calc_prob_master_given_prereqs()` on a root skill will raise an error. Use `generate_skill_diagnostics()` to correctly identify root vs. dependent skills before running individual queries.
+:::
+
+---
+
+## 3. Putting It All Together
+
+A typical post-estimation diagnostic workflow combines both tables to flag issues and then drills into the details:
+
+```r
+# 1. Generate both diagnostic tables
+item_dx  <- generate_item_diagnostics(results)
+skill_dx <- generate_skill_diagnostics(results)
+
+# 2. Flag problematic items (high guessing OR high slip)
+bad_items <- item_dx[item_dx$Guessing_Mean > 0.3 | item_dx$Slip_Mean > 0.3, ]
+bad_items[, c("Item", "Guessing_Mean", "Slip_Mean", "Discrimination_Index_Mean")]
+
+# 3. Flag weak prerequisite links
+weak_links <- skill_dx[!is.na(skill_dx$GateStrength_Mean) &
+                        skill_dx$GateStrength_Mean < 0.2, ]
+weak_links[, c("Skill", "GateStrength_Mean")]
+
+# 4. Drill into a specific flagged item
+calc_item_discrimination_index(results, bad_items$Item[1])
+```
+
+---
+
+## Function Reference
+
+| Function | Level | Returns |
+|----------|-------|---------|
+| `generate_item_diagnostics(results)` | All items | Data frame with guessing, slip, mastery, and discrimination metrics |
+| `generate_skill_diagnostics(results)` | All skills | Data frame with base rates, bottleneck/leap probs, and gate strengths |
+| `calc_item_guessing_prob(results, item)` | Single item | Guessing probability (false positive rate) |
+| `calc_item_true_positive_prob(results, item)` | Single item | True mastery probability |
+| `calc_item_slip_prob(results, item)` | Single item | Slip probability (false negative rate) |
+| `calc_item_discrimination_index(results, item)` | Single item | Master vs. non-master probability gap |
+| `calc_prob_master_given_prereqs(results, skill)` | Single skill | Bottleneck probability (prereqs met) |
+| `calc_prob_master_given_no_prereqs(results, skill)` | Single skill | Leap probability (no prereqs met) |
+| `calc_risk_difference(results, skill)` | Single skill | Gate strength (bottleneck - leap) |

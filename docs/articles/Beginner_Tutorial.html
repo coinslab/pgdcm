@@ -49,6 +49,7 @@
     <li><h6 class="dropdown-header" data-toc-skip>Cookbooks</h6></li>
     <li><a class="dropdown-item" href="../articles/Cookbook.html">Model Cookbook</a></li>
     <li><a class="dropdown-item" href="../articles/Scoring_Cookbook.html">Scoring Cookbook</a></li>
+    <li><a class="dropdown-item" href="../articles/Diagnostic_Queries.html">Generating Diagnostic Inferences</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
     <li><a class="dropdown-item" href="../articles/Understanding_DiBelloBN.html">Mathematical Foundations of the PGDCM Model</a></li>
@@ -133,6 +134,12 @@
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">Q</span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>The <code>pgdcm</code> package mathematically treats modern psychometric models as probabilistic graphical models (specifically, Directed Acyclic Graphs or Bayesian Networks). Because of this, we must first convert our standard Q-Matrix into a Directed Acyclic Graph (<code>g</code>) that represents the underlying node dependencies-i.e., the dependencies between the skills and the tasks/test items. The <code><a href="../reference/QMatrix2iGraph.html">QMatrix2iGraph()</a></code> function handles this graphical conversion automatically for us.</p>
+<div>
+<blockquote>
+<p><strong>Alternative: Using Nodes and Edges Files</strong></p>
+<p>If you prefer not to use a Q-Matrix, <code>pgdcm</code> allows you to construct the graph directly from CSV files defining the nodes and edges of your network. You can do this using the <code>build_from_node_edge_files("nodes.csv", "edges.csv")</code> function instead of <code><a href="../reference/QMatrix2iGraph.html">QMatrix2iGraph()</a></code>. This is particularly useful for modeling more complex structures like attributes hierarchies or prerequisites.</p>
+</blockquote>
+</div>
 <p>Once we have constructed the core network graph, several model parameters must be defined to establish the active modeling environment for NIMBLE. This includes validating topological constraints, isolating constants required for <code>nimble</code> inference calculations, and setting initial values for the model parameters. The <code><a href="../reference/build_model_config.html">build_model_config()</a></code> function handles all of this heavy lifting.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
@@ -288,16 +295,77 @@
 <p>You can open these directly in Excel or any spreadsheet tool for further analysis.</p>
 </blockquote>
 </div>
+</section><section class="level3"><h3 id="diagnostic-inferences">Diagnostic Inferences<a class="anchor" aria-label="anchor" href="#diagnostic-inferences"></a>
+</h3>
+<p>The <code>results</code> object also contains all the information needed to generate comprehensive diagnostic inferences about your test’s structural and item-level performance. You can extract these summaries using two high-level functions:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Generate summary metrics for all test items (e.g., True Mastery, Slip, and Guessing probabilities)</span></span>
+<span><span class="va">item_diagnostics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_item_diagnostics.html">generate_item_diagnostics</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">item_diagnostics</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Item Guessing_Mean Guessing_CI_Lower Guessing_CI_Upper Slip_Mean
+1    1    0.19770940       0.151554119        0.24682550 0.4205730
+2    2    0.64177343       0.580631792        0.69762363 0.1284566
+3    3    0.05392248       0.028243915        0.08473648 0.5975875
+4    4    0.17223737       0.131455623        0.21439683 0.6551670
+5    5    0.10811837       0.075211988        0.14388100 0.5960940
+6    6    0.01895034       0.007574128        0.03510981 0.8868185
+  Slip_CI_Lower Slip_CI_Upper TrueMastery_Mean TrueMastery_CI_Lower
+1    0.36917861     0.4698650        0.5794270            0.5301350
+2    0.09380757     0.1643251        0.8715434            0.8356749
+3    0.54997028     0.6438365        0.4024125            0.3561635
+4    0.60986378     0.6982315        0.3448330            0.3017685
+5    0.54678911     0.6431963        0.4039060            0.3568037
+6    0.85741563     0.9128643        0.1131815            0.0871357
+  TrueMastery_CI_Upper Discrimination_Index_Mean Discrimination_CI_Lower
+1            0.6308214                 0.3817176              0.30800792
+2            0.9061924                 0.2297700              0.16001146
+3            0.4500297                 0.3484900              0.29155086
+4            0.3901362                 0.1725956              0.10964309
+5            0.4532109                 0.2957876              0.23436290
+6            0.1425844                 0.0942312              0.06260998
+  Discrimination_CI_Upper
+1               0.4522043
+2               0.2996170
+3               0.4052518
+4               0.2383789
+5               0.3569461
+6               0.1265188</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Generate summary metrics for all skills (e.g., Prerequisite Bottlenecks and Leap probabilities)</span></span>
+<span><span class="va">skill_diagnostics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_skill_diagnostics.html">generate_skill_diagnostics</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">skill_diagnostics</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                      Skill Type Is_Continuous BaseRate_Mean
+1            referent_units Root         FALSE     0.4451870
+2    partitioning_iterating Root         FALSE     0.4615353
+3           appropriateness Root         FALSE     0.3825029
+4 multiplicative_comparison Root         FALSE     0.2887606
+  Prob_Given_All_Prereqs_Mean Prob_Given_No_Prereqs_Mean GateStrength_Mean
+1                          NA                         NA                NA
+2                          NA                         NA                NA
+3                          NA                         NA                NA
+4                          NA                         NA                NA
+  GateStrength_CI_Lower GateStrength_CI_Upper
+1                    NA                    NA
+2                    NA                    NA
+3                    NA                    NA
+4                    NA                    NA</code></pre>
+</div>
+</div>
+<p>These functions compute exact posterior probabilities directly from your MCMC traces, allowing you to easily evaluate the quality of your assessment and the underlying learning progression. For a deeper dive into these metrics and what they mean, see the <a href="https://coinslab.github.io/pgdcm/articles/Diagnostic_Queries.html" class="external-link">Diagnostic Queries Tutorial</a>.</p>
 </section><section class="level3"><h3 id="going-deeper-raw-mcmc-diagnostics">Going Deeper: Raw MCMC Diagnostics<a class="anchor" aria-label="anchor" href="#going-deeper-raw-mcmc-diagnostics"></a>
 </h3>
 <p>The outputs above are derived from the underlying Bayesian posterior distribution. If you want to inspect the raw MCMC chains directly - for example, to check convergence or visualize credible intervals - the <code>MCMCvis</code> package is a great tool for this.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/caseyyoungflesh/MCMCvis" class="external-link">MCMCvis</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <p>The <code>lambda</code> parameters capture the raw item properties. For each test item <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>, <code>lambda[j, 1]</code> is the discrimination (slope) and <code>lambda[j, 2]</code> is the difficulty (intercept).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Retrieve a numerical summary table specifically for the 'lambda' item parameters</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MCMCvis/man/MCMCsummary.html" class="external-link">MCMCsummary</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">samples</span>, params <span class="op">=</span> <span class="st">"lambda"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="co"># only a few rows from res are displayed here.</span></span></code></pre></div>
@@ -322,7 +390,7 @@ lambda[6, 1] 1.9544232 0.4345682 1.1549475 1.9382027 2.856814 1.02   239</code><
 </ul>
 <p>MCMC visualization functions like <code><a href="https://rdrr.io/pkg/MCMCvis/man/MCMCplot.html" class="external-link">MCMCplot()</a></code> can transform these into intuitive “Caterpillar Plots”:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Visually plot the 'lambda' parameter distributions</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/MCMCvis/man/MCMCplot.html" class="external-link">MCMCplot</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">samples</span>, params <span class="op">=</span> <span class="st">"lambda"</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">

@@ -27,6 +27,20 @@
   Configuration
 - [`build_scoring_config()`](build_scoring_config.md) : Build Model
   Configuration for Scoring
+- [`calc_item_discrimination_index()`](calc_item_discrimination_index.md)
+  : Get Item Discrimination Index (Probability Gap)
+- [`calc_item_guessing_prob()`](calc_item_guessing_prob.md) : Get Item
+  Guessing (False Positive) Probability
+- [`calc_item_slip_prob()`](calc_item_slip_prob.md) : Get Item Slip
+  (False Negative) Probability
+- [`calc_item_true_positive_prob()`](calc_item_true_positive_prob.md) :
+  Get Item True Mastery Probability
+- [`calc_prob_master_given_no_prereqs()`](calc_prob_master_given_no_prereqs.md)
+  : Get Prerequisite "Leap" Probability
+- [`calc_prob_master_given_prereqs()`](calc_prob_master_given_prereqs.md)
+  : Get Curriculum Bottleneck Probability
+- [`calc_risk_difference()`](calc_risk_difference.md) : Get Prerequisite
+  Gate Strength (Risk Difference)
 - [`check_mcmc_convergence()`](check_mcmc_convergence.md) : Check MCMC
   Convergence
 - [`checklegaledges()`](checklegaledges.md) : Check Legal Edges
@@ -47,8 +61,12 @@
   Sort on Attributes
 - [`filter_structural_nas()`](filter_structural_nas.md) : Filter
   Structural NAs from MCMC Samples
+- [`generate_item_diagnostics()`](generate_item_diagnostics.md) :
+  Generate Item Diagnostics Table
 - [`generate_ppc_plots()`](generate_ppc_plots.md) : Generate
   Posterior/Prior Predictive Plots
+- [`generate_skill_diagnostics()`](generate_skill_diagnostics.md) :
+  Generate Skill Diagnostics Table
 - [`generate_summary_tables()`](generate_summary_tables.md) : Generate
   Specific Summary Tables
 - [`get_Cyto_template()`](get_Cyto_template.md) : Get Cytoscape Template
@@ -67,10 +85,16 @@
 - [`push_to_cytoscape()`](push_to_cytoscape.md) : Push Graph to
   Cytoscape
 - [`readigraph()`](readigraph.md) : Read Igraph from Files
+- [`resolve_item()`](resolve_item.md) : Resolve Human-Readable Item Name
+  to Integer Index safely via Mapped Parameters
+- [`resolve_skill()`](resolve_skill.md) : Resolve Human-Readable Skill
+  Name to Integer Index safely via Mapped Parameters
 - [`run_pgdcm_auto()`](run_pgdcm_auto.md) : Run Integrated Workflow
   (Prior, MCMC, Posterior)
 - [`run_predictive_check()`](run_predictive_check.md) : Run Predictive
   Check (Prior or Posterior)
+- [`validate_discrete_assumption()`](validate_discrete_assumption.md) :
+  Validate Discrete Binary Assumption
 - [`validate_graph_and_data()`](validate_graph_and_data.md) : Validate
   Graph against Dataset
 - [`validate_graph_compute_nodes()`](validate_graph_compute_nodes.md) :

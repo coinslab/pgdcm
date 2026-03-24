@@ -18,6 +18,7 @@ Targeted examples and model recipes.
 - [Model Cookbook](Cookbook.md):
 - [Scoring Cookbook: Operational Scoring &
   Cross-Validation](Scoring_Cookbook.md):
+- [Generating Diagnostic Inferences](Diagnostic_Queries.md):
 
 ### Theory
 

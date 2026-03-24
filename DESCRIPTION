@@ -6,7 +6,7 @@ Authors@R: c(
     person("Athul", "Sudheesh", email = "Athul.Sudheesh@utdallas.edu", role = c("aut", "cre")),
     person("Richard M.", "Golden",  email = "golden@utdallas.edu", role = "aut")
   )
-Description: An R package for estimating Diagnostic Classification Models (DCM) and Structured Equation Models (SEM) natively using Nimble and Cytoscape.
+Description: An R package for estimating Diagnostic Classification Models (DCM) and Structured Equation Models (SEM) using Nimble and Cytoscape.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

@@ -10,7 +10,7 @@
 
 Sudheesh, A., & Golden, R. (2026). pgdcm: An R Package for Probabilistic
 Graphical Diagnostic Classification Modeling (0.1.0). Zenodo.
-https://doi.org/10.5281/zenodo.19163915
+https://doi.org/10.5281/zenodo.19163714
 
     @Manual{,
       title = {pgdcm: An R Package for Probabilistic Graphical Diagnostic Classification Modeling},
@@ -18,5 +18,5 @@ https://doi.org/10.5281/zenodo.19163915
       year = {2026},
       note = {R package version 0.1.0},
       url = {https://github.com/coinslab/pgdcm},
-      doi = {10.5281/zenodo.19163915},
+      doi = {10.5281/zenodo.19163714},
     }

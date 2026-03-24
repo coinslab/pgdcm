@@ -207,7 +207,7 @@ This approach lets you inspect and modify the exact sampler assigned to each par
 
 Once the sampler has finished executing, we isolate our posterior samples. 
 
-When mapping complex hierarchical graphical networks recursively, mathematically unconnected structural placeholders are marked with `NA` to preserve the parent Q-Matrix dimensions. We filter these empty pathways out natively before validating model convergence to guarantee pure mathematical comparisons.
+When mapping complex hierarchical graphical networks recursively, mathematically unconnected structural placeholders are marked with `NA` to preserve the parent Q-Matrix dimensions. We filter these empty pathways out before validating model convergence to guarantee pure mathematical comparisons.
 
 ```{r}
 #| eval: false

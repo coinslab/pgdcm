@@ -64,6 +64,11 @@ head(Q)
 
 The `pgdcm` package mathematically treats modern psychometric models as probabilistic graphical models (specifically, Directed Acyclic Graphs or Bayesian Networks). Because of this, we must first convert our standard Q-Matrix into a Directed Acyclic Graph (`g`) that represents the underlying node dependencies-i.e., the dependencies between the skills and the tasks/test items. The `QMatrix2iGraph()` function handles this graphical conversion automatically for us.
 
+::: {.callout-note}
+## Alternative: Using Nodes and Edges Files
+If you prefer not to use a Q-Matrix, `pgdcm` allows you to construct the graph directly from CSV files defining the nodes and edges of your network. You can do this using the `build_from_node_edge_files("nodes.csv", "edges.csv")` function instead of `QMatrix2iGraph()`. This is particularly useful for modeling more complex structures like attributes hierarchies or prerequisites.
+:::
+
 Once we have constructed the core network graph, several model parameters must be defined to establish the active modeling environment for NIMBLE. This includes validating topological constraints, isolating constants required for `nimble` inference calculations, and setting initial values for the model parameters. The `build_model_config()` function handles all of this heavy lifting.
 
 ```{r format-data, message=FALSE, warning=FALSE}
@@ -123,6 +128,11 @@ Additionally, standard comprehensive workflows evaluate the viability of a model
 
 ```{r load-cache, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
 # Hidden: silently load cached results so interpretation chunks render
+if (!requireNamespace("pgdcm", quietly = TRUE)) {
+    devtools::load_all("..")
+} else {
+    library(pgdcm)
+}
 results <- readRDS("Beginner_Tutorial_Results.rds")
 library(MCMCvis)
 ```
@@ -188,6 +198,22 @@ The number of possible mastery patterns grows as $2^K$ where $K$ is the number o
 
 You can open these directly in Excel or any spreadsheet tool for further analysis.
 :::
+
+### Diagnostic Inferences
+
+The `results` object also contains all the information needed to generate comprehensive diagnostic inferences about your test's structural and item-level performance. You can extract these summaries using two high-level functions:
+
+```{r diag-inferences, message=FALSE, warning=FALSE}
+# Generate summary metrics for all test items (e.g., True Mastery, Slip, and Guessing probabilities)
+item_diagnostics <- generate_item_diagnostics(results)
+head(item_diagnostics)
+
+# Generate summary metrics for all skills (e.g., Prerequisite Bottlenecks and Leap probabilities)
+skill_diagnostics <- generate_skill_diagnostics(results)
+head(skill_diagnostics)
+```
+
+These functions compute exact posterior probabilities directly from your MCMC traces, allowing you to easily evaluate the quality of your assessment and the underlying learning progression. For a deeper dive into these metrics and what they mean, see the [Diagnostic Queries Tutorial](https://coinslab.github.io/pgdcm/articles/Diagnostic_Queries.html).
 
 ### Going Deeper: Raw MCMC Diagnostics
 

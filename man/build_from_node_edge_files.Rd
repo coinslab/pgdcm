@@ -15,5 +15,5 @@ build_from_node_edge_files(NodesFile, EdgesFile)
 A topologically sorted \code{igraph} object.
 }
 \description{
-Constructs a directed \code{igraph} object natively from separate node and edge CSV lists.
+Constructs a directed \code{igraph} object from separate node and edge CSV lists.
 }

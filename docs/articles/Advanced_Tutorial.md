@@ -279,8 +279,8 @@ samples.
 When mapping complex hierarchical graphical networks recursively,
 mathematically unconnected structural placeholders are marked with `NA`
 to preserve the parent Q-Matrix dimensions. We filter these empty
-pathways out natively before validating model convergence to guarantee
-pure mathematical comparisons.
+pathways out before validating model convergence to guarantee pure
+mathematical comparisons.
 
 ``` r
 # Convert raw samples to an MCMC list format

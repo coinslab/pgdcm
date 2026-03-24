@@ -1,6 +1,6 @@
 # PGDCM: Probabilistic Graphical Diagnostic Classification Models
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19163915.svg)](https://doi.org/10.5281/zenodo.19163915)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19163714.svg)](https://doi.org/10.5281/zenodo.19163714)
 
 PGDCM is a unified framework for building and estimating several
 psychometric models within the probabilistic graphical modeling
@@ -164,6 +164,6 @@ If you use `pgdcm` in your research, please cite it as:
   year = {2026},
   note = {R package version 0.1.0},
   url = {https://github.com/coinslab/pgdcm},
-  doi = {10.5281/zenodo.19163915}
+  doi = {10.5281/zenodo.19163714}
 }
 ```

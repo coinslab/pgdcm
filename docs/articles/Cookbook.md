@@ -207,8 +207,7 @@ results$WAIC
 
 ## Comparing Results
 
-The recipes above were run on the DTMR dataset
-([`dcmdata::dtmr_data`](https://dcmdata.r-dcm.org/reference/dtmr.html)).
+The recipes above were run on the DTMR dataset (`dcmdata::dtmr_data`).
 The tables below summarize the results so you can see how different
 structural assumptions affect model fit, item parameter estimates, and
 classification accuracy.

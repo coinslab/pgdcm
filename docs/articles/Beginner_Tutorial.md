@@ -84,6 +84,16 @@ and the tasks/test items. The
 [`QMatrix2iGraph()`](../reference/QMatrix2iGraph.md) function handles
 this graphical conversion automatically for us.
 
+> **Alternative: Using Nodes and Edges Files**
+>
+> If you prefer not to use a Q-Matrix, `pgdcm` allows you to construct
+> the graph directly from CSV files defining the nodes and edges of your
+> network. You can do this using the
+> `build_from_node_edge_files("nodes.csv", "edges.csv")` function
+> instead of [`QMatrix2iGraph()`](../reference/QMatrix2iGraph.md). This
+> is particularly useful for modeling more complex structures like
+> attributes hierarchies or prerequisites.
+
 Once we have constructed the core network graph, several model
 parameters must be defined to establish the active modeling environment
 for NIMBLE. This includes validating topological constraints, isolating
@@ -313,6 +323,76 @@ the `threshold` argument.
 >
 > You can open these directly in Excel or any spreadsheet tool for
 > further analysis.
+
+### Diagnostic Inferences
+
+The `results` object also contains all the information needed to
+generate comprehensive diagnostic inferences about your test’s
+structural and item-level performance. You can extract these summaries
+using two high-level functions:
+
+``` r
+# Generate summary metrics for all test items (e.g., True Mastery, Slip, and Guessing probabilities)
+item_diagnostics <- generate_item_diagnostics(results)
+head(item_diagnostics)
+```
+
+      Item Guessing_Mean Guessing_CI_Lower Guessing_CI_Upper Slip_Mean
+    1    1    0.19770940       0.151554119        0.24682550 0.4205730
+    2    2    0.64177343       0.580631792        0.69762363 0.1284566
+    3    3    0.05392248       0.028243915        0.08473648 0.5975875
+    4    4    0.17223737       0.131455623        0.21439683 0.6551670
+    5    5    0.10811837       0.075211988        0.14388100 0.5960940
+    6    6    0.01895034       0.007574128        0.03510981 0.8868185
+      Slip_CI_Lower Slip_CI_Upper TrueMastery_Mean TrueMastery_CI_Lower
+    1    0.36917861     0.4698650        0.5794270            0.5301350
+    2    0.09380757     0.1643251        0.8715434            0.8356749
+    3    0.54997028     0.6438365        0.4024125            0.3561635
+    4    0.60986378     0.6982315        0.3448330            0.3017685
+    5    0.54678911     0.6431963        0.4039060            0.3568037
+    6    0.85741563     0.9128643        0.1131815            0.0871357
+      TrueMastery_CI_Upper Discrimination_Index_Mean Discrimination_CI_Lower
+    1            0.6308214                 0.3817176              0.30800792
+    2            0.9061924                 0.2297700              0.16001146
+    3            0.4500297                 0.3484900              0.29155086
+    4            0.3901362                 0.1725956              0.10964309
+    5            0.4532109                 0.2957876              0.23436290
+    6            0.1425844                 0.0942312              0.06260998
+      Discrimination_CI_Upper
+    1               0.4522043
+    2               0.2996170
+    3               0.4052518
+    4               0.2383789
+    5               0.3569461
+    6               0.1265188
+
+``` r
+# Generate summary metrics for all skills (e.g., Prerequisite Bottlenecks and Leap probabilities)
+skill_diagnostics <- generate_skill_diagnostics(results)
+head(skill_diagnostics)
+```
+
+                          Skill Type Is_Continuous BaseRate_Mean
+    1            referent_units Root         FALSE     0.4451870
+    2    partitioning_iterating Root         FALSE     0.4615353
+    3           appropriateness Root         FALSE     0.3825029
+    4 multiplicative_comparison Root         FALSE     0.2887606
+      Prob_Given_All_Prereqs_Mean Prob_Given_No_Prereqs_Mean GateStrength_Mean
+    1                          NA                         NA                NA
+    2                          NA                         NA                NA
+    3                          NA                         NA                NA
+    4                          NA                         NA                NA
+      GateStrength_CI_Lower GateStrength_CI_Upper
+    1                    NA                    NA
+    2                    NA                    NA
+    3                    NA                    NA
+    4                    NA                    NA
+
+These functions compute exact posterior probabilities directly from your
+MCMC traces, allowing you to easily evaluate the quality of your
+assessment and the underlying learning progression. For a deeper dive
+into these metrics and what they mean, see the [Diagnostic Queries
+Tutorial](https://coinslab.github.io/pgdcm/articles/Diagnostic_Queries.html).
 
 ### Going Deeper: Raw MCMC Diagnostics
 

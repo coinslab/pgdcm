@@ -1,6 +1,6 @@
 # =============================================================================
 # Graph_Constructors.R
-# Description: Native list/dataframe parsing to igraphs for various scenarios.
+# Description: List/dataframe parsing to igraphs for various scenarios.
 # =============================================================================
 
 
@@ -88,7 +88,7 @@ build_from_adjacency <- function(AdjMatrixFile, DataFileCols, DefaultAttributeCo
 
 #' Build Graph from Node and Edge Files
 #'
-#' Constructs a directed \code{igraph} object natively from separate node and edge CSV lists.
+#' Constructs a directed \code{igraph} object from separate node and edge CSV lists.
 #'
 #' @param NodesFile Character. Path to the CSV file containing node definitions.
 #' @param EdgesFile Character. Path to the CSV file containing edge definitions.
@@ -96,7 +96,7 @@ build_from_adjacency <- function(AdjMatrixFile, DataFileCols, DefaultAttributeCo
 #' @return A topologically sorted \code{igraph} object.
 #' @export
 build_from_node_edge_files <- function(NodesFile, EdgesFile) {
-    print(paste("Building from native nodes/edges lists:", NodesFile, EdgesFile))
+    print(paste("Building from nodes/edges lists:", NodesFile, EdgesFile))
     nodes <- read.csv(NodesFile, stringsAsFactors = FALSE)
     edges <- read.csv(EdgesFile, stringsAsFactors = FALSE)
 

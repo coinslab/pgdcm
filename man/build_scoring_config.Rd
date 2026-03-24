@@ -17,6 +17,6 @@ build_scoring_config(calib_results, calib_config, new_dataframe)
 A configuration list prepared for \code{run_pgdcm_auto} execution.
 }
 \description{
-Automatically isolates and structures the compiled structural and item constraints 
+Automatically isolates and structures the compiled structural and item constraints
 from a calibrated model into a tightly locked scoring model configuration.
 }

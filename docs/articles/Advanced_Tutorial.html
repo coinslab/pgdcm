@@ -49,6 +49,7 @@
     <li><h6 class="dropdown-header" data-toc-skip>Cookbooks</h6></li>
     <li><a class="dropdown-item" href="../articles/Cookbook.html">Model Cookbook</a></li>
     <li><a class="dropdown-item" href="../articles/Scoring_Cookbook.html">Scoring Cookbook</a></li>
+    <li><a class="dropdown-item" href="../articles/Diagnostic_Queries.html">Generating Diagnostic Inferences</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Theory</h6></li>
     <li><a class="dropdown-item" href="../articles/Understanding_DiBelloBN.html">Mathematical Foundations of the PGDCM Model</a></li>
@@ -281,7 +282,7 @@
 </section></section><section class="level2"><h2 id="post-processing-and-convergence">5. Post-Processing and Convergence<a class="anchor" aria-label="anchor" href="#post-processing-and-convergence"></a>
 </h2>
 <p>Once the sampler has finished executing, we isolate our posterior samples.</p>
-<p>When mapping complex hierarchical graphical networks recursively, mathematically unconnected structural placeholders are marked with <code>NA</code> to preserve the parent Q-Matrix dimensions. We filter these empty pathways out natively before validating model convergence to guarantee pure mathematical comparisons.</p>
+<p>When mapping complex hierarchical graphical networks recursively, mathematically unconnected structural placeholders are marked with <code>NA</code> to preserve the parent Q-Matrix dimensions. We filter these empty pathways out before validating model convergence to guarantee pure mathematical comparisons.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Convert raw samples to an MCMC list format</span></span>

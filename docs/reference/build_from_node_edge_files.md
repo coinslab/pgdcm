@@ -1,7 +1,7 @@
 # Build Graph from Node and Edge Files
 
-Constructs a directed `igraph` object natively from separate node and
-edge CSV lists.
+Constructs a directed `igraph` object from separate node and edge CSV
+lists.
 
 ## Usage
 

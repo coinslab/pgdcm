@@ -17,3 +17,6 @@ vignettes/renv/library/
 Rplots.pdf
 test_*.csv
 *.rds
+
+# NCME Presentation Folder
+NCME26/

@@ -37,3 +37,6 @@
 ^test_.*\.csv$
 ^Rplots\.pdf$
 ^DCM_.*\.csv$
+
+# NCME Presentation Folder
+^NCME26$
