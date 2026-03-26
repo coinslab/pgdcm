@@ -28,69 +28,29 @@
 #'         passed into the logistic regression equation `ilogit(slope * value - intercept)`.
 # Define Helper Function for Mixed Logic
 calc_mixed_kernel <- nimbleFunction(
-    run = function(weights = double(1), attributes = double(1), num_attr = double(0), nrbetaroot = double(0),
+    run = function(sum_cont = double(0), sum_disc = double(0), req_disc = double(0), sum_input = double(0), has_cont = double(0),
                    isDINA = double(0), isDINO = double(0), isDINM = double(0)) {
-        # Initialize accumulators for continuous and discrete parents
-        sum_cont <- 0.0 # Sum of continuous attribute values (e.g. latent ability)
-        sum_disc <- 0.0 # Sum of discrete attribute values (skills the student has)
-        req_disc <- 0.0 # Total required discrete attributes for this node
-
-        sum_total <- 0.0 # Total sum of all inputs (for DINM/DINO)
-        sum_input <- 0.0 # Total possible input weights (for DINM)
-        has_cont <- 0.0 # Flag indicating if there's a continuous parent
-
-        n <- num_attr
-
-        # Loop through each prerequisite for this node
-        for (p in 1:n) {
-            val <- weights[p] * attributes[p]
-            sum_total <- sum_total + val
-            sum_input <- sum_input + weights[p]
-
-            # If this attribute is a prerequisite (weight != 0)
-            if (weights[p] != 0) {
-                # Check if this parent is a continuous root attribute vs a discrete skill
-                # Root attributes (indices <= nrbetaroot) are treated as continuous/latent
-                if (p <= nrbetaroot) {
-                    sum_cont <- sum_cont + val
-                    has_cont <- 1.0
-                } else {
-                    # Dependent attributes (indices > nrbetaroot) are discrete (0 or 1)
-                    sum_disc <- sum_disc + val
-                    req_disc <- req_disc + weights[p]
-                }
-            }
-        }
+        
+        sum_total <- sum_cont + sum_disc
 
         # DINA Logic (Mixed/Gated Non-Compensatory)
-        # First, check the "Gate": does the student have all required discrete skills?
         gate <- (sum_disc == req_disc)
         val_dina <- 0.0
 
         if (has_cont == 1.0) {
-            # Mixed or Pure Continuous Case
             if (gate == 1.0) {
-                # If they have the discrete skills, the continuous ability passes through
                 val_dina <- sum_cont
             } else {
-                # If they lack the discrete skills, apply a massive penalty (-10)
-                # so the logistic probability plummets to near zero
                 val_dina <- -10.0
             }
         } else {
-            # Pure Discrete Case (No continuous parents)
-            # Standard DINA: 1 if all prerequisites met, 0 otherwise
             val_dina <- gate
         }
 
         # DINM (Compensatory)
-        # Simple ratio of possessed prerequisites over total required prerequisites
-        # (Works naturally with continuous abilities as well)
-        val_dinm <- sum_total / max(1, sum_input)
+        val_dinm <- sum_total / max(1.0, sum_input)
 
         # DINO (Mixed/Gated Disjunctive)
-        # Check the "Gate": does the student have AT LEAST ONE required discrete skill?
-        # (If no discrete skills are required, the gate is open by default)
         dino_gate <- 0.0
         if (req_disc == 0.0) {
             dino_gate <- 1.0
@@ -100,23 +60,16 @@ calc_mixed_kernel <- nimbleFunction(
 
         val_dino <- 0.0
         if (has_cont == 1.0) {
-            # Mixed or Pure Continuous Case
             if (dino_gate == 1.0) {
-                # They possess at least one prerequisite skill -> Continuous ability passes through
                 val_dino <- sum_cont
             } else {
-                # They lack ALL prerequisite skills -> Severe penalty
                 val_dino <- -10.0
             }
         } else {
-            # Pure Discrete Case
-            # Standard DINO: 1 if at least one prerequisite met, 0 otherwise
             val_dino <- dino_gate
         }
 
         returnType(double(0))
-        # Return the final kernel value based on which model is active
-        # Only one of isDINA, isDINO, isDINM should be 1, others 0
         return(isDINA * val_dina + isDINO * val_dino + isDINM * val_dinm)
     }
 )
@@ -167,21 +120,21 @@ DiBelloBN <- nimbleCode({
         # B. Dependent Attributes (Hierarchy)
         if (nrattributenodes > nrbetaroot) {
             for (k in (nrbetaroot + 1):nrattributenodes) {
-                # Calculate Kernel using Custom Function to handle Mixed Inputs
-                # Using 1:(k-1) properly ensures Nimble does not see a bidirectional DAG cycle.
-                # Because k is dynamic in the loop, Nimble handles 1:1 boundaries correctly here without the C++ bug.
+                sum_cont_node[i, k] <- sum(is_cont_parent[k, 1:(k - 1)] * attributenodes[i, 1:(k - 1)])
+                sum_disc_node[i, k] <- sum(is_disc_parent[k, 1:(k - 1)] * attributenodes[i, 1:(k - 1)])
+
                 psival[i, k] <- calc_mixed_kernel(
-                    weights = CDMmatrix[k, 1:(k - 1)],
-                    attributes = attributenodes[i, 1:(k - 1)],
-                    num_attr = k - 1,
-                    nrbetaroot = isContinuousHO * nrbetaroot, # Only treat roots as continuous if HO/MIRT/IRT
+                    sum_cont = sum_cont_node[i, k],
+                    sum_disc = sum_disc_node[i, k],
+                    req_disc = req_disc[k],
+                    sum_input = sum_input[k],
+                    has_cont = has_cont[k],
                     isDINA = isDINA[k],
                     isDINO = isDINO[k],
                     isDINM = isDINM[k]
                 )
 
                 # Probability using specific theta parameters for this attribute
-                # theta[k, 1] is Slope, theta[k, 2] is Intercept
                 atprob[i, k] <- ilogit(theta[k, 1] * psival[i, k] - theta[k, 2])
                 attributenodes[i, k] ~ dbern(atprob[i, k])
             }
@@ -190,11 +143,15 @@ DiBelloBN <- nimbleCode({
         # C. Task Nodes (Observed Data)
         for (j in 1:nrtasknodes) {
             # Task nodes use standard kernels
+            sum_cont_task[i, j] <- sum(is_cont_parent[nrattributenodes + j, 1:CDMattnodesmax] * attributenodes[i, 1:CDMattnodesmax])
+            sum_disc_task[i, j] <- sum(is_disc_parent[nrattributenodes + j, 1:CDMattnodesmax] * attributenodes[i, 1:CDMattnodesmax])
+
             phival[i, j] <- calc_mixed_kernel(
-                weights = CDMmatrix[nrattributenodes + j, 1:CDMattnodesmax],
-                attributes = attributenodes[i, 1:CDMattnodesmax],
-                num_attr = nrattributenodes,
-                nrbetaroot = isContinuousHO * nrbetaroot, # Dynamically handle MIRT/IRT continuous inputs to items
+                sum_cont = sum_cont_task[i, j],
+                sum_disc = sum_disc_task[i, j],
+                req_disc = req_disc[nrattributenodes + j],
+                sum_input = sum_input[nrattributenodes + j],
+                has_cont = has_cont[nrattributenodes + j],
                 isDINA = isDINA[nrattributenodes + j],
                 isDINO = isDINO[nrattributenodes + j],
                 isDINM = isDINM[nrattributenodes + j]

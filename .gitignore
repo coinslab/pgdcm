@@ -20,3 +20,7 @@ test_*.csv
 
 # NCME Presentation Folder
 NCME26/
+
+# Word Document Outputs
+*.docx
+*.doc

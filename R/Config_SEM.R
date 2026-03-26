@@ -12,11 +12,11 @@
 #'
 #' @param info Graph structural properties from \code{get_graph_info}.
 #' @param X A numeric matrix representing the observational participant data.
-#' @param priors Optional list of prior specifications. Can be provided as common pairs 
-#'   (e.g., \code{list(alpha = c(mean, std), beta = c(mean, std))}) or individual parameter arrays 
+#' @param priors Optional list of prior specifications. Can be provided as common pairs
+#'   (e.g., \code{list(alpha = c(mean, std), beta = c(mean, std))}) or individual parameter arrays
 #'   (e.g., \code{list(alpha_mean = c(...), alpha_std = c(...), beta_mean = matrix(...), beta_std = matrix(...))}).
-#'   If \code{NULL}, default priors (mean 0, std 2) are generated. Passing a standard deviation of 
-#'   \code{0.0001} or similar effectively acts as a point distribution, enabling the use of \code{pgdcm} 
+#'   If \code{NULL}, default priors (mean 0, std 2) are generated. Passing a standard deviation of
+#'   \code{0.0001} or similar effectively acts as a point distribution, enabling the use of \code{pgdcm}
 #'   as a scoring-only model when parameter means are supplied from a previous calibration.
 #' @param priors Optional list of prior specifications.
 #'
@@ -35,13 +35,17 @@ configure_sem <- function(info, X, priors = NULL) {
 
     if (length(att_sem_types) > 1) {
         stop("SEM Validation Error: All attribute nodes must share a single compute type, but found: ",
-             paste(unique(att_computes), collapse = ", "), ". ",
-             "The SEM model applies the same distribution to every node within a layer.", call. = FALSE)
+            paste(unique(att_computes), collapse = ", "), ". ",
+            "The SEM model applies the same distribution to every node within a layer.",
+            call. = FALSE
+        )
     }
     if (length(task_sem_types) > 1) {
         stop("SEM Validation Error: All task nodes must share a single compute type, but found: ",
-             paste(unique(task_computes), collapse = ", "), ". ",
-             "The SEM model applies the same distribution to every node within a layer.", call. = FALSE)
+            paste(unique(task_computes), collapse = ", "), ". ",
+            "The SEM model applies the same distribution to every node within a layer.",
+            call. = FALSE
+        )
     }
 
     constants <- list(
@@ -75,7 +79,7 @@ configure_sem <- function(info, X, priors = NULL) {
     # Prior generation
     alpha_prior_mean <- rep(0, info$nrnodes)
     alpha_prior_std <- rep(2, info$nrnodes)
-    
+
     if (nrow(edges) > 0) {
         beta_prior_mean <- rep(0, nrow(edges))
         beta_prior_std <- rep(2, nrow(edges))
@@ -89,8 +93,8 @@ configure_sem <- function(info, X, priors = NULL) {
             alpha_prior_mean[] <- priors$alpha[1]
             alpha_prior_std[] <- priors$alpha[2]
             if (nrow(edges) > 0) {
-                 beta_prior_mean[] <- priors$beta[1]
-                 beta_prior_std[] <- priors$beta[2]
+                beta_prior_mean[] <- priors$beta[1]
+                beta_prior_std[] <- priors$beta[2]
             }
         } else {
             if (!is.null(priors$alpha_mean)) alpha_prior_mean <- priors$alpha_mean
@@ -143,6 +147,13 @@ configure_sem <- function(info, X, priors = NULL) {
     )
 
     monitors <- c("alpha", "beta", "attributenodes", "sigma_task")
+
+    if (constants$SEMdoZscoreTask == 1) {
+        message("SEM Configuration: Globally auto-scaling continuous task observations to align with standard normal N(0,2) priors while preserving relative item difficulties.")
+        X_mean <- mean(X, na.rm = TRUE)
+        X_sd <- sd(X, na.rm = TRUE)
+        X <- as.matrix((X - X_mean) / X_sd)
+    }
 
     list(constants = constants, inits = inits, monitors = monitors, data = list(X = X))
 }

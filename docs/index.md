@@ -17,7 +17,7 @@ Currently supported models include:
   responses
 - Item Response Theory (IRT) Models with dichotomous responses
 - Linear and Logistic Structural Equation Models (SEM) with continuous
-  responses
+  responses \[experimental\]
 
 ## Key Features
 

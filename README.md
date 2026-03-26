@@ -10,7 +10,7 @@ Currently supported models include:
 * Higher-order Diagnostic Classification Models (HDCM) with dichotomous responses
 * Multidimensional Item Response Theory (MIRT) Models with dichotomous responses
 * Item Response Theory (IRT) Models with dichotomous responses
-* Linear and Logistic Structural Equation Models (SEM) with continuous responses
+* Linear and Logistic Structural Equation Models (SEM) with continuous responses [experimental]
 
 ## Key Features
 

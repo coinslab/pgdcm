@@ -43,6 +43,37 @@ configure_dcm <- function(info, X, priors = NULL) {
         CDMattnodesmax = max(2, info$nrattributenodes)
     )
 
+    # Pre-calculate DAG topology constants to eliminate inner MCMC loops
+    nrnodes <- info$nrnodes
+    is_cont_parent <- matrix(0, nrow = nrnodes, ncol = nrnodes)
+    is_disc_parent <- matrix(0, nrow = nrnodes, ncol = nrnodes)
+
+    req_disc <- numeric(nrnodes)
+    sum_input <- numeric(nrnodes)
+    has_cont <- numeric(nrnodes)
+
+    for (k in 1:nrnodes) {
+        for (p in 1:nrnodes) {
+            if (info$matrix[k, p] != 0) {
+                # If continuous root (taking into account HO dynamically as before)
+                if (is_continuous_ho == 1 && p <= info$nrbetaroot) {
+                    is_cont_parent[k, p] <- info$matrix[k, p]
+                } else {
+                    is_disc_parent[k, p] <- info$matrix[k, p]
+                }
+            }
+        }
+        sum_input[k] <- sum(info$matrix[k, ])
+        req_disc[k] <- sum(is_disc_parent[k, ])
+        has_cont[k] <- ifelse(sum(is_cont_parent[k, ]) > 0, 1.0, 0.0)
+    }
+
+    constants$is_cont_parent <- is_cont_parent
+    constants$is_disc_parent <- is_disc_parent
+    constants$req_disc <- req_disc
+    constants$sum_input <- sum_input
+    constants$has_cont <- has_cont
+
     # Prior generation
     # Defaults
     beta_prior_mean <- matrix(0, nrow = info$nrbetaroot, ncol = 1)
