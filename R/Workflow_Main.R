@@ -93,14 +93,14 @@ run_pgdcm_auto <- function(config,
     mapped_results <- NULL
     extra_tables <- list(skill_profiles = NULL, item_parameters = NULL, group_patterns = NULL)
     rhat_check <- list(converged = NA, max_rhat = NA)
-    
+
     tryCatch(
         {
             mcmc_summ <- MCMCsummary(object = res_clean)
             print(head(mcmc_summ))
 
             # Evaluate Rhat
-            rhat_check <<- check_rhat_convergence(mcmc_summ, threshold = 1.1)
+            rhat_check <- check_rhat_convergence(mcmc_summ, threshold = 1.1)
             print(paste("Rhat Convergence (max < 1.1):", rhat_check$converged, "| Max Rhat:", round(rhat_check$max_rhat, 4)))
 
             # Extract participant IDs from dataset if they exist in column 1
@@ -160,9 +160,6 @@ run_pgdcm_auto <- function(config,
 
     RMGconvergence <- check_RMG_convergence(res_clean, blocksize = min(50, estimation_config$niter / 10), burninperiod = min(100, estimation_config$nburnin / 2))
     print(paste("RMG Convergence Estimate (relerrors < 0.1):", RMGconvergence$converged))
-    if (!is.na(rhat_check$converged)) {
-        print(paste("Overall Rhat Convergence (max < 1.1):", rhat_check$converged))
-    }
 
     post_res <- NULL
     if (!is.null(estimation_config$post_sims) && estimation_config$post_sims > 0) {
