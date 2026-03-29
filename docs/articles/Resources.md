@@ -1,0 +1,89 @@
+# Resources for Further Learning
+
+The `pgdcm` package is built on a rich foundation of psychometric
+theory, Bayesian statistics, and cognitive science. This page curates
+essential reading materials for serious practitioners and researchers
+who want to learn more about the theory underlying these methods.
+
+## Evidence Centered Design
+
+- Mislevy, R. J., Almond, R. G., & Lukas, J. F. (2003). A brief
+  introduction to evidence‐centered design. *ETS Research Report Series,
+  2003*(1), i-29.
+
+- Sudheesh, A. (2024). The Changing Landscape of Validity-Centered
+  Cognitive Learning-Instructional-Assessment Design Frameworks.
+  https://doi.org/10.35542/osf.io/xe9qn
+
+## Diagnostic Classification Models
+
+- Rupp, A. A. (2023). Primer on diagnostic classification models.
+  *Dover, NH: Center for Assessment.*
+
+- Williamson, J. (2023). Cognitive Diagnostic Models and How They Can Be
+  Useful. *Research Report. Cambridge University Press & Assessment.*
+
+- Ravand, H., & Baghaei, P. (2020). Diagnostic classification models:
+  Recent developments, practical issues, and prospects. *International
+  Journal of Testing, 20*(1), 24-56.
+
+- Wang, F., Gao, W., Liu, Q., Li, J., Zhao, G., Zhang, Z., & Chen, E.
+  (2024). A survey of models for cognitive diagnosis: New developments
+  and future directions. *arXiv preprint arXiv:2407.05458.*
+
+## Bayesian Networks in Educational Assessment
+
+- Culbertson, M. J. (2016). Bayesian networks in educational assessment:
+  The state of the field. *Applied psychological measurement, 40*(1),
+  3-21.
+
+## Bayesian Inference & Modeling
+
+- Zhan, P., Jiao, H., Man, K., & Wang, L. (2019). Using JAGS for
+  Bayesian cognitive diagnosis modeling: A tutorial. *Journal of
+  Educational and Behavioral Statistics, 44*(4), 473-503.
+
+- Gelman, A., Vehtari, A., Simpson, D., Margossian, C. C, Carpenter, B.,
+  Yao, Y., Kennedy, L., Gabry, J., Bürkner, P.-C, & Modrák, M. (2020).
+  Bayesian workflow. *arXiv preprint arXiv:2011.01808.*
+
+- Schad, D. J., Betancourt, M., & Vasishth, S. (2021). Toward a
+  principled Bayesian workflow in cognitive science. *Psychological
+  Methods, 26*(1), 103–126.
+
+- Baribault, B., & Collins, A. G. (2025). Troubleshooting Bayesian
+  cognitive models. *Psychological Methods, 30*(1), 128.
+
+## NIMBLE
+
+- de Valpine, P., Turek, D., Paciorek, C. J., Anderson-Bergman, C.,
+  Temple Lang, D., & Bodik, R. (2017). Programming with models: writing
+  statistical algorithms for general model structures with NIMBLE.
+  *Journal of Computational and Graphical Statistics, 26*(2), 403–417.
+
+## Textbooks
+
+### Bayesian Modeling & Inference
+
+- Levy, R., & Mislevy, R. J. (2017). Bayesian psychometric modeling.
+  *Chapman and Hall/CRC.*
+
+- McElreath, R. (2018). Statistical rethinking: A Bayesian course with
+  examples in R and Stan. *Chapman and Hall/CRC.*
+
+- Vehtari, A., Gelman, A., Dunson, D., Rubin, D., Stern, H., &
+  Carlin, J. B. (2014). Bayesian data analysis.
+
+### Bayesian Networks & Educational Assessments
+
+- Almond, R. G., Mislevy, R. J., Steinberg, L. S., Yan, D., &
+  Williamson, D. M. (2015). Bayesian networks in educational assessment.
+  *Springer.*
+
+### NIMBLE Tutorials & User Manual
+
+- **IRT Example:** <https://r-nimble.org/examples/IRT_example.html>
+- **General Introduction:**
+  <https://oliviergimenez.github.io/banana-book/intronimble.html>
+- **NIMBLE User Manual:**
+  <https://r-nimble.org/manual/cha-welcome-nimble.html>

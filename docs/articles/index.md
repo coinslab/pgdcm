@@ -26,3 +26,9 @@ Mathematical details underlying the models.
 
 - [Mathematical Foundations of the PGDCM Bayesian Network
   Model](Understanding_DiBelloBN.md):
+
+### Resources
+
+Curated reading lists and learning materials.
+
+- [Resources for Further Learning](Resources.md):

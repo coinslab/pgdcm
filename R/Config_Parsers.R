@@ -17,11 +17,13 @@
 #' @export
 get_graph_info <- function(g) {
     CDMmatrix <- t(as_adjacency_matrix(g, sparse = FALSE, type = "both"))
+    CDMmatrix[CDMmatrix > 0] <- 1
 
     # Filter for attributes (latent skills)
     attr_nodes <- V(g)[tolower(V(g)$type) == "attribute"]
     comp_graph <- induced_subgraph(g, attr_nodes)
     comp_matrix <- t(as_adjacency_matrix(comp_graph, sparse = FALSE, type = "both"))
+    comp_matrix[comp_matrix > 0] <- 1
 
     # Root nodes (In-degree 0 in the competency graph)
     root_indices <- which(degree(comp_graph, mode = "in") == 0)

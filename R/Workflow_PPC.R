@@ -115,16 +115,25 @@ run_predictive_check <- function(config, obs_X, posterior_samples = NULL, n_sim 
 
     n_participants <- config$constants$nrparticipants
     n_items <- config$constants$nrtasknodes
+    
+    task_names <- igraph::V(config$graph)[tolower(igraph::V(config$graph)$type) == "task"]$name
 
     simMeans <- numeric(n_sim)
     simRowMeans <- matrix(NA, nrow = n_sim, ncol = n_participants)
     simColMeans <- matrix(NA, nrow = n_sim, ncol = n_items)
+    colnames(simColMeans) <- task_names
     simM2Sum <- matrix(0, nrow = n_items, ncol = n_items)
+    rownames(simM2Sum) <- task_names
+    colnames(simM2Sum) <- task_names
 
     obsMean <- mean(obs_X, na.rm = TRUE)
     obsRowMeans <- rowMeans(obs_X, na.rm = TRUE)
     obsColMeans <- colMeans(obs_X, na.rm = TRUE)
+    names(obsColMeans) <- task_names
+    
     obsM2 <- compute_M2(obs_X)
+    rownames(obsM2) <- task_names
+    colnames(obsM2) <- task_names
 
     if (!is.null(posterior_samples)) {
         samples_mat <- as.matrix(posterior_samples)

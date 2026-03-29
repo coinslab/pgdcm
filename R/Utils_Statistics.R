@@ -64,8 +64,8 @@ filter_structural_nas <- function(res) {
     return(res)
 }
 
-# ── check_mcmc_convergence ───────────────────────────────────────────────────
-#' Check MCMC Convergence
+# ── check_RMG_convergence ───────────────────────────────────────────────────
+#' Check MCMC Convergence using RMG metrics
 #'
 #' Evaluates rough convergence metrics by comparing block averages.
 #'
@@ -75,7 +75,7 @@ filter_structural_nas <- function(res) {
 #'
 #' @return A list containing \code{avgparamvector}, \code{abserrors}, \code{relerrors}, and a boolean \code{converged} flag.
 #' @export
-check_mcmc_convergence <- function(chainlist, blocksize = 10, burninperiod = 1000) {
+check_RMG_convergence <- function(chainlist, blocksize = 10, burninperiod = 1000) {
     numericalepsilon <- 1e-8
     convergeinfo <- list()
 
@@ -133,6 +133,39 @@ check_mcmc_convergence <- function(chainlist, blocksize = 10, burninperiod = 100
     }
 
     return(convergeinfo)
+}
+
+# ── check_rhat_convergence ───────────────────────────────────────────────────
+#' Check MCMC Convergence via Rhat
+#'
+#' Evaluates if the chains have converged by extracting non-NA Rhat values
+#' from a summary matrix and returning whether convergence was met along with
+#' the largest Rhat value.
+#'
+#' @param summary_mx A matrix or data.frame (like from \code{MCMCsummary}) containing an \code{Rhat} column.
+#' @param threshold Numeric. Maximum acceptable Rhat value (default is 1.1).
+#'
+#' @return A list containing \code{converged} (boolean) and \code{max_rhat} (numeric).
+#' @export
+check_rhat_convergence <- function(summary_mx, threshold = 1.1) {
+    summ_df <- as.data.frame(summary_mx)
+    
+    if (!"Rhat" %in% colnames(summ_df)) {
+        stop("The provided summary does not contain an 'Rhat' column.")
+    }
+    
+    # Find valid Rhats (non-NA)
+    valid_rhats <- summ_df$Rhat[!is.na(summ_df$Rhat)]
+    
+    if (length(valid_rhats) == 0) {
+        return(list(converged = NA, max_rhat = NA))
+    }
+    
+    # Identify largest Rhat
+    max_rhat <- max(valid_rhats)
+    converged <- (max_rhat < threshold)
+    
+    return(list(converged = converged, max_rhat = max_rhat))
 }
 
 # ── map_pgdcm_parameters ─────────────────────────────────────────────────────

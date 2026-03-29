@@ -166,14 +166,14 @@ test_that("generate_ppc_plots handles NULL filename gracefully", {
     dev.off()
 })
 
-test_that("check_mcmc_convergence handles typical mcmc lists", {
-    m1 <- matrix(rnorm(100), 50, 2)
-    colnames(m1) <- c("var1", "var2")
-    m2 <- matrix(rnorm(100), 50, 2)
-    colnames(m2) <- c("var1", "var2")
-
-    mc_list <- coda::mcmc.list(coda::mcmc(m1), coda::mcmc(m2))
-    conv <- check_mcmc_convergence(mc_list, blocksize = 10, burninperiod = 5)
+test_that("check_RMG_convergence handles typical mcmc lists", {
+    # Provide enough samples to pass burnin + blocksize
+    mc_list <- coda::mcmc.list(
+        coda::mcmc(matrix(rnorm(200), ncol=2, dimnames=list(NULL, c("A","B")))),
+        coda::mcmc(matrix(rnorm(200), ncol=2, dimnames=list(NULL, c("A","B"))))
+    )
+    
+    conv <- check_RMG_convergence(mc_list, blocksize = 10, burninperiod = 5)
     expect_type(conv$converged, "logical")
 })
 
