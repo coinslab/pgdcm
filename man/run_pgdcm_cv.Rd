@@ -7,7 +7,8 @@
 run_pgdcm_cv(
   config,
   k_folds = 5,
-  lossFunction = "predictive",
+  lossFunction = "MSE",
+  return_samples = FALSE,
   estimation_config = list(niter = 1000, nburnin = 100),
   nCores = 1,
   nBootReps = 200
@@ -19,8 +20,8 @@ run_pgdcm_cv(
 \item{k_folds}{Integer. The number of folds to split the data into. Default is 5.}
 
 \item{lossFunction}{Character. The loss metric to evaluate predictions against held-out data.
-Must be one of \code{"predictive"} (log predictive density) or \code{"MSE"} (Mean Squared Error).
-Alternatively, an R function can be provided. Default is \code{"predictive"}.}
+Must be one of \code{"MSE"} (Mean Squared Error) or \code{"predictive"} (log predictive density).
+Alternatively, an R function can be provided. Default is \code{"MSE"}.}
 
 \item{estimation_config}{List of parameters controlling MCMC execution (\code{niter}, \code{nburnin}).
 Defaults to \code{list(niter = 1000, nburnin = 100)}.}
