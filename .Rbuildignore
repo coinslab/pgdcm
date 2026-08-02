@@ -40,3 +40,4 @@
 
 # NCME Presentation Folder
 ^NCME26$
+^.*\.Rproj$
