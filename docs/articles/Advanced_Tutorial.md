@@ -309,14 +309,13 @@ convergence_diag <- check_mcmc_convergence(
 print(paste("Algorithm fully converged:", convergence_diag$converged))
 ```
 
-- [`check_mcmc_convergence()`](../reference/check_mcmc_convergence.md)
-  accepts an `mcmc.list`, a block size to average across, and a burn-in
-  iteration count. It conceptually evaluates chain stability by
-  calculating moving block averages across the specified intervals. It
-  returns a list of resulting stability metrics, including a strict
-  boolean `converged` parameter indicating if the relative errors of all
-  parameter blocks have successfully stabilized beneath a 10% tolerance
-  threshold (`< 0.1`).
+- `check_mcmc_convergence()` accepts an `mcmc.list`, a block size to
+  average across, and a burn-in iteration count. It conceptually
+  evaluates chain stability by calculating moving block averages across
+  the specified intervals. It returns a list of resulting stability
+  metrics, including a strict boolean `converged` parameter indicating
+  if the relative errors of all parameter blocks have successfully
+  stabilized beneath a 10% tolerance threshold (`< 0.1`).
 
     Algorithm fully converged: FALSE
 

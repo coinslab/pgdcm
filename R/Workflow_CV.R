@@ -88,45 +88,45 @@ run_pgdcm_cv <- function(config,
 #' @param cv_output The list returned by \code{run_pgdcm_cv} (with \code{return_samples = TRUE}).
 #' @param config The original model configuration object used to generate the data.
 #'
-#' @return Invisibly returns a list containing accuracy, confusion matrix, 
+#' @return Invisibly returns a list containing accuracy, confusion matrix,
 #' observed values, and simulated predictive means.
 #' @export
 plot_pgdcm_cv <- function(cv_output, config) {
     if (is.null(cv_output$samples)) {
         stop("plot_pgdcm_cv requires cv_output$samples to exist. Run run_pgdcm_cv with return_samples = TRUE.")
     }
-    
+
     X_true <- as.matrix(config$data$X)
-    
+
     all_obs <- numeric(0)
     all_pred <- numeric(0)
-    
+
     k <- length(cv_output$samples)
     for (i in seq_len(k)) {
         samps <- as.matrix(cv_output$samples[[i]])
-        
+
         # Identify X columns
         X_cols <- grep("^X\\[", colnames(samps), value = TRUE)
         if (length(X_cols) == 0) {
             stop("No 'X' nodes were monitored in the posterior samples.")
         }
-        
+
         # Find which items were held out (they will vary, fixed ones won't)
         vars <- apply(samps[, X_cols, drop = FALSE], 2, var)
         held_out_cols <- names(vars)[vars > 0]
-        
+
         if (length(held_out_cols) == 0) {
             warning(paste("No held-out nodes identified in fold", i))
             next
         }
-        
+
         # Extract the posterior mean (probability) for the held-out nodes
         pred_means <- colMeans(samps[, held_out_cols, drop = FALSE])
-        
+
         # Extract the true observed values for those exact nodes
         true_vals <- numeric(length(held_out_cols))
         names(true_vals) <- held_out_cols
-        
+
         for (node in held_out_cols) {
             # Extract matrix indices from node string (e.g., "X[1, 5]")
             matches <- regmatches(node, gregexpr("[0-9]+", node))[[1]]
@@ -136,36 +136,36 @@ plot_pgdcm_cv <- function(cv_output, config) {
                 true_vals[node] <- X_true[row_idx, col_idx]
             }
         }
-        
+
         valid <- is.finite(true_vals) & is.finite(pred_means)
         all_obs <- c(all_obs, true_vals[valid])
         all_pred <- c(all_pred, pred_means[valid])
     }
-    
+
     if (length(all_obs) == 0) {
         stop("No valid observed and simulated values were found.")
     }
-    
+
     # Binarize predictions
     all_sim_binary <- ifelse(all_pred >= 0.5, 1, 0)
     accuracy <- mean(all_obs == all_sim_binary)
-    
+
     confusion_matrix <- table(
         Observed = factor(all_obs, levels = c(0, 1)),
         Predicted = factor(all_sim_binary, levels = c(0, 1))
     )
-    
+
     print("\n--- Plot 4 Cross-Validation Summary ---")
     print(paste("Total evaluated responses:", length(all_obs)))
     print(paste("Overall accuracy:", round(accuracy, 4)))
     print("Confusion Matrix:")
     print(confusion_matrix)
-    
+
     # Generate Plot
     set.seed(123)
     observed_jitter <- jitter(all_obs, amount = 0.06)
     simulated_jitter <- jitter(all_sim_binary, amount = 0.06)
-    
+
     plot(
         observed_jitter,
         simulated_jitter,
@@ -187,7 +187,7 @@ plot_pgdcm_cv <- function(cv_output, config) {
         legend = paste0("Overall binary accuracy = ", round(accuracy, 3)),
         bty = "n"
     )
-    
+
     invisible(list(
         accuracy = accuracy,
         confusion_matrix = confusion_matrix,

@@ -96,7 +96,12 @@ If <code>NULL</code>, plots render inline instead of saving to PDF.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing the simulated and observed statistics.</p>
+    <p>A nested list containing exact Posterior/Prior Predictive P-values (PPPs)
+  and their corresponding observed discrepancy values:</p><ul><li><p><code>Global_Fit</code>: Global matrix means.</p></li>
+<li><p><code>Item_Fit</code>: Item column means (Proportion correct).</p></li>
+<li><p><code>Person_Fit</code>: Participant row means (Total score).</p></li>
+<li><p><code>Edge_Fit</code>: Pairwise Log Odds Ratios (LOR) and Joint Co-occurrences (M2).</p></li>
+</ul><p>Each metric is returned as a list containing <code>value</code> (the observed statistic) and <code>ppp</code> (the predictive p-value).</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

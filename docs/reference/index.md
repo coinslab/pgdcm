@@ -41,10 +41,15 @@
   : Get Curriculum Bottleneck Probability
 - [`calc_risk_difference()`](calc_risk_difference.md) : Get Prerequisite
   Gate Strength (Risk Difference)
-- [`check_mcmc_convergence()`](check_mcmc_convergence.md) : Check MCMC
-  Convergence
+- [`check_RMG_convergence()`](check_RMG_convergence.md) : Check MCMC
+  Convergence using RMG metrics
+- [`check_rhat_convergence()`](check_rhat_convergence.md) : Check MCMC
+  Convergence via Rhat
 - [`checklegaledges()`](checklegaledges.md) : Check Legal Edges
+- [`compute_LOR()`](compute_LOR.md) : Compute Log Odds Ratio Matrix
 - [`compute_M2()`](compute_M2.md) : Compute Second-Order Moment Matrix
+- [`compute_empirical_reliability()`](compute_empirical_reliability.md)
+  : Compute Empirical Reliability Metrics
 - [`configure_dcm()`](configure_dcm.md) : Configure DCM Initialization
   and Constants
 - [`configure_sem()`](configure_sem.md) : Configure SEM Initialization
@@ -80,6 +85,10 @@
 - [`igraphedit()`](igraphedit.md) : Run Interactive Graph Editor
 - [`map_pgdcm_parameters()`](map_pgdcm_parameters.md) : Map PGDCM
   Parameters to Readble Names
+- [`map_sem_parameters()`](map_sem_parameters.md) : Map SEM Parameters
+  to Readable Names
+- [`plot_pgdcm_cv()`](plot_pgdcm_cv.md) : Plot Posterior Predictive CV
+  Results
 - [`pull_from_cytoscape()`](pull_from_cytoscape.md) : Pull Graph from
   Cytoscape
 - [`push_to_cytoscape()`](push_to_cytoscape.md) : Push Graph to
@@ -91,8 +100,12 @@
   Name to Integer Index safely via Mapped Parameters
 - [`run_pgdcm_auto()`](run_pgdcm_auto.md) : Run Integrated Workflow
   (Prior, MCMC, Posterior)
+- [`run_pgdcm_cv()`](run_pgdcm_cv.md) : Run K-Fold Cross Validation for
+  PGDCM Models
 - [`run_predictive_check()`](run_predictive_check.md) : Run Predictive
   Check (Prior or Posterior)
+- [`simulate_data()`](simulate_data.md) : Simulate Data for Parameter
+  Recovery
 - [`validate_discrete_assumption()`](validate_discrete_assumption.md) :
   Validate Discrete Binary Assumption
 - [`validate_graph_and_data()`](validate_graph_and_data.md) : Validate

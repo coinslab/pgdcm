@@ -12,7 +12,7 @@ plot_pgdcm_cv(cv_output, config)
 \item{config}{The original model configuration object used to generate the data.}
 }
 \value{
-Invisibly returns a list containing accuracy, confusion matrix, 
+Invisibly returns a list containing accuracy, confusion matrix,
 observed values, and simulated predictive means.
 }
 \description{

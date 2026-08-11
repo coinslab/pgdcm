@@ -62,6 +62,7 @@ run_pgdcm_auto <- function(config,
             samples = NULL,
             mapped_parameters = NULL,
             skill_profiles = NULL,
+            empirical_reliability = NULL,
             item_parameters = NULL,
             group_patterns = NULL,
             prior_ppc = prior_res,
@@ -92,6 +93,7 @@ run_pgdcm_auto <- function(config,
 
     mapped_results <- NULL
     extra_tables <- list(skill_profiles = NULL, item_parameters = NULL, group_patterns = NULL)
+    reliability_metrics <- NULL
     rhat_check <- list(converged = NA, max_rhat = NA)
 
     tryCatch(
@@ -127,6 +129,15 @@ run_pgdcm_auto <- function(config,
             skill_csv <- paste0(prefix, "_skill_profiles.csv")
             write.csv(extra_tables$skill_profiles, file = skill_csv, row.names = TRUE)
             print(paste("Skill profiles saved to:", skill_csv))
+            
+            print("Computing empirical reliability metrics...")
+            reliability_metrics <- compute_empirical_reliability(extra_tables$skill_profiles)
+            rel_csv <- paste0(prefix, "_empirical_reliability.csv")
+            write.csv(reliability_metrics, file = rel_csv, row.names = FALSE)
+            print(paste("Empirical reliability saved to:", rel_csv))
+            print("--- Empirical Reliability Summary ---")
+            print(reliability_metrics)
+            print("-------------------------------------")
 
             item_csv <- paste0(prefix, "_item_parameters.csv")
             write.csv(extra_tables$item_parameters, file = item_csv, row.names = FALSE)
@@ -175,6 +186,7 @@ run_pgdcm_auto <- function(config,
         samples = res_clean,
         mapped_parameters = mapped_results,
         skill_profiles = extra_tables$skill_profiles,
+        empirical_reliability = reliability_metrics,
         item_parameters = extra_tables$item_parameters,
         group_patterns = extra_tables$group_patterns,
         prior_ppc = prior_res,

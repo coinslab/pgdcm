@@ -47,4 +47,17 @@ run_predictive_check(
 
 ## Value
 
-A list containing the simulated and observed statistics.
+A nested list containing exact Posterior/Prior Predictive P-values
+(PPPs) and their corresponding observed discrepancy values:
+
+- `Global_Fit`: Global matrix means.
+
+- `Item_Fit`: Item column means (Proportion correct).
+
+- `Person_Fit`: Participant row means (Total score).
+
+- `Edge_Fit`: Pairwise Log Odds Ratios (LOR) and Joint Co-occurrences
+  (M2).
+
+Each metric is returned as a list containing `value` (the observed
+statistic) and `ppp` (the predictive p-value).

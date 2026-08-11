@@ -24,6 +24,46 @@ compute_M2 <- function(mat) {
     return(M2)
 }
 
+# ── compute_LOR ──────────────────────────────────────────────────────────────
+#' Compute Log Odds Ratio Matrix
+#'
+#' Computes the Log Odds Ratio (LOR) matrix with Haldane-Anscombe correction
+#' for a given dataset directly from the response matrix to robustly handle NAs.
+#'
+#' @param mat A numeric matrix of responses (usually binary).
+#'
+#' @return A numeric matrix representing the pairwise Log Odds Ratios.
+#' @export
+compute_LOR <- function(mat) {
+    n_cols <- ncol(mat)
+    LOR <- matrix(0, nrow = n_cols, ncol = n_cols)
+    for (j in 1:(n_cols - 1)) {
+        for (k in (j + 1):n_cols) {
+            # Only consider rows where both j and k are non-NA
+            valid_rows <- !is.na(mat[, j]) & !is.na(mat[, k])
+            if (sum(valid_rows) == 0) {
+                LOR[j, k] <- NA
+                LOR[k, j] <- NA
+                next
+            }
+            
+            x_j <- mat[valid_rows, j]
+            x_k <- mat[valid_rows, k]
+            
+            n11 <- sum(x_j == 1 & x_k == 1)
+            n10 <- sum(x_j == 1 & x_k == 0)
+            n01 <- sum(x_j == 0 & x_k == 1)
+            n00 <- sum(x_j == 0 & x_k == 0)
+            
+            lor <- log( ((n11 + 0.5) * (n00 + 0.5)) / ((n10 + 0.5) * (n01 + 0.5)) )
+            LOR[j, k] <- lor
+            LOR[k, j] <- lor
+        }
+    }
+    diag(LOR) <- NA
+    return(LOR)
+}
+
 # ── filter_structural_nas ────────────────────────────────────────────────────
 #' Filter Structural NAs from MCMC Samples
 #'
@@ -596,4 +636,59 @@ assess_classification_accuracy <- function(skill_profiles, true_data, mapping_li
     }
 
     return(list(metrics = skill_metrics, profile_accuracy = prof_acc))
+}
+
+# ── compute_empirical_reliability ────────────────────────────────────────────
+#' Compute Empirical Reliability Metrics
+#'
+#' Calculates three standard Cognitive Diagnostic Model reliability metrics based
+#' on posterior mastery probabilities: Marginal Reliability, Classification Accuracy,
+#' and Classification Consistency.
+#'
+#' @param skill_profiles An \code{N x K} matrix or dataframe of continuous mastery 
+#'   probabilities (e.g., from \code{generate_summary_tables}).
+#'
+#' @return A data.frame containing the metrics for each skill/attribute.
+#' @export
+compute_empirical_reliability <- function(skill_profiles) {
+    p_mat <- as.matrix(skill_profiles)
+    N <- nrow(p_mat)
+    K <- ncol(p_mat)
+    
+    attr_names <- colnames(p_mat)
+    if (is.null(attr_names)) attr_names <- paste0("Skill_", 1:K)
+    
+    out_df <- data.frame(
+        Skill = attr_names,
+        Marginal_Reliability = numeric(K),
+        Classification_Accuracy = numeric(K),
+        Classification_Consistency = numeric(K),
+        stringsAsFactors = FALSE
+    )
+    
+    for (k in 1:K) {
+        p <- p_mat[, k]
+        
+        # 1. Marginal Reliability (True Var / Total Var)
+        true_var <- var(p, na.rm = TRUE)
+        error_var <- mean(p * (1 - p), na.rm = TRUE)
+        
+        if (is.na(true_var) || true_var == 0) {
+            rho <- 0
+        } else {
+            rho <- true_var / (true_var + error_var)
+        }
+        
+        # 2. Classification Accuracy
+        acc <- mean(pmax(p, 1 - p), na.rm = TRUE)
+        
+        # 3. Classification Consistency
+        cons <- mean(p^2 + (1 - p)^2, na.rm = TRUE)
+        
+        out_df$Marginal_Reliability[k] <- round(rho, 4)
+        out_df$Classification_Accuracy[k] <- round(acc, 4)
+        out_df$Classification_Consistency[k] <- round(cons, 4)
+    }
+    
+    return(out_df)
 }

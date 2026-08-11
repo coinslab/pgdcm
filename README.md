@@ -25,10 +25,12 @@ PGDCM is designed to provide maximum flexibility through three core pillars: **M
 
 ### Estimation & Workflow
 
-* **End-to-End Bayesian Pipeline** - A single function call orchestrates your entire analysis: prior predictive checking, MCMC sampling, convergence diagnostics, posterior predictive checking, and result extraction (skill profiles, item parameters, WAIC).
+* **End-to-End Bayesian Pipeline** - A single function call orchestrates your entire analysis: prior predictive checking, MCMC sampling, convergence diagnostics, and result extraction (skill profiles, item parameters, WAIC).
+* **Rigorous Diagnostics & Reliability** - Automatically computes state-of-the-art Posterior Predictive Checks (Log Odds Ratios, Pairwise Co-occurrences) and empirical reliability metrics (Marginal Reliability, Classification Accuracy) directly from the posterior samples.
+* **Data Simulation & Parameter Recovery** - Includes a dedicated `simulate_data()` engine for generating full response matrices and latent profiles from custom priors or fixed true parameters, making parameter recovery studies effortless.
 * **Operational Scoring** - Lock calibrated item parameters from a calibration sample to score new examinees against the validated framework.
 * **Flexible Prior Specification** - Supply custom priors as simple `(mean, sd)` pairs or full per-parameter arrays. Omit priors for weakly informative defaults, or use near-zero variance to lock values for scoring workflows.
-* **Missing Data Handling** - Built-in Bayesian missing data capabilities. Safely estimate item parameters and student profiles even when your response matrix has missing data.
+* **Missing Data Handling** - Built-in Bayesian missing data capabilities. Safely estimate item parameters, student profiles, and exact Posterior Predictive checks even when your response matrix has missing data.
 
 ### Architecture & Extensibility
 

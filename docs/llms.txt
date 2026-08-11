@@ -47,8 +47,17 @@ pillars: **Modeling Capabilities**, **Estimation & Workflow**, and
 
 - **End-to-End Bayesian Pipeline** - A single function call orchestrates
   your entire analysis: prior predictive checking, MCMC sampling,
-  convergence diagnostics, posterior predictive checking, and result
-  extraction (skill profiles, item parameters, WAIC).
+  convergence diagnostics, and result extraction (skill profiles, item
+  parameters, WAIC).
+- **Rigorous Diagnostics & Reliability** - Automatically computes
+  state-of-the-art Posterior Predictive Checks (Log Odds Ratios,
+  Pairwise Co-occurrences) and empirical reliability metrics (Marginal
+  Reliability, Classification Accuracy) directly from the posterior
+  samples.
+- **Data Simulation & Parameter Recovery** - Includes a dedicated
+  [`simulate_data()`](reference/simulate_data.md) engine for generating
+  full response matrices and latent profiles from custom priors or fixed
+  true parameters, making parameter recovery studies effortless.
 - **Operational Scoring** - Lock calibrated item parameters from a
   calibration sample to score new examinees against the validated
   framework.
@@ -57,8 +66,9 @@ pillars: **Modeling Capabilities**, **Estimation & Workflow**, and
   weakly informative defaults, or use near-zero variance to lock values
   for scoring workflows.
 - **Missing Data Handling** - Built-in Bayesian missing data
-  capabilities. Safely estimate item parameters and student profiles
-  even when your response matrix has missing data.
+  capabilities. Safely estimate item parameters, student profiles, and
+  exact Posterior Predictive checks even when your response matrix has
+  missing data.
 
 ### Architecture & Extensibility
 
@@ -211,10 +221,15 @@ If you use `pgdcm` in your research, please cite it as:
   : Get Curriculum Bottleneck Probability
 - [`calc_risk_difference()`](calc_risk_difference.md) : Get Prerequisite
   Gate Strength (Risk Difference)
-- [`check_mcmc_convergence()`](check_mcmc_convergence.md) : Check MCMC
-  Convergence
+- [`check_RMG_convergence()`](check_RMG_convergence.md) : Check MCMC
+  Convergence using RMG metrics
+- [`check_rhat_convergence()`](check_rhat_convergence.md) : Check MCMC
+  Convergence via Rhat
 - [`checklegaledges()`](checklegaledges.md) : Check Legal Edges
+- [`compute_LOR()`](compute_LOR.md) : Compute Log Odds Ratio Matrix
 - [`compute_M2()`](compute_M2.md) : Compute Second-Order Moment Matrix
+- [`compute_empirical_reliability()`](compute_empirical_reliability.md)
+  : Compute Empirical Reliability Metrics
 - [`configure_dcm()`](configure_dcm.md) : Configure DCM Initialization
   and Constants
 - [`configure_sem()`](configure_sem.md) : Configure SEM Initialization
@@ -250,6 +265,10 @@ If you use `pgdcm` in your research, please cite it as:
 - [`igraphedit()`](igraphedit.md) : Run Interactive Graph Editor
 - [`map_pgdcm_parameters()`](map_pgdcm_parameters.md) : Map PGDCM
   Parameters to Readble Names
+- [`map_sem_parameters()`](map_sem_parameters.md) : Map SEM Parameters
+  to Readable Names
+- [`plot_pgdcm_cv()`](plot_pgdcm_cv.md) : Plot Posterior Predictive CV
+  Results
 - [`pull_from_cytoscape()`](pull_from_cytoscape.md) : Pull Graph from
   Cytoscape
 - [`push_to_cytoscape()`](push_to_cytoscape.md) : Push Graph to
@@ -261,8 +280,12 @@ If you use `pgdcm` in your research, please cite it as:
   Name to Integer Index safely via Mapped Parameters
 - [`run_pgdcm_auto()`](run_pgdcm_auto.md) : Run Integrated Workflow
   (Prior, MCMC, Posterior)
+- [`run_pgdcm_cv()`](run_pgdcm_cv.md) : Run K-Fold Cross Validation for
+  PGDCM Models
 - [`run_predictive_check()`](run_predictive_check.md) : Run Predictive
   Check (Prior or Posterior)
+- [`simulate_data()`](simulate_data.md) : Simulate Data for Parameter
+  Recovery
 - [`validate_discrete_assumption()`](validate_discrete_assumption.md) :
   Validate Discrete Binary Assumption
 - [`validate_graph_and_data()`](validate_graph_and_data.md) : Validate

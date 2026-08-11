@@ -28,7 +28,15 @@ If \code{NULL}, plots render inline instead of saving to PDF.}
 \item{title}{Character. String used for labeling (e.g., "PriorPPC").}
 }
 \value{
-A list containing the simulated and observed statistics.
+A nested list containing exact Posterior/Prior Predictive P-values (PPPs) 
+  and their corresponding observed discrepancy values:
+  \itemize{
+    \item \code{Global_Fit}: Global matrix means.
+    \item \code{Item_Fit}: Item column means (Proportion correct).
+    \item \code{Person_Fit}: Participant row means (Total score).
+    \item \code{Edge_Fit}: Pairwise Log Odds Ratios (LOR) and Joint Co-occurrences (M2).
+  }
+  Each metric is returned as a list containing \code{value} (the observed statistic) and \code{ppp} (the predictive p-value).
 }
 \description{
 Simulates responses from the specified Nimble model using either priors

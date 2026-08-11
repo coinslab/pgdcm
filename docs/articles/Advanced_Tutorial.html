@@ -299,7 +299,7 @@
 <p>We can now cleanly verify if our MCMC chains have successfully traversed the distribution and converged:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">convergence_diag</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/check_mcmc_convergence.html">check_mcmc_convergence</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">convergence_diag</span> <span class="op">&lt;-</span> <span class="fu">check_mcmc_convergence</span><span class="op">(</span></span>
 <span>    chainlist <span class="op">=</span> <span class="va">res_clean</span>,</span>
 <span>    blocksize <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>    burninperiod <span class="op">=</span> <span class="fl">100</span></span>
@@ -309,7 +309,7 @@
 </div>
 <ul>
 <li>
-<code><a href="../reference/check_mcmc_convergence.html">check_mcmc_convergence()</a></code> accepts an <code>mcmc.list</code>, a block size to average across, and a burn-in iteration count. It conceptually evaluates chain stability by calculating moving block averages across the specified intervals. It returns a list of resulting stability metrics, including a strict boolean <code>converged</code> parameter indicating if the relative errors of all parameter blocks have successfully stabilized beneath a 10% tolerance threshold (<code>&lt; 0.1</code>).</li>
+<code>check_mcmc_convergence()</code> accepts an <code>mcmc.list</code>, a block size to average across, and a burn-in iteration count. It conceptually evaluates chain stability by calculating moving block averages across the specified intervals. It returns a list of resulting stability metrics, including a strict boolean <code>converged</code> parameter indicating if the relative errors of all parameter blocks have successfully stabilized beneath a 10% tolerance threshold (<code>&lt; 0.1</code>).</li>
 </ul>
 <div class="cell">
 <div class="cell-output cell-output-stdout">

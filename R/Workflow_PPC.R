@@ -99,7 +99,15 @@ generate_ppc_plots <- function(filename, title_suffix, simMeans, simRowMeans, si
 #'   If \code{NULL}, plots render inline instead of saving to PDF.
 #' @param title Character. String used for labeling (e.g., "PriorPPC").
 #'
-#' @return A list containing the simulated and observed statistics.
+#' @return A nested list containing exact Posterior/Prior Predictive P-values (PPPs) 
+#'   and their corresponding observed discrepancy values:
+#'   \itemize{
+#'     \item \code{Global_Fit}: Global matrix means.
+#'     \item \code{Item_Fit}: Item column means (Proportion correct).
+#'     \item \code{Person_Fit}: Participant row means (Total score).
+#'     \item \code{Edge_Fit}: Pairwise Log Odds Ratios (LOR) and Joint Co-occurrences (M2).
+#'   }
+#'   Each metric is returned as a list containing \code{value} (the observed statistic) and \code{ppp} (the predictive p-value).
 #' @export
 run_predictive_check <- function(config, obs_X, posterior_samples = NULL, n_sim = 50, prefix = "Untitled", title = "PPC") {
     source(config$code_file)
@@ -122,9 +130,13 @@ run_predictive_check <- function(config, obs_X, posterior_samples = NULL, n_sim 
     simRowMeans <- matrix(NA, nrow = n_sim, ncol = n_participants)
     simColMeans <- matrix(NA, nrow = n_sim, ncol = n_items)
     colnames(simColMeans) <- task_names
+    
     simM2Sum <- matrix(0, nrow = n_items, ncol = n_items)
     rownames(simM2Sum) <- task_names
     colnames(simM2Sum) <- task_names
+
+    LOR_ppp_count <- matrix(0, nrow = n_items, ncol = n_items)
+    M2_ppp_count <- matrix(0, nrow = n_items, ncol = n_items)
 
     obsMean <- mean(obs_X, na.rm = TRUE)
     obsRowMeans <- rowMeans(obs_X, na.rm = TRUE)
@@ -134,6 +146,10 @@ run_predictive_check <- function(config, obs_X, posterior_samples = NULL, n_sim 
     obsM2 <- compute_M2(obs_X)
     rownames(obsM2) <- task_names
     colnames(obsM2) <- task_names
+    
+    obsLOR <- compute_LOR(obs_X)
+    rownames(obsLOR) <- task_names
+    colnames(obsLOR) <- task_names
 
     if (!is.null(posterior_samples)) {
         samples_mat <- as.matrix(posterior_samples)
@@ -143,6 +159,7 @@ run_predictive_check <- function(config, obs_X, posterior_samples = NULL, n_sim 
         nodesToSim <- cmodel_sim$getDependencies(params_in_model, self = TRUE, downstream = TRUE)
     }
 
+    # Single Pass: Simulate and calculate strict test statistics
     for (i in 1:n_sim) {
         if (!is.null(posterior_samples)) {
             idx <- sample_indices[i]
@@ -167,10 +184,24 @@ run_predictive_check <- function(config, obs_X, posterior_samples = NULL, n_sim 
         cmodel_sim$simulate(nodesToSim)
         simX <- cmodel_sim$X
 
-        simMeans[i] <- mean(simX, na.rm = TRUE)
-        simRowMeans[i, ] <- rowMeans(simX, na.rm = TRUE)
-        simColMeans[i, ] <- colMeans(simX, na.rm = TRUE)
-        simM2Sum <- simM2Sum + compute_M2(simX)
+        # Univariate
+        sim_mean <- mean(simX, na.rm = TRUE)
+        sim_col_means <- colMeans(simX, na.rm = TRUE)
+        sim_row_means <- rowMeans(simX, na.rm = TRUE)
+        
+        simMeans[i] <- sim_mean
+        simColMeans[i, ] <- sim_col_means
+        simRowMeans[i, ] <- sim_row_means
+        
+        # Bivariate
+        simM2 <- compute_M2(simX)
+        simM2Sum <- simM2Sum + replace(simM2, is.na(simM2), 0)
+        
+        simLOR <- compute_LOR(simX)
+        
+        # Accumulate PPPs for bivariate statistics
+        M2_ppp_count <- M2_ppp_count + replace(simM2 >= obsM2, is.na(simM2 >= obsM2), 0)
+        LOR_ppp_count <- LOR_ppp_count + replace(simLOR >= obsLOR, is.na(simLOR >= obsLOR), 0)
 
         if (i %% 10 == 0) print(paste(title, "Simulation:", i, "/", n_sim))
     }
@@ -186,13 +217,34 @@ run_predictive_check <- function(config, obs_X, posterior_samples = NULL, n_sim 
         paste("(", title, "-", config$type, ")"),
         simMeans, simRowMeans, simColMeans, simM2Sum / n_sim, obsColMeans, obsRowMeans, obsMean, obsM2
     )
-
+    
+    # Calculate Posterior Predictive P-values (PPP)
+    ppp_Global_Mean <- mean(simMeans >= obsMean, na.rm = TRUE)
+    ppp_Item_Mean <- colMeans(sweep(simColMeans, 2, obsColMeans, ">="), na.rm = TRUE)
+    ppp_Person_Mean <- colMeans(sweep(simRowMeans, 2, obsRowMeans, ">="), na.rm = TRUE)
+    
+    ppp_LOR <- LOR_ppp_count / n_sim
+    ppp_M2 <- M2_ppp_count / n_sim
+    
+    cat(sprintf("\n--- %s Standard PPC Fit Summary ---\n", title))
+    cat(sprintf("Global Mean = %.3f (PPP: %.3f)\n", obsMean, ppp_Global_Mean))
+    cat(sprintf("Item Means (PPP < 0.05 or > 0.95): %d / %d\n", sum(ppp_Item_Mean < 0.05 | ppp_Item_Mean > 0.95), n_items))
+    cat(sprintf("Item LOR (PPP < 0.05 or > 0.95): %d / %d\n", sum(ppp_LOR[upper.tri(ppp_LOR)] < 0.05 | ppp_LOR[upper.tri(ppp_LOR)] > 0.95, na.rm = TRUE), (n_items * (n_items - 1)) / 2))
+    
     return(list(
-        simMeans = simMeans,
-        simRowMeans = simRowMeans,
-        simColMeans = simColMeans,
-        simM2Sum = simM2Sum,
-        obsMean = obsMean,
+        Global_Fit = list(
+            Mean = list(value = obsMean, ppp = ppp_Global_Mean)
+        ),
+        Item_Fit = list(
+            Mean = list(value = obsColMeans, ppp = ppp_Item_Mean)
+        ),
+        Person_Fit = list(
+            Mean = list(value = obsRowMeans, ppp = ppp_Person_Mean)
+        ),
+        Edge_Fit = list(
+            LOR = list(value = obsLOR, ppp = ppp_LOR),
+            M2 = list(value = obsM2, ppp = ppp_M2)
+        ),
         n_sim = n_sim
     ))
 }
