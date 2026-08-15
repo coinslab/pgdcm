@@ -162,6 +162,12 @@ plot_pgdcm_cv <- function(cv_output, config) {
     print(confusion_matrix)
 
     # Generate Plot
+    if (exists(".Random.seed", envir = .GlobalEnv)) {
+        old_seed <- get(".Random.seed", envir = .GlobalEnv)
+        on.exit({ assign(".Random.seed", old_seed, envir = .GlobalEnv) }, add = TRUE)
+    } else {
+        on.exit({ rm(".Random.seed", envir = .GlobalEnv) }, add = TRUE)
+    }
     set.seed(123)
     observed_jitter <- jitter(all_obs, amount = 0.06)
     simulated_jitter <- jitter(all_sim_binary, amount = 0.06)

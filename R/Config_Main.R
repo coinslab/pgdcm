@@ -67,7 +67,7 @@ validate_graph_and_data <- function(graph, dataframe) {
 #' @return Boolean indicating if validation passed. Throws an error if unsupported nodes are found.
 #' @export
 validate_graph_compute_nodes <- function(graph) {
-    allowed_computes <- c("dina", "dino", "dinm", "zscore", "continuous", "percentile", "binary", "pattern")
+    allowed_computes <- c("dina", "dino", "dinm", "zscore", "continuous", "percentile", "binary")
     node_computes <- tolower(V(graph)$compute)
     node_names <- V(graph)$name
 
@@ -203,11 +203,14 @@ build_scoring_config <- function(calib_results, calib_config, new_dataframe) {
 
     K <- calib_config$constants$nrattributenodes
     J <- calib_config$constants$nrtasknodes
+    num_beta_roots <- calib_config$constants$nrbetaroot
 
-    calibrated_theta_means <- matrix(mapped$mean[theta_rows], nrow = K, ncol = 2)
+    calibrated_theta_means <- matrix(0, nrow = K, ncol = 2)
+    if (K > num_beta_roots) {
+        calibrated_theta_means[(num_beta_roots + 1):K, ] <- matrix(mapped$mean[theta_rows], nrow = K - num_beta_roots, ncol = 2)
+    }
     calibrated_lambda_means <- matrix(mapped$mean[lambda_rows], nrow = J, ncol = 2)
 
-    num_beta_roots <- calib_config$constants$nrbetaroot
     if (!is.null(num_beta_roots) && num_beta_roots > 0) {
         b_mean <- rep(0, num_beta_roots)
         b_std <- rep(2, num_beta_roots)

@@ -40,7 +40,8 @@ configure_dcm <- function(info, X, priors = NULL) {
         isDINO = info$isDINO,
         isDINM = info$isDINM,
         isContinuousHO = is_continuous_ho,
-        CDMattnodesmax = max(2, info$nrattributenodes)
+        CDMattnodesmax = max(2, info$nrattributenodes),
+        closed_gate_penalty = -15.0
     )
 
     # Pre-calculate DAG topology constants to eliminate inner MCMC loops

@@ -29,7 +29,7 @@
 # Define Helper Function for Mixed Logic
 calc_mixed_kernel <- nimbleFunction(
     run = function(sum_cont = double(0), sum_disc = double(0), req_disc = double(0), sum_input = double(0), has_cont = double(0),
-                   isDINA = double(0), isDINO = double(0), isDINM = double(0)) {
+                   isDINA = double(0), isDINO = double(0), isDINM = double(0), closed_gate_penalty = double(0)) {
         
         sum_total <- sum_cont + sum_disc
 
@@ -41,13 +41,15 @@ calc_mixed_kernel <- nimbleFunction(
             if (gate == 1.0) {
                 val_dina <- sum_cont
             } else {
-                val_dina <- -10.0
+                val_dina <- closed_gate_penalty
             }
         } else {
             val_dina <- gate
         }
 
         # DINM (Compensatory)
+        # Note: DINM explicitly assumes discrete compensatory parents. With continuous
+        # parents, the ratio can leave the [0,1] range and must be constrained or interpreted as an unbounded logit offset.
         val_dinm <- sum_total / max(1.0, sum_input)
 
         # DINO (Mixed/Gated Disjunctive)
@@ -123,7 +125,7 @@ DiBelloBN <- nimbleCode({
                 sum_cont_node[i, k] <- sum(is_cont_parent[k, 1:(k - 1)] * attributenodes[i, 1:(k - 1)])
                 sum_disc_node[i, k] <- sum(is_disc_parent[k, 1:(k - 1)] * attributenodes[i, 1:(k - 1)])
 
-                psival[i, k] <- calc_mixed_kernel(
+                psi[i, k] <- calc_mixed_kernel(
                     sum_cont = sum_cont_node[i, k],
                     sum_disc = sum_disc_node[i, k],
                     req_disc = req_disc[k],
@@ -131,11 +133,12 @@ DiBelloBN <- nimbleCode({
                     has_cont = has_cont[k],
                     isDINA = isDINA[k],
                     isDINO = isDINO[k],
-                    isDINM = isDINM[k]
+                    isDINM = isDINM[k],
+                    closed_gate_penalty = closed_gate_penalty
                 )
 
                 # Probability using specific theta parameters for this attribute
-                atprob[i, k] <- ilogit(theta[k, 1] * psival[i, k] - theta[k, 2])
+                atprob[i, k] <- ilogit(theta[k, 1] * psi[i, k] - theta[k, 2])
                 attributenodes[i, k] ~ dbern(atprob[i, k])
             }
         }
@@ -154,7 +157,8 @@ DiBelloBN <- nimbleCode({
                 has_cont = has_cont[nrattributenodes + j],
                 isDINA = isDINA[nrattributenodes + j],
                 isDINO = isDINO[nrattributenodes + j],
-                isDINM = isDINM[nrattributenodes + j]
+                isDINM = isDINM[nrattributenodes + j],
+                closed_gate_penalty = closed_gate_penalty
             )
 
             # Probability using specific lambda parameters for this item

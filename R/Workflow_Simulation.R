@@ -21,7 +21,15 @@
 #' }
 #' @export
 simulate_data <- function(config, parameters = NULL, seed = NULL) {
-    if (!is.null(seed)) set.seed(seed)
+    if (!is.null(seed)) {
+        if (exists(".Random.seed", envir = .GlobalEnv)) {
+            old_seed <- get(".Random.seed", envir = .GlobalEnv)
+            on.exit({ assign(".Random.seed", old_seed, envir = .GlobalEnv) }, add = TRUE)
+        } else {
+            on.exit({ rm(".Random.seed", envir = .GlobalEnv) }, add = TRUE)
+        }
+        set.seed(seed)
+    }
     
     source(config$code_file)
     model_code <- get(config$model_object)

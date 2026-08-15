@@ -110,13 +110,9 @@ determine_model_type <- function(info) {
 
     # Check attributes
     all_attr_sem <- all(info$attr_computes %in% sem_types)
-    all_attr_pattern <- all(info$attr_computes == "pattern")
 
     if (tasks_all_sem && all_attr_sem) {
         return("SEM")
-    }
-    if (all_attr_pattern && tasks_all_cdm) {
-        return("LCDCM")
     }
 
     return("DCM")

@@ -18,6 +18,18 @@ validate_discrete_assumption <- function(samples) {
     }
   }
 }
+#' Validate No Continuous Parents Assumption
+#' @description Aborts the function if the specified node has continuous parents,
+#' which would violate the pure discrete condensation (psi=0/1) rules assumed by these queries.
+validate_no_continuous_parents <- function(results, skill_index) {
+  if ("config" %in% names(results) && "constants" %in% names(results$config)) {
+    if ("has_cont" %in% names(results$config$constants)) {
+      if (results$config$constants$has_cont[skill_index] == 1) {
+        stop("Error: This query assumes pure discrete condensation logic (psi=0 or 1), but the target skill has continuous parents. Probability semantics are invalid.")
+      }
+    }
+  }
+}
 
 #' Resolve Human-Readable Skill Name to Integer Index safely via Mapped Parameters
 resolve_skill <- function(results, skill) {
@@ -82,6 +94,7 @@ calc_prob_master_given_prereqs <- function(results, skill) {
   s <- resolve_skill(results, skill)
   samples <- as.matrix(results$samples)
   validate_discrete_assumption(samples)
+  validate_no_continuous_parents(results, s$index)
   
   slope_col <- paste0("theta[", s$index, ", 1]")
   intercept_col <- paste0("theta[", s$index, ", 2]")
@@ -112,6 +125,7 @@ calc_prob_master_given_no_prereqs <- function(results, skill) {
   s <- resolve_skill(results, skill)
   samples <- as.matrix(results$samples)
   validate_discrete_assumption(samples)
+  validate_no_continuous_parents(results, s$index)
   
   intercept_col <- paste0("theta[", s$index, ", 2]")
   probs <- plogis(-samples[, intercept_col])
@@ -138,6 +152,7 @@ calc_risk_difference <- function(results, skill) {
   s <- resolve_skill(results, skill)
   samples <- as.matrix(results$samples)
   validate_discrete_assumption(samples)
+  validate_no_continuous_parents(results, s$index)
   
   slope_col <- paste0("theta[", s$index, ", 1]")
   intercept_col <- paste0("theta[", s$index, ", 2]")
@@ -373,7 +388,7 @@ generate_skill_diagnostics <- function(results) {
       if (!df$Is_Continuous[k]) {
         root_col <- paste0("beta_root[", s_idx, "]")
         if (root_col %in% colnames(samples)) {
-          probs <- plogis(samples[, root_col])
+          probs <- plogis(-samples[, root_col])
           df$BaseRate_Mean[k] <- mean(probs)
         }
       }

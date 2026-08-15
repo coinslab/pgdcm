@@ -613,6 +613,12 @@ assess_classification_accuracy <- function(skill_profiles, true_data, mapping_li
         n_inspect <- min(random_inspect, n_common)
         message(sprintf("\n--- Random Comparison of %d Students ---", n_inspect))
 
+        if (exists(".Random.seed", envir = .GlobalEnv)) {
+            old_seed <- get(".Random.seed", envir = .GlobalEnv)
+            on.exit({ assign(".Random.seed", old_seed, envir = .GlobalEnv) }, add = TRUE)
+        } else {
+            on.exit({ rm(".Random.seed", envir = .GlobalEnv) }, add = TRUE)
+        }
         set.seed(123)
         sample_locs <- sample(1:n_common, n_inspect)
 
@@ -670,6 +676,10 @@ compute_empirical_reliability <- function(skill_profiles) {
         p <- p_mat[, k]
         
         # 1. Marginal Reliability (True Var / Total Var)
+        # Citation/Methodological Note: This uses the posterior means `p` to estimate 
+        # true-score variance `var(p)` and Bernoulli error variance `mean(p * (1 - p))`.
+        # This is a known approximation (e.g., Templin & Bradshaw 2013 style) that can 
+        # understate true variance due to shrinkage, but serves as a useful diagnostic proxy.
         true_var <- var(p, na.rm = TRUE)
         error_var <- mean(p * (1 - p), na.rm = TRUE)
         
