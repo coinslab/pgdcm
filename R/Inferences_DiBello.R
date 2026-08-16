@@ -416,3 +416,48 @@ generate_skill_diagnostics <- function(results) {
   }
   return(df)
 }
+
+#' Assess Differential Item Functioning (DIF) Bias
+#' 
+#' @description Scans the posterior distributions of lambda_dif parameters to identify items
+#' that exhibit significant uniform bias against focal groups.
+#' @param results The full pgdcm results list object.
+#' @return A data.frame containing all evaluated bias parameters, with a boolean flag indicating if the 95% Credible Interval excludes 0.0.
+#' @export
+assess_item_bias <- function(results) {
+  if (is.null(results$config) || results$config$model_object != "DiBelloBN_DIF") {
+    stop("Error: assess_item_bias() requires a model calibrated with the DIF module. Please supply a dif_group_col during build_model_config().")
+  }
+  
+  df <- results$mapped_parameters
+  if (is.null(df)) stop("Error: Results object is missing mapped_parameters.")
+  
+  dif_df <- df[df$Type == "DIF Parameter", ]
+  if (nrow(dif_df) == 0) {
+    stop("Error: No DIF parameters found in the mapped output.")
+  }
+  
+  # Identify standard quantile columns from coda::summary output
+  col_lower <- grep("2.5%", colnames(dif_df), fixed = TRUE, value = TRUE)
+  col_upper <- grep("97.5%", colnames(dif_df), fixed = TRUE, value = TRUE)
+  
+  if (length(col_lower) == 0 || length(col_upper) == 0) {
+      stop("Error: Cannot find 2.5% and 97.5% quantile columns in mapped_parameters to evaluate significance.")
+  }
+  
+  # A parameter is significantly biased if the 95% CI strictly excludes 0.0
+  dif_df$Significant_Bias <- (dif_df[[col_lower]] > 0.0) | (dif_df[[col_upper]] < 0.0)
+  
+  # For the reference group (Group 1), Nimble evaluates lambda_dif as exactly 0.0 with 0 variance.
+  # We should mark these as strictly FALSE to avoid false positives from floating point noise.
+  is_reference <- (dif_df$Mean == 0.0 & dif_df$SD == 0.0)
+  dif_df$Significant_Bias[is_reference] <- FALSE
+  
+  # Sort by magnitude of bias (descending)
+  dif_df <- dif_df[order(-abs(dif_df$Mean)), ]
+  
+  # Clean up column names for presentation if needed
+  rownames(dif_df) <- NULL
+  
+  return(dif_df)
+}

@@ -254,6 +254,21 @@ map_pgdcm_parameters <- function(summary_mx, config_obj, student_names = NULL) {
                 types[i] <- "Index Error"
             }
         }
+        # --- A2. Lambda DIF (Differential Item Functioning) ---
+        else if (grepl("^lambda_dif\\[", rn)) {
+            matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]
+            j <- as.numeric(matches[1])
+            g <- as.numeric(matches[2])
+
+            if (j <= length(task_nodes)) {
+                item_name <- task_nodes[j]
+                clean_names[i] <- paste0(item_name, " - Bias Group ", g)
+                types[i] <- "DIF Parameter"
+            } else {
+                clean_names[i] <- rn
+                types[i] <- "Index Error"
+            }
+        }
         # --- B. Theta (Attribute Dependencies/Non-Roots) ---
         else if (grepl("^theta\\[", rn)) {
             matches <- regmatches(rn, gregexpr("[0-9]+", rn))[[1]]

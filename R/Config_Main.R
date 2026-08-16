@@ -99,6 +99,7 @@ validate_graph_compute_nodes <- function(graph) {
 #' @param graph An \code{igraph} object representing the conceptual architecture.
 #' @param dataframe A \code{data.frame} of raw responses matching graph Tasks.
 #' @param priors Optional list of prior specifications. See \code{configure_dcm} or \code{configure_sem} for details.
+#' @param dif_group_col Optional string. The name of the demographic column in \code{dataframe} used to assess Differential Item Functioning (DIF).
 #'
 #' @return A configuration list encompassing Nimble requirements. The list contains:
 #' \itemize{
@@ -112,7 +113,7 @@ validate_graph_compute_nodes <- function(graph) {
 #'   \item \code{type}: A character string denoting the detected architecture (e.g., \code{"DCM"}, \code{"SEM"}).
 #' }
 #' @export
-build_model_config <- function(graph, dataframe, priors = NULL) {
+build_model_config <- function(graph, dataframe, priors = NULL, dif_group_col = NULL) {
     # Coerce topological sort in case users provide a raw, unordered igraph object
     graph <- enforce_topo_sort(graph)
 
@@ -123,6 +124,14 @@ build_model_config <- function(graph, dataframe, priors = NULL) {
     validate_graph_compute_nodes(graph)
 
     info <- get_graph_info(graph)
+    
+    m_type <- determine_model_type(info)
+    
+    # If SEM, Tasks must also be topologically sorted to ensure ascending indexing in nimble loops
+    if (m_type == "SEM") {
+        graph <- enforce_topo_sort(graph, sort_tasks = TRUE)
+        info <- get_graph_info(graph)
+    }
 
     # Align dataset columns with task nodes
     X_mat <- as.matrix(dataframe)
@@ -143,8 +152,24 @@ build_model_config <- function(graph, dataframe, priors = NULL) {
     new_dataframe <- dataframe[, c(1, dataidsortlist), drop = FALSE]
 
     X <- as.matrix(new_dataframe[, -1, drop = FALSE])
-
-    m_type <- determine_model_type(info)
+    
+    # Process DIF parameters
+    group_ids <- NULL
+    num_groups <- 1
+    if (!is.null(dif_group_col)) {
+        if (!(dif_group_col %in% names(dataframe))) {
+            stop(paste("DIF Error: Column", dif_group_col, "not found in dataframe."))
+        }
+        # Convert factors/strings to sequential integer IDs starting at 1
+        group_ids <- as.integer(as.factor(dataframe[[dif_group_col]]))
+        num_groups <- max(group_ids, na.rm = TRUE)
+        if (m_type == "DCM") {
+            m_type <- "DCM_DIF"
+        } else {
+            stop("DIF module is currently only supported for base DCM models, not SEM or Polytomous.")
+        }
+    }
+    
     print(paste("Detected Model Type:", m_type))
 
     # Structural Validation: DCMs cannot have continuous dependent attributes
@@ -166,6 +191,10 @@ build_model_config <- function(graph, dataframe, priors = NULL) {
         cfg <- configure_sem(info, X, priors = priors)
         cfg$code_file <- get_model_path("loglinearSEM.R")
         cfg$model_object <- "loglinearSEM"
+    } else if (m_type == "DCM_DIF") {
+        cfg <- configure_dcm(info, X, priors = priors, dif_group_ids = group_ids, num_groups = num_groups)
+        cfg$code_file <- get_model_path("DiBelloBN_DIF.R")
+        cfg$model_object <- "DiBelloBN_DIF"
     } else {
         cfg <- configure_dcm(info, X, priors = priors)
         cfg$code_file <- get_model_path("DiBelloBN.R")

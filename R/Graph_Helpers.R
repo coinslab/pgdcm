@@ -47,10 +47,11 @@ create_edge_df <- function(from, to) {
 #' Useful for ensuring attributes are processed in dependency order.
 #'
 #' @param g An \code{igraph} object containing "Attribute" and "Task" nodes.
+#' @param sort_tasks Logical. If TRUE, topologically sorts Task nodes as well. Default is FALSE.
 #'
 #' @return A new \code{igraph} object with vertices ordered topologically.
 #' @export
-enforce_topo_sort <- function(g) {
+enforce_topo_sort <- function(g, sort_tasks = FALSE) {
     V(g)$type_id <- ifelse(tolower(V(g)$type) == "attribute", 1, 2)
     AttNodes <- V(g)[tolower(V(g)$type) == "attribute"]
 
@@ -60,7 +61,13 @@ enforce_topo_sort <- function(g) {
         sorted_att_names <- V(g_att)[sorted_att_indices]$name
 
         OtherNodes <- V(g)[tolower(V(g)$type) != "attribute"]
-        other_names <- OtherNodes$name
+        if (sort_tasks && length(OtherNodes) > 0) {
+            g_other <- induced_subgraph(g, OtherNodes)
+            sorted_other_indices <- topo_sort(g_other, mode = "out")
+            other_names <- V(g_other)[sorted_other_indices]$name
+        } else {
+            other_names <- OtherNodes$name
+        }
 
         final_order_names <- c(sorted_att_names, other_names)
         new_indices <- match(V(g)$name, final_order_names)

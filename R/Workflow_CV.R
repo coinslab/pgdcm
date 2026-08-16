@@ -161,38 +161,39 @@ plot_pgdcm_cv <- function(cv_output, config) {
     print("Confusion Matrix:")
     print(confusion_matrix)
 
-    # Generate Plot
-    if (exists(".Random.seed", envir = .GlobalEnv)) {
-        old_seed <- get(".Random.seed", envir = .GlobalEnv)
-        on.exit({ assign(".Random.seed", old_seed, envir = .GlobalEnv) }, add = TRUE)
-    } else {
-        on.exit({ rm(".Random.seed", envir = .GlobalEnv) }, add = TRUE)
-    }
-    set.seed(123)
-    observed_jitter <- jitter(all_obs, amount = 0.06)
-    simulated_jitter <- jitter(all_sim_binary, amount = 0.06)
+    # Generate Heatmap Plot
+    # Convert confusion matrix to proportions for coloring
+    cm_prop <- sweep(confusion_matrix, 1, rowSums(confusion_matrix), FUN = "/")
+    cm_prop[is.na(cm_prop)] <- 0 # Handle division by zero if any row is empty
 
     plot(
-        observed_jitter,
-        simulated_jitter,
+        c(0, 2), c(0, 2),
+        type = "n",
         xlab = "Observed Held-Out Responses",
         ylab = "Posterior Predictive Predicted Responses",
-        main = "Plot 4: Posterior Predictive CV Check",
-        pch = 16,
-        col = grDevices::adjustcolor("black", alpha.f = 0.20),
-        xlim = c(-0.12, 1.12),
-        ylim = c(-0.12, 1.12),
+        main = "Plot 4: Cross-Validation Confusion Matrix",
         xaxt = "n",
-        yaxt = "n"
-    )
-    axis(side = 1, at = c(0, 1), labels = c("0", "1"))
-    axis(side = 2, at = c(0, 1), labels = c("0", "1"))
-    abline(a = 0, b = 1, col = "red", lwd = 2)
-    legend(
-        "top",
-        legend = paste0("Overall binary accuracy = ", round(accuracy, 3)),
+        yaxt = "n",
         bty = "n"
     )
+    axis(side = 1, at = c(0.5, 1.5), labels = c("0", "1"), tick = FALSE)
+    axis(side = 2, at = c(0.5, 1.5), labels = c("0", "1"), tick = FALSE, las = 1)
+
+    # Draw tiles and text
+    for (i in 1:2) { # Observed (X-axis)
+        for (j in 1:2) { # Predicted (Y-axis)
+            val <- confusion_matrix[i, j]
+            prop <- cm_prop[i, j]
+            
+            # Use a blue color scale (0 to 1) based on row proportions
+            col_val <- grDevices::rgb(0.2, 0.5, 0.9, alpha = prop * 0.8)
+            
+            rect(i - 1, j - 1, i, j, col = col_val, border = "white", lwd = 2)
+            text(i - 0.5, j - 0.5, labels = as.character(val), cex = 2, font = 2)
+        }
+    }
+    
+    mtext(paste0("Overall binary accuracy = ", round(accuracy, 3)), side = 3, line = 0.5, cex = 0.9)
 
     invisible(list(
         accuracy = accuracy,

@@ -27,6 +27,8 @@ navbar:
           href: articles/Scoring_Cookbook.html
         - text: Generating Diagnostic Inferences
           href: articles/Diagnostic_Queries.html
+        - text: Q-Matrix Validation & Causal Discovery
+          href: articles/Causal_Discovery.html
         - text: "---"
         - text: Theory
         - text: "Mathematical Foundations of the PGDCM Model"
@@ -44,6 +46,7 @@ articles:
       - Cookbook
       - Scoring_Cookbook
       - Diagnostic_Queries
+      - Causal_Discovery
   - title: "Theory"
     desc: "Mathematical details underlying the models."
     contents:

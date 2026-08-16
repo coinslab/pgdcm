@@ -2,13 +2,21 @@ loglinearSEM <- nimbleCode({
     # --- Priors ---
 
     # 1. Intercepts (alpha) for all nodes
-    for (k in 1:nrnodes) {
+    for (k in 1:attdim) {
+        alpha[k] <- 0.0 # Latent means are structurally anchored to 0 for identifiability
+    }
+    for (k in (attdim + 1):nrnodes) {
         alpha[k] ~ dnorm(mean = alpha_prior_mean[k], sd = alpha_prior_std[k])
     }
 
     # 2. Weights (beta) ONLY for existent edges (Sparse Parameterization)
     for (e in 1:num_edges) {
-        beta_edge[e] ~ dnorm(mean = beta_prior_mean[e], sd = beta_prior_std[e])
+        if (is_anchor_edge[e] == 1) {
+            # Anchor the first indicator of each factor to resolve reflection unidentifiability
+            beta_edge[e] ~ T(dnorm(mean = beta_prior_mean[e], sd = beta_prior_std[e]), 0, Inf)
+        } else {
+            beta_edge[e] ~ dnorm(mean = beta_prior_mean[e], sd = beta_prior_std[e])
+        }
         # Map the sparse edge back to the dense matrix for equation simplicity
         beta[edge_from[e], edge_to[e]] <- beta_edge[e]
     }
@@ -66,7 +74,8 @@ loglinearSEM <- nimbleCode({
         # 1. Calc Input from Attributes (All tasks)
         for (j in 1:nrtasknodes) {
             # Evaluating input from attributes to task j
-            input_from_atts[i, j] <- sum(beta[attdim + j, 1:CDMattnodesmax] * CDMmatrix[attdim + j, 1:CDMattnodesmax] * attributenodes[i, 1:CDMattnodesmax])
+            # SEM_att_adj safely masks phantom columns for single-factor models
+            input_from_atts[i, j] <- sum(beta[attdim + j, 1:CDMattnodesmax] * SEM_att_adj[attdim + j, 1:CDMattnodesmax] * attributenodes[i, 1:CDMattnodesmax])
         }
 
         # 2. Calc Input from Tasks

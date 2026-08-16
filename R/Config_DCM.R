@@ -17,10 +17,12 @@
 #'   If \code{NULL}, default priors (mean 0, std 2) are generated. Passing a standard deviation of
 #'   \code{0.0001} or similar effectively acts as a point distribution, enabling the use of \code{pgdcm}
 #'   as a scoring-only model when parameter means are supplied from a previous calibration.
+#' @param dif_group_ids Optional integer vector mapping participants to demographic groups for DIF assessment.
+#' @param num_groups Optional integer specifying the total number of demographic groups (default 1).
 #'
 #' @return A list with \code{constants}, \code{inits}, \code{monitors}, and \code{data}.
 #' @export
-configure_dcm <- function(info, X, priors = NULL) {
+configure_dcm <- function(info, X, priors = NULL, dif_group_ids = NULL, num_groups = 1) {
     nrparticipants <- nrow(X)
 
     # Determine if root attributes are continuous (Higher-Order, MIRT, IRT structures)
@@ -41,7 +43,8 @@ configure_dcm <- function(info, X, priors = NULL) {
         isDINM = info$isDINM,
         isContinuousHO = is_continuous_ho,
         CDMattnodesmax = max(2, info$nrattributenodes),
-        closed_gate_penalty = -15.0
+        closed_gate_penalty = -15.0,
+        num_groups = num_groups
     )
 
     # Pre-calculate DAG topology constants to eliminate inner MCMC loops
@@ -102,16 +105,25 @@ configure_dcm <- function(info, X, priors = NULL) {
             if (!is.null(priors$theta_std)) theta_prior_std <- priors$theta_std
 
             if (!is.null(priors$lambda_mean)) lambda_prior_mean <- priors$lambda_mean
-            if (!is.null(priors$lambda_std)) lambda_prior_std <- priors$lambda_std
-        }
+            if (!is.null(priors$lambda_std))        lambda_prior_std <- priors$lambda_std
+    }
+    
+    # DIF Priors
+    lambda_dif_prior_mean <- matrix(0, nrow = info$nrtasknodes, ncol = num_groups)
+    lambda_dif_prior_std <- matrix(2.0, nrow = info$nrtasknodes, ncol = num_groups)
+    if (num_groups > 1) {
+        lambda_dif_prior_std[, 1] <- 0.0001 # Lock Reference Group to mean 0
     }
 
+    # Add priors to constants
     constants$beta_prior_mean <- beta_prior_mean
     constants$beta_prior_std <- beta_prior_std
     constants$theta_prior_mean <- theta_prior_mean
     constants$theta_prior_std <- theta_prior_std
     constants$lambda_prior_mean <- lambda_prior_mean
     constants$lambda_prior_std <- lambda_prior_std
+    constants$lambda_dif_prior_mean <- lambda_dif_prior_mean
+    constants$lambda_dif_prior_std <- lambda_dif_prior_std
 
     # Inits
     beta_root_init <- rnorm(info$nrbetaroot, mean = 0, sd = 1)
@@ -139,10 +151,13 @@ configure_dcm <- function(info, X, priors = NULL) {
         }
     }
 
+    lambda_dif_init <- matrix(0.0, nrow = info$nrtasknodes, ncol = num_groups)
+
     inits <- list(
         beta_root = beta_root_init,
         theta = theta_init,
         lambda = lambda_init,
+        lambda_dif = lambda_dif_init,
         attributenodes = attributenodes_init
     )
 
@@ -150,6 +165,12 @@ configure_dcm <- function(info, X, priors = NULL) {
     monitors <- c("lambda", "attributenodes")
     if (constants$isContinuousHO == 0) monitors <- c(monitors, "beta_root")
     if (info$nrattributenodes > info$nrbetaroot) monitors <- c(monitors, "theta")
+    if (num_groups > 1) monitors <- c(monitors, "lambda_dif")
 
-    list(constants = constants, inits = inits, monitors = monitors, data = list(X = X))
+    data_list <- list(X = X)
+    if (!is.null(dif_group_ids)) {
+        data_list$group_id <- dif_group_ids
+    }
+
+    list(constants = constants, inits = inits, monitors = monitors, data = data_list)
 }

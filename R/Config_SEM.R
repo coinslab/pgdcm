@@ -64,17 +64,38 @@ configure_sem <- function(info, X, priors = NULL) {
         CDMattnodesmax = max(2, info$nrattributenodes)
     )
 
+    # Build explicit masked adjacency to fix the single-factor nimble loop bug
+    SEM_att_adj <- matrix(0, nrow = info$nrnodes, ncol = constants$CDMattnodesmax)
+    if (info$nrattributenodes > 0) {
+        # Only copy attribute columns. Anything padded to column 2 remains 0.
+        SEM_att_adj[, 1:info$nrattributenodes] <- info$matrix[, 1:info$nrattributenodes]
+    }
+    constants$SEM_att_adj <- SEM_att_adj
+
     # Extracting sparse edges to send as constants alongside the data
     edges <- which(info$matrix == 1, arr.ind = TRUE)
     zeros <- which(info$matrix == 0, arr.ind = TRUE)
 
     constants$num_edges <- nrow(edges)
-    constants$edge_from <- edges[, 1]
-    constants$edge_to <- edges[, 2]
+    constants$edge_from <- edges[, 1] # Note: info$matrix is [child, parent], so edge_from is child
+    constants$edge_to <- edges[, 2]   # edge_to is parent
 
     constants$num_zeros <- nrow(zeros)
     constants$zero_from <- zeros[, 1]
     constants$zero_to <- zeros[, 2]
+
+    is_anchor_edge <- rep(0, nrow(edges))
+    if (info$nrattributenodes > 0 && nrow(edges) > 0) {
+        for (a in 1:info$nrattributenodes) {
+            # edges[, 2] is the source (parent). edges[, 1] is the target (child).
+            att_edges <- which(edges[, 2] == a)
+            if (length(att_edges) > 0) {
+                # Anchor the first indicator for each latent attribute
+                is_anchor_edge[att_edges[1]] <- 1
+            }
+        }
+    }
+    constants$is_anchor_edge <- is_anchor_edge
 
     # Prior generation
     alpha_prior_mean <- rep(0, info$nrnodes)
@@ -102,12 +123,13 @@ configure_sem <- function(info, X, priors = NULL) {
 
             if (!is.null(priors$beta_mean) && nrow(edges) > 0) {
                 for (e in 1:nrow(edges)) {
-                    beta_prior_mean[e] <- priors$beta_mean[edges[e, "row"], edges[e, "col"]]
+                    # User supplies prior as [parent, child]. edges[,2] is parent, edges[,1] is child.
+                    beta_prior_mean[e] <- priors$beta_mean[edges[e, "col"], edges[e, "row"]]
                 }
             }
             if (!is.null(priors$beta_std) && nrow(edges) > 0) {
                 for (e in 1:nrow(edges)) {
-                    beta_prior_std[e] <- priors$beta_std[edges[e, "row"], edges[e, "col"]]
+                    beta_prior_std[e] <- priors$beta_std[edges[e, "col"], edges[e, "row"]]
                 }
             }
         }

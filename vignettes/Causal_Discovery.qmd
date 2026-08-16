@@ -1,0 +1,111 @@
+---
+title: "Q-Matrix Validation & Causal Discovery"
+author: "pgdcm Team"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    theme: cosmo
+---
+
+# Introduction
+
+One of the most difficult challenges in Cognitive Diagnostic Modeling (CDM) is **Q-matrix validation**. How do you know if the arrows you drew from your Latent Skills to your Observed Tasks are actually correct?
+
+Traditionally, psychometricians have had to use exhaustive search algorithms (like the Wald test or G-DINA modifications) to test every possible combination of item-to-skill mappings. In a Bayesian MCMC framework, running thousands of models is computationally impossible.
+
+To solve this, `pgdcm` includes a powerful **Causal Discovery Bridge**. By seamlessly connecting `pgdcm` with the state-of-the-art `bnlearn` package, you can run machine learning algorithms to organically discover the true structure of your test in less than a second!
+
+## How it Works
+
+The process leverages the strengths of both packages:
+1. **Confirmatory MCMC (`pgdcm`)**: First, you run your baseline theoretical model in `pgdcm`. The MCMC engine forms a mathematical consensus on what each Skill represents, generating the `$skill_profiles`.
+2. **Imputation**: The `pgdcm` causal bridge automatically binarizes these skill profiles and binds them alongside your raw item responses. We now have a "fully observed" dataset.
+3. **Exploratory Discovery (`bnlearn`)**: We pass this dataset into a Hill-Climbing algorithm. We apply a strict *structural blacklist* to prevent impossible relationships (e.g., an Item cannot cause a Skill). The algorithm evaluates the mutual information across the entire network and draws the true causal arrows.
+
+---
+
+# Step-by-Step Tutorial
+
+## 1. Run Your Baseline Model
+
+First, estimate your model as you normally would using `run_pgdcm_auto()`. This step is crucial because it generates the posterior estimates of student mastery.
+
+```r
+library(pgdcm)
+
+# Assuming you already have your graph and dataframe ready
+config <- build_model_config(graph, df)
+
+# Run the MCMC estimation
+results <- run_pgdcm_auto(config, 
+                          estimation_config = list(niter = 2000, nburnin = 500, chains = 2))
+```
+
+## 2. Ensure `bnlearn` is Installed
+
+The causal discovery module is built as an optional post-hoc tool to keep `pgdcm` lightweight. Before proceeding, ensure you have the `bnlearn` package installed on your system.
+
+```r
+if (!requireNamespace("bnlearn", quietly = TRUE)) {
+  install.packages("bnlearn")
+}
+```
+
+## 3. Run Q-Matrix Discovery
+
+Now, we simply pass our fitted `results` object into the wrapper function `run_qmatrix_discovery()`. 
+
+This function automatically extracts the data, applies a `0.5` threshold to classify masters vs. non-masters, builds the logical blacklist, and executes the `hc` (Hill-Climbing) algorithm.
+
+```r
+# Run the discovery algorithm
+learned_graph <- run_qmatrix_discovery(results, algorithm = "hc", threshold = 0.5)
+```
+
+## 4. Visualize the Results
+
+The returned `learned_graph` is a standard `bn` object from `bnlearn`. You can plot it to visually inspect the data-driven Q-matrix!
+
+```r
+library(bnlearn)
+# Plot the discovered directed acyclic graph
+plot(learned_graph)
+```
+
+### Interpreting the Plot
+
+When you examine the plotted network, compare it to your original theoretical Q-matrix:
+
+*   **Missing Arrows**: If an arrow you originally drew (e.g., `Skill_A` -> `Item_1`) is missing from the plot, the data suggests that `Skill_A` is not actually required to solve `Item_1`.
+*   **New Arrows (Cross-loadings)**: If the algorithm drew a *new* arrow (e.g., `Skill_B` -> `Item_1`), the data suggests `Item_1` has a hidden prerequisite that you failed to model! You should update your Q-matrix.
+*   **Omega-Matrix Discovery**: Look at the arrows *between* the Skills themselves. The algorithm will also empirically validate your prerequisite hierarchy! If `Skill_A` -> `Skill_B` was your theory, but the data drew `Skill_B` -> `Skill_A`, you may need to reconsider your learning progression.
+
+---
+
+# Advanced Customization
+
+## Using Alternative Algorithms
+
+By default, the bridge uses Hill-Climbing (`"hc"`), which is fast and robust. However, you can easily switch to a Tabu Search (`"tabu"`) algorithm, which helps prevent the search from getting stuck in local optima.
+
+```r
+learned_graph_tabu <- run_qmatrix_discovery(results, algorithm = "tabu")
+```
+
+## Adjusting the Scoring Metric
+
+Under the hood, `bnlearn` evaluates the graph using the Bayesian Information Criterion (BIC). You can pass additional arguments directly to the `bnlearn` algorithm via the `...` operator. For example, if you want to use the Akaike Information Criterion (AIC) instead:
+
+```r
+learned_graph_aic <- run_qmatrix_discovery(results, algorithm = "hc", score = "aic")
+```
+
+# Important Theoretical Limitations
+
+While this tool is incredibly fast and intuitive, psychometricians should be aware of a few statistical caveats:
+
+1.  **The "Two-Step" Information Loss**: By converting probabilistic masteries (e.g., 80% chance of mastery) into hard integers (1), we throw away measurement uncertainty to satisfy the discrete assumptions of the `bnlearn` engine.
+2.  **Shrinkage Circularity**: The imputed skills are derived from your original Q-matrix. If your original theory was completely incorrect, the MCMC will produce noisy estimates, and the resulting discovery plot will also be noisy. This tool is best used for **Local Refinement** (fixing a few misaligned items in a mostly correct theory).
+3.  **Equivalence Classes**: Bayesian networks are sometimes blind to the true direction of causality between highly correlated skills. Human theory is still required to rationally orient the arrows!
