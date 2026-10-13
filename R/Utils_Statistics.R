@@ -3,6 +3,23 @@
 # Description: General Utility Functions unified for PGDCM and SEM architecture
 # =============================================================================
 
+
+# --- Generate NonParametric Bootstrap Data from X matrix ----
+# RMG 10/9/2026
+#' Generate Nonparametric Bootstrap Data Set of sample size n by sampling
+#' n times with replacement from data matrix with n rows and m columns
+#'
+#' @param xmatrix Data matrix where ith subject response to jth task is ijth element
+getnpbootmx <- function(xmatrix) {
+  nrparticipants <- nrow(xmatrix)
+  row_indices <- sample(1:nrparticipants, size = nrparticipants, replace = TRUE)
+  
+  # Extract the rows (leave the column index blank to select all columns)
+  xboot <- xmatrix[row_indices, ]
+  return(xboot)
+}     
+# end of RMG 10/9/2026 modification
+
 # ── compute_M2 ───────────────────────────────────────────────────────────────
 #' Compute Second-Order Moment Matrix
 #'
